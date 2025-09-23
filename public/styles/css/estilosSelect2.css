@@ -1,0 +1,53 @@
+
+    /* Estilo personalizado para Select2 */
+    .select2-container--default .select2-selection--single {
+      width: auto;
+      padding: 8px 12px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      transition: border-color 0.3s;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      height: auto;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 14px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+        right: 10px;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Estilo base para cada opción del dropdown */
+    .select2-container .select2-results__option {
+      padding: 8px;
+      color: #333;
+      background-color: #fff;
+    }
+
+    /* Opción resaltada al pasar el cursor o con el teclado */
+    .select2-container .select2-results__option--highlighted[aria-selected] {
+        /* background-color: #007bff; */
+        color: white;
+    }
+
+    /* Opción seleccionada */
+    /* .select2-container .select2-results__option[aria-selected="true"] {
+        color: #000;
+    } */
+
+    /* Opcional: Redondear esquinas del dropdown */
+      /* .select2-container .select2-results {
+          border-radius: 4px;
+          overflow: hidden;
+      } */

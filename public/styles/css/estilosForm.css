@@ -1,0 +1,103 @@
+    /* Estilo general para etiquetas (títulos) */
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    /* Estilo para selects */
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    select:focus {
+      border-color: blue;
+      outline: none;
+    }
+    /* select2 Estilo */
+    
+
+    /* Estilo para inputs */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="date"],
+    input[type="password"] {
+      width: 100%;
+      height: auto;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+
+    /* Cambiar el borde a azul al hacer hover */
+    input[type="text"]:hover,
+    input[type="number"]:hover,
+    input[type="email"]:hover,
+    input[type="password"]:hover,
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus{
+      border-color: blue;
+      outline: none;
+    }
+
+    input[type="checkbox"] {
+      appearance: none; /* Quita el estilo por defecto */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      width: 15px;
+      height: 15px;
+      border: 2px solid #555;
+      border-radius: 4px;
+      background-color: #fff;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    /* Marca de verificación cuando está marcado */
+    input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: -1px;
+      width: 5px;
+      height: 8px;
+      border: solid #1cc88a;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* Cambiar color de fondo cuando está marcado */
+    input[type="checkbox"]:checked {
+      background-color: #e0ffe0;
+      border-color: #1cc88a;
+    }
+    
+    ::placeholder {
+      color: #a9a9a9;
+    }
+
+    /* Nota: este campo afecta a los datos del select2 en las opciones*/
+    span {
+      color: red;
+    }
+
+    textarea{
+      border: 1px solid #cccccc00;
+    }
+
+    textarea:hover{
+     border-color: blue;
+    }

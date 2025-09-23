@@ -1,0 +1,177 @@
+/* {{-- Tablas --}} */
+
+    #crono{
+        overflow: scroll;
+        overflow-y: auto;
+        overflow-x: auto;
+        overscroll-behavior-x:initial;
+        overscroll-behavior-y:initial;
+        height: auto;
+        max-height: 650px;
+    }
+    #crono::-webkit-scrollbar{
+        -webkit-appearance: none;
+    }
+    #crono::-webkit-scrollbar:vertical{
+        width: 10px;
+    }
+    #crono::-webkit-scrollbar-button:increment, #crono::-webkit-scrollbar-button{
+        display: none;
+    }
+    #crono::-webkit-scrollbar:horizontal{
+        height: 10px;
+    }
+    #crono::-webkit-scrollbar-thumb{
+        background: #016099;
+        border-radius: 20px;
+        border: 2px solid #f1f2f3;
+    }
+
+    /* Encabezados Fijos */
+    /* fija los encabezados para solo prmitir el movimiento del cuerpo de la tabla */
+        .encabezado_fijos {
+            position: sticky;
+            top: 0px;
+            transform: translateY(-1px);
+            background-color: #E3E6F0;
+            z-index: 2;
+            border-bottom: 2px solid #E3E6F0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Parar tablas dinamincas con diferentes encabezados*/
+        .columna_fija_td {
+            position: sticky;
+            left: 0;
+            transform: translateX(-1px); /* Ajuste visual fino */
+            background-color: #fff;
+            z-index: 2;
+        }
+
+        .columna_fija_th_top_lef {
+            position: sticky;
+            top: 0;
+            left: 0;
+            transform: translate(-1px, -1px); /* aplica X e Y al mismo tiempo */
+            background-color: #E3E6F0;
+            z-index: 3;
+            border-bottom: 2px solid #E3E6F0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .columna_fija_th_top {
+            position: sticky;
+            top: 0;
+            transform: translateY(-1px);
+            background-color: #E3E6F0;
+            z-index: 2;
+            border-bottom: 2px solid #E3E6F0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Estilo para que la tabla se ajuste al contenedor */
+    .responsive-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto; /* Fuerza que las celdas se ajusten al ancho */
+        word-wrap: break-word; /* Asegura que el texto largo se divida */
+    }
+
+    /* Estilo general de celdas */
+    .responsive-table th,
+    .responsive-table td {
+        border: 1px solid #E3E6F0;
+        padding: 8px;
+        text-align: left;
+        word-break: break-word; /* Rompe palabras largas si es necesario */
+        overflow-wrap: break-word;
+    }
+
+    /* Opcional: estilo de cabecera */
+    .responsive-table th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+        border-radius: 5px;
+        border-bottom: 3px solid #E3E6F0;
+    }
+
+    .tablas{
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+
+    .tablas thead {
+        color: #000000;
+        font-weight: 500;
+        font-size: 1em;
+    }
+
+    .tablas th,
+    .tablas td {
+        border: 1px solid #E3E6F0;
+        white-space: nowrap;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .tablas th {
+        border-bottom: 3px solid #E3E6F0;
+        background-color: #f4f4f4;
+        position: -webkit-sticky !important;
+        position: sticky !important;
+    }
+
+    .tablas tr{
+        text-align: center;
+    }
+    .tablas .thtablas{
+        padding: 10px;
+    }
+    
+    .tablas tbody tr td{
+        padding: 7px;
+        text-align: left;
+    }
+
+    .tablas tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+
+    .tablas tbody tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+
+    .tablas tbody tr:hover{
+        background-color: rgba(4, 4, 4, 0.138) !important;
+    }
+
+/* {{-- Tablas --}} */
+
+/* Tablas para mostrar datos */
+    /* Estilo para que la tabla se ajuste al contenedor */
+    .detail-table {
+        width: 90%;
+        border-collapse: collapse;
+        table-layout: auto; /* Fuerza que las celdas se ajusten al ancho */
+        word-wrap: break-word; /* Asegura que el texto largo se divida */
+        margin: 0 auto;
+    }
+
+    /* Estilo general de celdas */
+    .detail-table th,
+    .detail-table td {
+        padding: 8px;
+        text-align: left;
+        word-break: break-word; /* Rompe palabras largas si es necesario */
+        overflow-wrap: break-word;
+    }
+
+    /* Opcional: estilo de cabecera */
+    .detail-table th {
+        font-weight: bold;
+        /* border-radius: 5px; */
+        /* border-bottom: 3px solid #E3E6F0; */
+    }
+/* Tablas para mostrar datos */
+
