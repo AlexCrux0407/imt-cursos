@@ -1,11 +1,11 @@
-/* CSS específico para módulo de estudiantes */
+/* CSS base para estudiantes - Esquema azul */
 
-/* Colores para estudiantes */
 :root {
-    --student-primary: #27ae60;
-    --student-secondary: #2ecc71;
-    --student-accent: #f1c40f;
-    --student-bg: #f8fffe;
+    --estudiante-primary: #3498db;
+    --estudiante-secondary: #2980b9;
+    --estudiante-accent: #2c3e50;
+    --estudiante-light: #e3f2fd;
+    --estudiante-bg: #f8fbff;
 }
 
 /* Animaciones para estudiantes */
@@ -280,6 +280,217 @@
     display: block;
     font-size: 0.8rem;
     margin-top: 5px;
+}
+
+/* Progreso de cursos */
+.progress-container {
+    margin-top: 15px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--estudiante-primary), var(--estudiante-secondary));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+/* Cursos completados */
+.completed-courses {
+    display: grid;
+    gap: 15px;
+}
+
+.completed-course-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--estudiante-primary);
+}
+
+.completed-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff3cd;
+    border-radius: 50%;
+}
+
+.completed-content {
+    flex: 1;
+}
+
+.completed-title {
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.completed-instructor {
+    color: #7f8c8d;
+    margin-bottom: 3px;
+    font-size: 0.9rem;
+}
+
+.completed-date {
+    color: #95a5a6;
+    font-size: 0.8rem;
+}
+
+.btn-certificate {
+    background: #f39c12;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-certificate:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
+}
+
+/* Actividad */
+.activity-list {
+    display: grid;
+    gap: 10px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--estudiante-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.activity-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.8rem;
+}
+
+.activity-progress {
+    color: var(--estudiante-primary);
+    font-weight: 500;
+}
+
+.activity-date {
+    color: #95a5a6;
+}
+
+.activity-action {
+    margin-left: auto;
+}
+
+.btn-small {
+    background: var(--estudiante-primary);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.btn-small:hover {
+    background: var(--estudiante-secondary);
+}
+
+/* Recursos de lecciones */
+.leccion-resource {
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 10px;
+    border-left: 4px solid var(--estudiante-primary);
+}
+
+.resource-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+}
+
+.resource-link:hover {
+    color: var(--estudiante-primary);
+    transform: translateY(-2px);
+}
+
+.resource-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.resource-info {
+    flex: 1;
+}
+
+.resource-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.resource-type {
+    color: #7f8c8d;
+    font-size: 0.9rem;
 }
 
 /* Responsive para estudiantes */

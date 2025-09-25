@@ -20,23 +20,22 @@ if (!$curso) {
     exit;
 }
 
-// Debug temporal - verificar los valores del curso
-error_log("Curso cargado - Objetivo general: " . ($curso['objetivo_general'] ?? 'NULL'));
-error_log("Curso cargado - Objetivos específicos: " . ($curso['objetivos_especificos'] ?? 'NULL'));
-error_log("Curso cargado - Duración: " . ($curso['duracion'] ?? 'NULL'));
+// Debug temporal valores del curso
+//error_log("Curso cargado - Objetivo general: " . ($curso['objetivo_general'] ?? 'NULL'));
+//error_log("Curso cargado - Objetivos específicos: " . ($curso['objetivos_especificos'] ?? 'NULL'));
+//error_log("Curso cargado - Duración: " . ($curso['duracion'] ?? 'NULL'));
 
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
 <div class="contenido">
-    <!-- Mostrar mensaje de debug temporal -->
-    <div style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem;">
+    <!--<div style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem;">
         <strong>Debug:</strong> 
         Objetivo General: "<?= $curso['objetivo_general'] ?? 'vacío' ?>" | 
         Objetivos Específicos: "<?= $curso['objetivos_especificos'] ?? 'vacío' ?>" | 
         Duración: "<?= $curso['duracion'] ?? 'vacío' ?>"
-    </div>
+    </div> -->
 
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
         <div class="div-fila-alt-start">

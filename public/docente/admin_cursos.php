@@ -5,18 +5,41 @@ require_once __DIR__ . '/../../config/database.php';
 
 $page_title = 'Docente – Administración de Cursos';
 
-// Obtener cursos del docente actual
-$stmt = $conn->prepare("
-    SELECT c.*, 
-           COUNT(i.id) as total_inscritos,
-           AVG(COALESCE(i.progreso, 0)) as promedio_progreso
-    FROM cursos c 
-    LEFT JOIN inscripciones i ON c.id = i.curso_id 
-    WHERE c.creado_por = :docente_id 
-    GROUP BY c.id 
-    ORDER BY c.created_at DESC
-");
-$stmt->execute([':docente_id' => $_SESSION['user_id']]);
+// Verificar si las nuevas columnas existen
+$stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'asignado_a'");
+$stmt->execute();
+$nuevas_columnas_existen = $stmt->fetch();
+
+if ($nuevas_columnas_existen) {
+    // Sistema nuevo: cursos asignados al docente
+    $stmt = $conn->prepare("
+        SELECT c.*, 
+               u.nombre as creado_por_nombre,
+               COUNT(i.id) as total_inscritos,
+               AVG(COALESCE(i.progreso, 0)) as promedio_progreso
+        FROM cursos c 
+        INNER JOIN usuarios u ON c.creado_por = u.id
+        LEFT JOIN inscripciones i ON c.id = i.curso_id 
+        WHERE c.asignado_a = :docente_id 
+        GROUP BY c.id 
+        ORDER BY c.fecha_asignacion DESC
+    ");
+    $stmt->execute([':docente_id' => $_SESSION['user_id']]);
+} else {
+    // Sistema anterior: cursos creados por el docente
+    $stmt = $conn->prepare("
+        SELECT c.*, 
+               COUNT(i.id) as total_inscritos,
+               AVG(COALESCE(i.progreso, 0)) as promedio_progreso
+        FROM cursos c 
+        LEFT JOIN inscripciones i ON c.id = i.curso_id 
+        WHERE c.creado_por = :docente_id 
+        GROUP BY c.id 
+        ORDER BY c.created_at DESC
+    ");
+    $stmt->execute([':docente_id' => $_SESSION['user_id']]);
+}
+
 $cursos = $stmt->fetchAll();
 
 require __DIR__ . '/../partials/header.php';
@@ -161,58 +184,43 @@ require __DIR__ . '/../partials/nav.php';
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
         <div class="div-fila-alt-start">
             <div>
-                <h1 style="font-size: 2rem; margin-bottom: 10px;">Administración de Cursos</h1>
-                <p style="opacity: 0.9;">Gestiona tus cursos, contenido y seguimiento de estudiantes</p>
+                <h1 style="font-size: 2rem; margin-bottom: 10px;">
+                    <?= $nuevas_columnas_existen ? 'Cursos Asignados' : 'Administración de Cursos' ?>
+                </h1>
+                <p style="opacity: 0.9;">
+                    <?= $nuevas_columnas_existen ? 'Gestiona el contenido de los cursos asignados por el master' : 'Gestiona tus cursos, contenido y seguimiento de estudiantes' ?>
+                </p>
             </div>
-            <button onclick="mostrarFormularioNuevoCurso()" 
-                    style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;"
-                    onmouseover="this.style.background='white'; this.style.color='#3498db'"
-                    onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.color='white'">
-                + Nuevo Curso
-            </button>
-        </div>
-    </div>
-
-    <!-- Estadísticas Rápidas -->
-    <div class="form-container-body" style="margin-bottom: 20px;">
-        <div class="div-fila" style="gap: 20px;">
-            <div style="background: #3498db; color: white; padding: 20px; border-radius: 10px; text-align: center; flex: 1;">
-                <div style="font-size: 2rem; font-weight: bold;"><?= count($cursos) ?></div>
-                <div style="font-size: 0.9rem; opacity: 0.9;">Cursos Creados</div>
-            </div>
-            <div style="background: #3498db; color: white; padding: 20px; border-radius: 10px; text-align: center; flex: 1;">
-                <div style="font-size: 2rem; font-weight: bold;"><?= array_sum(array_column($cursos, 'total_inscritos')) ?></div>
-                <div style="font-size: 0.9rem; opacity: 0.9;">Total Estudiantes</div>
-            </div>
-            <div style="background: #3498db; color: white; padding: 20px; border-radius: 10px; text-align: center; flex: 1;">
-                <div style="font-size: 2rem; font-weight: bold;">
-                    <?= count($cursos) > 0 ? number_format(array_sum(array_map(function($c) { return $c['promedio_progreso'] ?? 0; }, $cursos)) / count($cursos), 1) : 0 ?>%
+            <?php if (empty($cursos)): ?>
+                <div style="background: rgba(255,255,255,0.2); color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem;">
+                    Sin cursos asignados
                 </div>
-                <div style="font-size: 0.9rem; opacity: 0.9;">Progreso Promedio</div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 
     <!-- Lista de Cursos -->
     <div class="form-container-body">
-        <h2 style="color: #3498db; margin-bottom: 20px; font-size: 1.5rem;">Mis Cursos</h2>
+        <h2 style="color: #3498db; margin-bottom: 20px; font-size: 1.5rem;">
+            <?= $nuevas_columnas_existen ? 'Mis Cursos Asignados' : 'Mis Cursos' ?>
+        </h2>
         
         <?php if (empty($cursos)): ?>
-            <div class="empty-state" style="text-align: center; padding: 40px; color: #7f8c8d;">
+            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
                 <img src="/imt-cursos/public/styles/iconos/desk.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px;">
-                <h3>No tienes cursos creados</h3>
-                <p>Comienza creando tu primer curso</p>
-                <button onclick="mostrarFormularioNuevoCurso()" 
-                        style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; margin-top: 15px;">
-                    Crear Primer Curso
-                </button>
+                <h3><?= $nuevas_columnas_existen ? 'No tienes cursos asignados' : 'No tienes cursos creados' ?></h3>
+                <p><?= $nuevas_columnas_existen ? 'El master te asignará cursos para que puedas desarrollar el contenido' : 'Comienza creando tu primer curso' ?></p>
+                <?php if (!$nuevas_columnas_existen): ?>
+                    <button onclick="mostrarFormularioNuevoCurso()" 
+                            style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; margin-top: 15px;">
+                        Crear Primer Curso
+                    </button>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div style="display: grid; gap: 20px;">
                 <?php foreach ($cursos as $curso): ?>
-                    <div class="curso-card" style="border: 2px solid #e8ecef; border-radius: 12px; padding: 20px; background: white; transition: all 0.3s ease;"
-                         onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'"
-                         onmouseout="this.style.borderColor='#e8ecef'; this.style.transform='translateY(0)'">
+                    <div class="curso-card" style="border: 2px solid #e8ecef; border-radius: 12px; padding: 20px; background: white; transition: all 0.3s ease;">
                         
                         <div class="div-fila" style="gap: 20px;">
                             <!-- Información del Curso -->
@@ -224,11 +232,27 @@ require __DIR__ . '/../partials/nav.php';
                                     <div>
                                         <h3 style="color: #2c3e50; margin-bottom: 5px;"><?= htmlspecialchars($curso['titulo']) ?></h3>
                                         <div class="div-fila-alt-start" style="gap: 15px;">
-                                            <span style="background: <?= $curso['estado'] === 'activo' ? '#27ae60' : ($curso['estado'] === 'borrador' ? '#f39c12' : '#e74c3c') ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
-                                                <?= ucfirst($curso['estado']) ?>
-                                            </span>
+                                            <?php if ($nuevas_columnas_existen && isset($curso['estado_asignacion'])): ?>
+                                                <span style="background: 
+                                                    <?php 
+                                                    echo match($curso['estado_asignacion']) {
+                                                        'pendiente' => '#f39c12',
+                                                        'en_desarrollo' => '#3498db', 
+                                                        'completado' => '#27ae60',
+                                                        default => '#95a5a6'
+                                                    };
+                                                    ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                                                    <?= ucfirst(str_replace('_', ' ', $curso['estado_asignacion'])) ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span style="background: <?= $curso['estado'] === 'activo' ? '#27ae60' : ($curso['estado'] === 'borrador' ? '#f39c12' : '#e74c3c') ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                                                    <?= ucfirst($curso['estado']) ?>
+                                                </span>
+                                            <?php endif; ?>
                                             <span style="color: #7f8c8d; font-size: 0.9rem;">
-                                                Creado: <?= date('d/m/Y', strtotime($curso['created_at'])) ?>
+                                                <?= $nuevas_columnas_existen && isset($curso['fecha_asignacion']) ? 
+                                                    'Asignado: ' . date('d/m/Y', strtotime($curso['fecha_asignacion'])) :
+                                                    'Creado: ' . date('d/m/Y', strtotime($curso['created_at'])) ?>
                                             </span>
                                         </div>
                                     </div>
@@ -237,6 +261,12 @@ require __DIR__ . '/../partials/nav.php';
                                 <p style="color: #5a5c69; margin-bottom: 15px; line-height: 1.5;">
                                     <?= htmlspecialchars(substr($curso['descripcion'], 0, 150)) ?><?= strlen($curso['descripcion']) > 150 ? '...' : '' ?>
                                 </p>
+                                
+                                <?php if ($nuevas_columnas_existen && isset($curso['creado_por_nombre'])): ?>
+                                    <div style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;">
+                                        <strong>Creado por:</strong> <?= htmlspecialchars($curso['creado_por_nombre']) ?>
+                                    </div>
+                                <?php endif; ?>
                                 
                                 <div class="div-fila-alt-start" style="gap: 20px;">
                                     <div>
@@ -251,34 +281,33 @@ require __DIR__ . '/../partials/nav.php';
                             </div>
                             
                             <!-- Acciones -->
-                            <div class="curso-actions" style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
                                 <a href="/imt-cursos/public/docente/visualizar_curso.php?id=<?= $curso['id'] ?>" 
-                                   style="background: #3498db; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 500; transition: all 0.3s ease;"
-                                   onmouseover="this.style.background='#2980b9'"
-                                   onmouseout="this.style.background='#3498db'">
+                                   style="background: #3498db; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 500;">
                                     Ver Detalles
                                 </a>
                                 
-                                <button onclick="editarCurso(<?= $curso['id'] ?>)" 
-                                        style="background: transparent; color: #3498db; border: 2px solid #3498db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;"
-                                        onmouseover="this.style.background='#3498db'; this.style.color='white'"
-                                        onmouseout="this.style.background='transparent'; this.style.color='#3498db'">
-                                    Editar
-                                </button>
-                                
-                                <button onclick="gestionarModulos(<?= $curso['id'] ?>)" 
-                                        style="background: transparent; color: #7f8c8d; border: 2px solid #e8ecef; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;"
-                                        onmouseover="this.style.borderColor='#3498db'; this.style.color='#3498db'"
-                                        onmouseout="this.style.borderColor='#e8ecef'; this.style.color='#7f8c8d'">
-                                    Módulos
-                                </button>
-                                
-                                <button onclick="confirmarEliminar(<?= $curso['id'] ?>, '<?= addslashes($curso['titulo']) ?>')" 
-                                        style="background: transparent; color: #e74c3c; border: 2px solid #e74c3c; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;"
-                                        onmouseover="this.style.background='#e74c3c'; this.style.color='white'"
-                                        onmouseout="this.style.background='transparent'; this.style.color='#e74c3c'">
-                                    Eliminar
-                                </button>
+                                <?php if ($nuevas_columnas_existen): ?>
+                                    <button onclick="gestionarModulos(<?= $curso['id'] ?>)" 
+                                            style="background: transparent; color: #3498db; border: 2px solid #3498db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                        Gestionar Contenido
+                                    </button>
+                                <?php else: ?>
+                                    <button onclick="editarCurso(<?= $curso['id'] ?>)" 
+                                            style="background: transparent; color: #3498db; border: 2px solid #3498db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                        Editar
+                                    </button>
+                                    
+                                    <button onclick="gestionarModulos(<?= $curso['id'] ?>)" 
+                                            style="background: transparent; color: #7f8c8d; border: 2px solid #e8ecef; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                        Módulos
+                                    </button>
+                                    
+                                    <button onclick="confirmarEliminar(<?= $curso['id'] ?>, '<?= addslashes($curso['titulo']) ?>')" 
+                                            style="background: transparent; color: #e74c3c; border: 2px solid #e74c3c; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                        Eliminar
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -288,103 +317,105 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 </div>
 
-<!-- Modal para Nuevo Curso -->
-<div id="modalNuevoCurso" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 30px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto;">
-        <div class="div-fila" style="justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="color: #3498db; margin: 0;">Crear Nuevo Curso</h2>
-            <button onclick="cerrarModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">&times;</button>
+<?php if (!$nuevas_columnas_existen): ?>
+    <!-- Modal para Nuevo Curso -->
+    <div id="modalNuevoCurso" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="div-fila" style="justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: #3498db; margin: 0;">Crear Nuevo Curso</h2>
+                <button onclick="cerrarModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">&times;</button>
+            </div>
+            
+            <form method="POST" action="/imt-cursos/public/docente/procesar_curso.php">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Título del Curso</label>
+                    <input type="text" name="titulo" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
+                           onfocus="this.style.borderColor='#3498db'" 
+                           onblur="this.style.borderColor='#e8ecef'">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Descripción</label>
+                    <textarea name="descripcion" rows="3" 
+                              style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; resize: vertical; transition: border-color 0.3s ease;"
+                              onfocus="this.style.borderColor='#3498db'" 
+                              onblur="this.style.borderColor='#e8ecef'"></textarea>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Objetivo General</label>
+                    <textarea name="objetivo_general" rows="3" 
+                              style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; resize: vertical; transition: border-color 0.3s ease;"
+                              placeholder="¿Cuál es el objetivo principal que se espera lograr con este curso?"
+                              onfocus="this.style.borderColor='#3498db'" 
+                              onblur="this.style.borderColor='#e8ecef'"></textarea>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Objetivos Específicos</label>
+                    <textarea name="objetivos_especificos" rows="4" 
+                              style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; resize: vertical; transition: border-color 0.3s ease;"
+                              placeholder="Lista los objetivos específicos que se alcanzarán (uno por línea)&#10;• Objetivo 1&#10;• Objetivo 2&#10;• Objetivo 3"
+                              onfocus="this.style.borderColor='#3498db'" 
+                              onblur="this.style.borderColor='#e8ecef'"></textarea>
+                </div>
+                
+                <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Duración</label>
+                        <input type="text" name="duracion" 
+                               style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
+                               placeholder="Ej: 40 horas, 8 semanas, 3 meses"
+                               onfocus="this.style.borderColor='#3498db'" 
+                               onblur="this.style.borderColor='#e8ecef'">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Categoría</label>
+                        <input type="text" name="categoria" 
+                               style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
+                               onfocus="this.style.borderColor='#3498db'" 
+                               onblur="this.style.borderColor='#e8ecef'">
+                    </div>
+                </div>
+                
+                <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Dirigido a</label>
+                        <input type="text" name="dirigido_a" 
+                               style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
+                               placeholder="Ej: Personal de TI, practicantes"
+                               onfocus="this.style.borderColor='#3498db'" 
+                               onblur="this.style.borderColor='#e8ecef'">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Estado</label>
+                        <select name="estado" 
+                                style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
+                                onfocus="this.style.borderColor='#3498db'" 
+                                onblur="this.style.borderColor='#e8ecef'">
+                            <option value="borrador">Borrador</option>
+                            <option value="activo">Activo</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="div-fila-alt" style="gap: 15px;">
+                    <button type="button" onclick="cerrarModal()" 
+                            style="background: #e8ecef; color: #5a5c69; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;"
+                            onmouseover="this.style.background='#2980b9'"
+                            onmouseout="this.style.background='#3498db'">
+                        Crear Curso
+                    </button>
+                </div>
+            </form>
         </div>
-        
-        <form method="POST" action="/imt-cursos/public/docente/procesar_curso.php">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Título del Curso</label>
-                <input type="text" name="titulo" required 
-                       style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
-                       onfocus="this.style.borderColor='#3498db'" 
-                       onblur="this.style.borderColor='#e8ecef'">
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Descripción</label>
-                <textarea name="descripcion" rows="3" 
-                          style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; resize: vertical; transition: border-color 0.3s ease;"
-                          onfocus="this.style.borderColor='#3498db'" 
-                          onblur="this.style.borderColor='#e8ecef'"></textarea>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Objetivo General</label>
-                <textarea name="objetivo_general" rows="3" 
-                          style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; resize: vertical; transition: border-color 0.3s ease;"
-                          placeholder="¿Cuál es el objetivo principal que se espera lograr con este curso?"
-                          onfocus="this.style.borderColor='#3498db'" 
-                          onblur="this.style.borderColor='#e8ecef'"></textarea>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Objetivos Específicos</label>
-                <textarea name="objetivos_especificos" rows="4" 
-                          style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; resize: vertical; transition: border-color 0.3s ease;"
-                          placeholder="Lista los objetivos específicos que se alcanzarán (uno por línea)&#10;• Objetivo 1&#10;• Objetivo 2&#10;• Objetivo 3"
-                          onfocus="this.style.borderColor='#3498db'" 
-                          onblur="this.style.borderColor='#e8ecef'"></textarea>
-            </div>
-            
-            <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
-                <div style="flex: 1;">
-                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Duración</label>
-                    <input type="text" name="duracion" 
-                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
-                           placeholder="Ej: 40 horas, 8 semanas, 3 meses"
-                           onfocus="this.style.borderColor='#3498db'" 
-                           onblur="this.style.borderColor='#e8ecef'">
-                </div>
-                <div style="flex: 1;">
-                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Categoría</label>
-                    <input type="text" name="categoria" 
-                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
-                           onfocus="this.style.borderColor='#3498db'" 
-                           onblur="this.style.borderColor='#e8ecef'">
-                </div>
-            </div>
-            
-            <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
-                <div style="flex: 1;">
-                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Dirigido a</label>
-                    <input type="text" name="dirigido_a" 
-                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
-                           placeholder="Ej: Personal de TI, practicantes"
-                           onfocus="this.style.borderColor='#3498db'" 
-                           onblur="this.style.borderColor='#e8ecef'">
-                </div>
-                <div style="flex: 1;">
-                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Estado</label>
-                    <select name="estado" 
-                            style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
-                            onfocus="this.style.borderColor='#3498db'" 
-                            onblur="this.style.borderColor='#e8ecef'">
-                        <option value="borrador">Borrador</option>
-                        <option value="activo">Activo</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="div-fila-alt" style="gap: 15px;">
-                <button type="button" onclick="cerrarModal()" 
-                        style="background: #e8ecef; color: #5a5c69; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                    Cancelar
-                </button>
-                <button type="submit" 
-                        style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease;"
-                        onmouseover="this.style.background='#2980b9'"
-                        onmouseout="this.style.background='#3498db'">
-                    Crear Curso
-                </button>
-            </div>
-        </form>
     </div>
-</div>
+<?php endif; ?>
 
 <script>
 function mostrarFormularioNuevoCurso() {
@@ -407,6 +438,56 @@ function confirmarEliminar(id, titulo) {
     if (confirm(`¿Estás seguro de que deseas eliminar el curso "${titulo}"?\n\nEsta acción eliminará permanentemente:\n- El curso y toda su información\n- Todos los módulos y lecciones\n- Las inscripciones de estudiantes\n- Los archivos asociados\n\nEsta acción NO se puede deshacer.`)) {
         window.location.href = `/imt-cursos/public/docente/eliminar_curso.php?id=${id}`;
     }
+}
+
+function marcarEnDesarrollo(id) {
+    // Lógica para marcar el curso como "en desarrollo"
+    fetch(`/imt-cursos/public/docente/cambiar_estado_curso.php?id=${id}&estado=en_desarrollo`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar la interfaz
+            location.reload();
+        } else {
+            alert('Error al cambiar el estado del curso. Inténtalo nuevamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cambiar el estado del curso. Inténtalo nuevamente.');
+    });
+}
+
+function marcarCompletado(id) {
+    // Lógica para marcar el curso como "completado"
+    fetch(`/imt-cursos/public/docente/cambiar_estado_curso.php?id=${id}&estado=completado`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar la interfaz
+            location.reload();
+        } else {
+            alert('Error al cambiar el estado del curso. Inténtalo nuevamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cambiar el estado del curso. Inténtalo nuevamente.');
+    });
 }
 
 // Cerrar modal al hacer clic fuera

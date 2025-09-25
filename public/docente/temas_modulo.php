@@ -68,7 +68,7 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Lista de Temas -->
     <div class="temas-container">
         <h2 class="temas-section-title">Temas</h2>
-        
+
         <?php if (empty($temas)): ?>
             <div class="temas-empty">
                 <img src="/imt-cursos/public/styles/iconos/desk.png" class="empty-icon-temas">
@@ -84,7 +84,7 @@ require __DIR__ . '/../partials/nav.php';
                     <div class="tema-card">
                         <div class="div-fila" style="gap: 20px; align-items: center;">
                             <div class="tema-orden"><?= $tema['orden'] ?></div>
-                            
+
                             <div style="flex: 1;">
                                 <h4 class="tema-title"><?= htmlspecialchars($tema['titulo']) ?></h4>
                                 <p class="tema-desc">
@@ -95,7 +95,7 @@ require __DIR__ . '/../partials/nav.php';
                                     <span class="tema-fecha">Creado: <?= date('d/m/Y', strtotime($tema['created_at'])) ?></span>
                                 </div>
                             </div>
-                            
+
                             <div class="tema-actions">
                                 <button onclick="gestionarSubtemas(<?= $tema['id'] ?>)" class="btn-subtemas">
                                     Subtemas
@@ -197,7 +197,7 @@ require __DIR__ . '/../partials/nav.php';
         }
     }
 
-    document.getElementById('modalNuevoTema').addEventListener('click', function (e) {
+    document.getElementById('modalNuevoTema').addEventListener('click', function(e) {
         if (e.target === this) {
             cerrarModal();
         }

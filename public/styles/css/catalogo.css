@@ -1,0 +1,413 @@
+/* CSS para el catálogo de cursos */
+
+:root {
+    --catalogo-primary: #3498db;
+    --catalogo-secondary: #2980b9;
+    --catalogo-success: #27ae60;
+    --catalogo-warning: #f39c12;
+    --catalogo-light: #ecf0f1;
+}
+
+/* Header del catálogo */
+.catalogo-header {
+    background: linear-gradient(135deg, var(--catalogo-primary), var(--catalogo-secondary));
+    color: white;
+    padding: 40px 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.catalogo-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.catalogo-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Filtros */
+.filtros-container {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.filtros-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filtro-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.filtro-input, .filtro-select {
+    padding: 12px;
+    border: 2px solid #e8ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.filtro-input:focus, .filtro-select:focus {
+    outline: none;
+    border-color: var(--catalogo-primary);
+}
+
+.btn-filtrar {
+    background: var(--catalogo-primary);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-filtrar:hover {
+    background: var(--catalogo-secondary);
+    transform: translateY(-1px);
+}
+
+.btn-limpiar {
+    background: #e8ecef;
+    color: #5a5c69;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.btn-limpiar:hover {
+    background: #ddd;
+}
+
+/* Resultados */
+.resultados-container {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.resultados-titulo {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 1.3rem;
+}
+
+/* Grid de cursos */
+.cursos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.curso-card {
+    border: 2px solid #e8ecef;
+    border-radius: 15px;
+    padding: 0;
+    background: white;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.curso-card:hover {
+    border-color: var(--catalogo-primary);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.15);
+}
+
+.curso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e8ecef;
+}
+
+.curso-categoria {
+    background: var(--catalogo-primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.curso-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.curso-badge.inscrito {
+    background: var(--catalogo-success);
+    color: white;
+}
+
+.curso-body {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.curso-titulo {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.curso-docente {
+    color: #7f8c8d;
+    font-style: italic;
+    margin: 0;
+}
+
+.curso-descripcion {
+    color: #5a5c69;
+    line-height: 1.5;
+}
+
+.curso-objetivo {
+    color: #2c3e50;
+    font-size: 0.9rem;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--catalogo-primary);
+}
+
+.curso-detalles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 10px 0;
+}
+
+.detalle-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.detalle-valor {
+    font-weight: 500;
+}
+
+.curso-dirigido {
+    color: #2c3e50;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    background: #e8f4fd;
+    border-radius: 6px;
+}
+
+.curso-footer {
+    padding: 20px;
+    border-top: 1px solid #e8ecef;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-curso {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+}
+
+.btn-curso.ver-detalles {
+    background: #e8ecef;
+    color: #5a5c69;
+}
+
+.btn-curso.ver-detalles:hover {
+    background: #ddd;
+}
+
+.btn-curso.inscribirse {
+    background: var(--catalogo-primary);
+    color: white;
+}
+
+.btn-curso.inscribirse:hover {
+    background: var(--catalogo-secondary);
+}
+
+.btn-curso.inscrito {
+    background: var(--catalogo-success);
+    color: white;
+}
+
+.btn-curso.inscrito:hover {
+    background: #219a52;
+}
+
+/* Sin resultados */
+.sin-resultados {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+}
+
+.sin-resultados-icon {
+    width: 80px;
+    height: 80px;
+    opacity: 0.3;
+    margin-bottom: 20px;
+}
+
+.sin-resultados h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    background: var(--catalogo-primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--catalogo-secondary);
+    transform: translateY(-1px);
+}
+
+/* Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    padding: 0;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e8ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #7f8c8d;
+    padding: 5px;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e8ecef;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-cancelar {
+    background: #e8ecef;
+    color: #5a5c69;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-inscribirse {
+    background: var(--catalogo-primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filtros-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .cursos-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .curso-footer {
+        flex-direction: column;
+    }
+}
