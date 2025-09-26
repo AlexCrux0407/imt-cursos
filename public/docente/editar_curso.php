@@ -16,7 +16,7 @@ $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
 $curso = $stmt->fetch();
 
 if (!$curso) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=curso_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=curso_no_encontrado');
     exit;
 }
 
@@ -51,7 +51,7 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="form-container-body">
-        <form method="POST" action="/imt-cursos/public/docente/actualizar_curso.php">
+        <form method="POST" action="<?= BASE_URL ?>/docente/actualizar_curso.php">
             <input type="hidden" name="curso_id" value="<?= $curso['id'] ?>">
             
             <div style="margin-bottom: 20px;">

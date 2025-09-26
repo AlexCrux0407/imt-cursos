@@ -1,0 +1,365 @@
+/* CSS específico para contenido de temas - usando sistema de colores azul */
+
+/* Header del tema */
+.tema-header {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.breadcrumb {
+    margin-bottom: 15px;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.breadcrumb a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb a:hover {
+    color: white;
+}
+
+.tema-titulo {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.tema-descripcion {
+    opacity: 0.9;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+/* Contenedor principal */
+.tema-contenido {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.seccion-titulo {
+    color: #3498db;
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e3f2fd;
+}
+
+/* Contenido principal */
+.contenido-principal {
+    margin-bottom: 40px;
+}
+
+.contenido-texto {
+    color: #5a5c69;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    padding: 20px;
+    background: #f8fbff;
+    border-radius: 10px;
+    border-left: 4px solid #3498db;
+}
+
+/* Lecciones directas */
+.lecciones-section {
+    margin-bottom: 40px;
+}
+
+.lecciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.leccion-card {
+    border: 2px solid #e8ecef;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.leccion-card:hover {
+    border-color: #3498db;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.15);
+}
+
+.leccion-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.leccion-numero {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.leccion-titulo {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.leccion-descripcion {
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.leccion-footer {
+    text-align: center;
+}
+
+.btn-leccion {
+    background: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-leccion:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Subtemas */
+.subtemas-section {
+    margin-bottom: 40px;
+}
+
+.subtemas-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.subtema-card {
+    border: 2px solid #e3f2fd;
+    border-radius: 12px;
+    padding: 25px;
+    background: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.subtema-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #2980b9);
+}
+
+.subtema-card:hover {
+    border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.15);
+}
+
+.subtema-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.subtema-numero {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.subtema-info {
+    flex: 1;
+}
+
+.subtema-titulo {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+}
+
+.lecciones-count {
+    background: #3498db;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.subtema-descripcion {
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.subtema-footer {
+    text-align: center;
+}
+
+.btn-subtema {
+    background: #3498db;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-subtema:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Lecciones agrupadas por subtema */
+.subtema-lecciones {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8fbff;
+    border-radius: 12px;
+    border-left: 4px solid #3498db;
+}
+
+.subtema-header {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+/* Estado vacío */
+.empty-content {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+}
+
+.empty-content img {
+    width: 80px;
+    height: 80px;
+    opacity: 0.3;
+    margin-bottom: 20px;
+}
+
+.empty-content h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.empty-content p {
+    margin-bottom: 20px;
+}
+
+.btn-volver {
+    background: #3498db;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-volver:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Animaciones */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tema-header {
+        padding: 20px;
+    }
+    
+    .tema-titulo {
+        font-size: 1.6rem;
+    }
+    
+    .tema-contenido {
+        padding: 20px;
+    }
+    
+    .lecciones-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .subtema-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .leccion-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

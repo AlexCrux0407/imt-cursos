@@ -64,7 +64,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/estudiante.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
 
 <style>
 /* Animaciones de entrada */
@@ -371,15 +371,15 @@ require __DIR__ . '/../partials/nav.php';
     <div class="dashboard-section">
         <div class="section-header">
             <h2 class="section-title">Continúa Aprendiendo</h2>
-            <a href="/imt-cursos/public/estudiante/mis_cursos.php" class="section-link">Ver todos →</a>
+            <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="section-link">Ver todos →</a>
         </div>
         
         <?php if (empty($cursos_progreso)): ?>
             <div class="empty-state">
-                <img src="/imt-cursos/public/styles/iconos/desk.png" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 15px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 15px;">
                 <h4>No tienes cursos en progreso</h4>
                 <p>Explora nuestro catálogo y comienza tu aprendizaje</p>
-                <a href="/imt-cursos/public/estudiante/catalogo.php" class="btn-primary">Explorar Cursos</a>
+                <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="btn-primary">Explorar Cursos</a>
             </div>
         <?php else: ?>
             <div class="courses-grid">
@@ -401,7 +401,7 @@ require __DIR__ . '/../partials/nav.php';
                             </div>
                         </div>
                         <div class="course-actions">
-                            <a href="/imt-cursos/public/estudiante/curso_contenido.php?id=<?= $curso['id'] ?>" class="btn-action">Continuar</a>
+                            <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $curso['id'] ?>" class="btn-action">Continuar</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -426,7 +426,7 @@ require __DIR__ . '/../partials/nav.php';
                         <small class="completed-date">Completado el <?= date('d/m/Y', strtotime($curso['fecha_completado'])) ?></small>
                     </div>
                     <div class="completed-actions">
-                        <a href="/imt-cursos/public/estudiante/certificado.php?curso_id=<?= $curso['id'] ?>" class="btn-certificate">Ver Certificado</a>
+                        <a href="<?= BASE_URL ?>/estudiante/certificado.php?curso_id=<?= $curso['id'] ?>" class="btn-certificate">Ver Certificado</a>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -442,7 +442,7 @@ require __DIR__ . '/../partials/nav.php';
         
         <?php if (empty($actividad_reciente)): ?>
             <div class="empty-state">
-                <img src="/imt-cursos/public/styles/iconos/entrada.png" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 15px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 15px;">
                 <h4>No hay actividad reciente</h4>
                 <p>Tu actividad de aprendizaje aparecerá aquí</p>
             </div>
@@ -451,7 +451,7 @@ require __DIR__ . '/../partials/nav.php';
                 <?php foreach ($actividad_reciente as $actividad): ?>
                     <div class="activity-item">
                         <div class="activity-icon">
-                            <img src="/imt-cursos/public/styles/iconos/desk.png" style="width: 16px; height: 16px;">
+                            <img src="<?= BASE_URL ?>/styles/iconos/desk.png" style="width: 16px; height: 16px;">
                         </div>
                         <div class="activity-content">
                             <p class="activity-text">
@@ -463,7 +463,7 @@ require __DIR__ . '/../partials/nav.php';
                             </div>
                         </div>
                         <div class="activity-action">
-                            <a href="/imt-cursos/public/estudiante/curso_contenido.php?id=<?= $actividad['curso_id'] ?>" class="btn-small">Continuar</a>
+                            <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $actividad['curso_id'] ?>" class="btn-small">Continuar</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -475,16 +475,16 @@ require __DIR__ . '/../partials/nav.php';
     <div class="quick-actions">
         <h3>Acciones Rápidas</h3>
         <div class="action-buttons">
-            <button class="action-btn" onclick="window.location.href='/imt-cursos/public/estudiante/catalogo.php'">
-                <img src="/imt-cursos/public/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+            <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/estudiante/catalogo.php'">
+                <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
                 Explorar Cursos
             </button>
-            <button class="action-btn" onclick="window.location.href='/imt-cursos/public/estudiante/mis_cursos.php'">
-                <img src="/imt-cursos/public/styles/iconos/desk.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+            <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/estudiante/mis_cursos.php'">
+                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
                 Mis Cursos
             </button>
-            <button class="action-btn" onclick="window.location.href='/imt-cursos/public/estudiante/certificados.php'">
-                <img src="/imt-cursos/public/styles/iconos/detalles.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+            <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/estudiante/certificados.php'">
+                <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
                 Mis Certificados
             </button>
         </div>

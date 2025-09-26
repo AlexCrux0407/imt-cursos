@@ -8,7 +8,7 @@ $modulo_id = (int)($_GET['modulo_id'] ?? 0);
 $curso_id = (int)($_GET['curso_id'] ?? 0);
 
 if ($tema_id === 0 || $modulo_id === 0) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=datos_invalidos');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=datos_invalidos');
     exit;
 }
 
@@ -23,7 +23,7 @@ $stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id']]);
 $tema = $stmt->fetch();
 
 if (!$tema) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=acceso_denegado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
     exit;
 }
 
@@ -59,12 +59,12 @@ try {
         }
     }
     
-    header('Location: /imt-cursos/public/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=tema_eliminado');
+    header('Location: ' . BASE_URL . '/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=tema_eliminado');
     exit;
     
 } catch (Exception $e) {
     $conn->rollBack();
-    header('Location: /imt-cursos/public/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_eliminar');
+    header('Location: ' . BASE_URL . '/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_eliminar');
     exit;
 }
 ?>

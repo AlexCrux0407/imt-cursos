@@ -73,7 +73,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/catalogo.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/catalogo.css">
 
 <div class="contenido">
     <div class="catalogo-header">
@@ -116,7 +116,7 @@ require __DIR__ . '/../partials/nav.php';
             
             <div class="filtro-grupo">
                 <button type="submit" class="btn-filtrar">Filtrar</button>
-                <a href="/imt-cursos/public/estudiante/catalogo.php" class="btn-limpiar">Limpiar</a>
+                <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="btn-limpiar">Limpiar</a>
             </div>
         </form>
     </div>
@@ -131,10 +131,10 @@ require __DIR__ . '/../partials/nav.php';
 
         <?php if (empty($cursos)): ?>
             <div class="sin-resultados">
-                <img src="/imt-cursos/public/styles/iconos/desk.png" class="sin-resultados-icon">
+                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" class="sin-resultados-icon">
                 <h3>No se encontraron cursos</h3>
                 <p>Intenta modificar tus filtros de búsqueda</p>
-                <a href="/imt-cursos/public/estudiante/catalogo.php" class="btn-primary">Ver todos los cursos</a>
+                <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="btn-primary">Ver todos los cursos</a>
             </div>
         <?php else: ?>
             <div class="cursos-grid">
@@ -151,28 +151,12 @@ require __DIR__ . '/../partials/nav.php';
                         
                         <div class="curso-body">
                             <h3 class="curso-titulo"><?= htmlspecialchars($curso['titulo']) ?></h3>
-                            <p class="curso-docente">Por <?= htmlspecialchars($curso['docente_nombre']) ?></p>
                             
                             <div class="curso-descripcion">
                                 <?= htmlspecialchars(substr($curso['descripcion'], 0, 120)) ?><?= strlen($curso['descripcion']) > 120 ? '...' : '' ?>
                             </div>
                             
-                            <?php if (!empty($curso['objetivo_general'])): ?>
-                                <div class="curso-objetivo">
-                                    <strong>Objetivo:</strong> 
-                                    <?= htmlspecialchars(substr($curso['objetivo_general'], 0, 100)) ?><?= strlen($curso['objetivo_general']) > 100 ? '...' : '' ?>
-                                </div>
-                            <?php endif; ?>
-                            
                             <div class="curso-detalles">
-                                <div class="detalle-item">
-                                    <span class="detalle-label">📚</span>
-                                    <span class="detalle-valor"><?= $curso['total_modulos'] ?> módulo<?= $curso['total_modulos'] !== 1 ? 's' : '' ?></span>
-                                </div>
-                                <div class="detalle-item">
-                                    <span class="detalle-label">👥</span>
-                                    <span class="detalle-valor"><?= $curso['total_inscritos'] ?> estudiante<?= $curso['total_inscritos'] !== 1 ? 's' : '' ?></span>
-                                </div>
                                 <?php if (!empty($curso['duracion'])): ?>
                                     <div class="detalle-item">
                                         <span class="detalle-label">⏱️</span>
@@ -190,7 +174,7 @@ require __DIR__ . '/../partials/nav.php';
                         
                         <div class="curso-footer">
                             <?php if ($curso['ya_inscrito']): ?>
-                                <a href="/imt-cursos/public/estudiante/curso_contenido.php?id=<?= $curso['id'] ?>" 
+                                <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $curso['id'] ?>" 
                                    class="btn-curso inscrito">
                                     Continuar Curso
                                 </a>
@@ -235,29 +219,12 @@ require __DIR__ . '/../partials/nav.php';
 let cursoSeleccionado = null;
 
 function mostrarDetallesCurso(cursoId) {
-    fetch(`/imt-cursos/public/estudiante/detalle_curso.php?id=${cursoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                cursoSeleccionado = cursoId;
-                document.getElementById('modal-titulo').textContent = data.curso.titulo;
-                document.getElementById('modal-body').innerHTML = data.html;
-                document.getElementById('modalDetallesCurso').style.display = 'flex';
-            } else {
-                alert('Error al cargar los detalles del curso');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al cargar los detalles del curso');
-        });
-}
+        window.location.href = `<?= BASE_URL ?>/estudiante/inscribirse.php?curso_id=${cursoId}`;
+        }
 
 function inscribirseCurso(cursoId) {
-    if (confirm('¿Estás seguro de que deseas inscribirte en este curso?')) {
-        window.location.href = `/imt-cursos/public/estudiante/inscribirse.php?curso_id=${cursoId}`;
+        window.location.href = `<?= BASE_URL ?>/estudiante/inscribirse.php?curso_id=${cursoId}`;
     }
-}
 
 function inscribirseDesdModal() {
     if (cursoSeleccionado) {

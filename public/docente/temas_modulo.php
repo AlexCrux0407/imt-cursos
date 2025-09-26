@@ -19,7 +19,7 @@ $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id'
 $modulo = $stmt->fetch();
 
 if (!$modulo) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=modulo_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=modulo_no_encontrado');
     exit;
 }
 
@@ -39,7 +39,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/temas.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/temas.css">
 
 <div class="contenido">
     <div class="temas-header">
@@ -57,9 +57,9 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Navegación -->
     <div class="temas-breadcrumb">
         <div class="div-fila-alt-start" style="gap: 10px;">
-            <a href="/imt-cursos/public/docente/admin_cursos.php" class="breadcrumb-link">Mis Cursos</a>
+            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="breadcrumb-link">Mis Cursos</a>
             <span class="breadcrumb-separator"> > </span>
-            <a href="/imt-cursos/public/docente/modulos_curso.php?id=<?= $curso_id ?>" class="breadcrumb-link">Módulos</a>
+            <a href="<?= BASE_URL ?>/docente/modulos_curso.php?id=<?= $curso_id ?>" class="breadcrumb-link">Módulos</a>
             <span class="breadcrumb-separator"> > </span>
             <span class="breadcrumb-current">Temas</span>
         </div>
@@ -71,7 +71,7 @@ require __DIR__ . '/../partials/nav.php';
 
         <?php if (empty($temas)): ?>
             <div class="temas-empty">
-                <img src="/imt-cursos/public/styles/iconos/desk.png" class="empty-icon-temas">
+                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" class="empty-icon-temas">
                 <h3>No hay temas creados</h3>
                 <p>Comienza agregando el primer tema a este módulo</p>
                 <button onclick="mostrarFormularioNuevoTema()" class="btn-crear-tema">
@@ -123,7 +123,7 @@ require __DIR__ . '/../partials/nav.php';
             <button onclick="cerrarModal()" class="modal-close-temas">&times;</button>
         </div>
 
-        <form method="POST" action="/imt-cursos/public/docente/procesar_tema.php" enctype="multipart/form-data">
+        <form method="POST" action="<?= BASE_URL ?>/docente/procesar_tema.php" enctype="multipart/form-data">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
 
@@ -184,16 +184,16 @@ require __DIR__ . '/../partials/nav.php';
     }
 
     function editarTema(id) {
-        window.location.href = `/imt-cursos/public/docente/editar_tema.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+        window.location.href = `<?= BASE_URL ?>/docente/editar_tema.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
     }
 
     function gestionarSubtemas(id) {
-        window.location.href = `/imt-cursos/public/docente/subtemas_tema.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+        window.location.href = `<?= BASE_URL ?>/docente/subtemas_tema.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
     }
 
     function confirmarEliminarTema(id, titulo) {
         if (confirm(`¿Estás seguro de que deseas eliminar el tema "${titulo}"?\n\nEsta acción eliminará permanentemente:\n- El tema y su contenido\n- Todos los subtemas asociados\n- Todas las lecciones asociadas\n- Los archivos asociados\n\nEsta acción NO se puede deshacer.`)) {
-            window.location.href = `/imt-cursos/public/docente/eliminar_tema.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+            window.location.href = `<?= BASE_URL ?>/docente/eliminar_tema.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
         }
     }
 

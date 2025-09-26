@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orden = (int)($_POST['orden'] ?? 1);
     
     if (empty($titulo) || $modulo_id === 0) {
-        header('Location: /imt-cursos/public/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_invalidos');
+        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_invalidos');
         exit;
     }
     
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id']]);
     
     if (!$stmt->fetch()) {
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=acceso_denegado');
+        header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
         exit;
     }
     
@@ -73,15 +73,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        header('Location: /imt-cursos/public/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_creada');
+        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_creada');
         exit;
         
     } catch (Exception $e) {
-        header('Location: /imt-cursos/public/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_crear');
+        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_crear');
         exit;
     }
 } else {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php');
     exit;
 }
 ?>

@@ -6,7 +6,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/ejecutivo.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/ejecutivo.css">
 
 <div class="exec-dashboard">
     <div class="exec-header">
@@ -42,39 +42,39 @@ require __DIR__ . '/../partials/nav.php';
     <div class="reports-grid">
         <div class="report-card">
             <div class="report-icon">
-                <img src="/imt-cursos/public/styles/iconos/addicon.png" alt="Estudiantes">
+                <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Estudiantes">
             </div>
             <h3 class="report-title">Reportes de Estudiantes</h3>
             <p class="report-description">
                 Visualiza estadísticas de estudiantes, progreso académico, inscripciones y rendimiento general.
             </p>
-            <a href="/imt-cursos/public/ejecutivo/reportes_estudiantes.php" class="report-link">
+            <a href="<?= BASE_URL ?>/ejecutivo/reportes_estudiantes.php" class="report-link">
                 Ver Reportes
             </a>
         </div>
 
         <div class="report-card">
             <div class="report-icon">
-                <img src="/imt-cursos/public/styles/iconos/edit.png" alt="Docentes">
+                <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="Docentes">
             </div>
             <h3 class="report-title">Reportes de Docentes</h3>
             <p class="report-description">
                 Analiza la actividad docente, cursos asignados, estudiantes por docente y eficiencia educativa.
             </p>
-            <a href="/imt-cursos/public/ejecutivo/reportes_docentes.php" class="report-link">
+            <a href="<?= BASE_URL ?>/ejecutivo/reportes_docentes.php" class="report-link">
                 Ver Reportes
             </a>
         </div>
 
         <div class="report-card">
             <div class="report-icon">
-                <img src="/imt-cursos/public/styles/iconos/desk.png" alt="Cursos">
+                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="Cursos">
             </div>
             <h3 class="report-title">Reportes de Cursos</h3>
             <p class="report-description">
                 Examina el desempeño de cursos, tasas de finalización, popularidad y efectividad del contenido.
             </p>
-            <a href="/imt-cursos/public/ejecutivo/reportes_cursos.php" class="report-link">
+            <a href="<?= BASE_URL ?>/ejecutivo/reportes_cursos.php" class="report-link">
                 Ver Reportes
             </a>
         </div>

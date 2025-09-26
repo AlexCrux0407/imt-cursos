@@ -46,7 +46,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/docente.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/docente.css">
 
 <style>
 /* Animaciones de entrada para admin cursos */
@@ -207,7 +207,7 @@ require __DIR__ . '/../partials/nav.php';
         
         <?php if (empty($cursos)): ?>
             <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                <img src="/imt-cursos/public/styles/iconos/desk.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px;">
                 <h3><?= $nuevas_columnas_existen ? 'No tienes cursos asignados' : 'No tienes cursos creados' ?></h3>
                 <p><?= $nuevas_columnas_existen ? 'El master te asignará cursos para que puedas desarrollar el contenido' : 'Comienza creando tu primer curso' ?></p>
                 <?php if (!$nuevas_columnas_existen): ?>
@@ -227,7 +227,7 @@ require __DIR__ . '/../partials/nav.php';
                             <div style="flex: 2;">
                                 <div class="div-fila-alt-start" style="margin-bottom: 15px;">
                                     <div style="width: 50px; height: 50px; background: #3498db; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                        <img src="/imt-cursos/public/styles/iconos/desk.png" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                                        <img src="<?= BASE_URL ?>/styles/iconos/desk.png" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                                     </div>
                                     <div>
                                         <h3 style="color: #2c3e50; margin-bottom: 5px;"><?= htmlspecialchars($curso['titulo']) ?></h3>
@@ -282,7 +282,7 @@ require __DIR__ . '/../partials/nav.php';
                             
                             <!-- Acciones -->
                             <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
-                                <a href="/imt-cursos/public/docente/visualizar_curso.php?id=<?= $curso['id'] ?>" 
+                                <a href="<?= BASE_URL ?>/docente/visualizar_curso.php?id=<?= $curso['id'] ?>" 
                                    style="background: #3498db; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; text-align: center; font-weight: 500;">
                                     Ver Detalles
                                 </a>
@@ -326,7 +326,7 @@ require __DIR__ . '/../partials/nav.php';
                 <button onclick="cerrarModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">&times;</button>
             </div>
             
-            <form method="POST" action="/imt-cursos/public/docente/procesar_curso.php">
+            <form method="POST" action="<?= BASE_URL ?>/docente/procesar_curso.php">
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Título del Curso</label>
                     <input type="text" name="titulo" required 
@@ -427,22 +427,22 @@ function cerrarModal() {
 }
 
 function editarCurso(id) {
-    window.location.href = `/imt-cursos/public/docente/editar_curso.php?id=${id}`;
+    window.location.href = `<?= BASE_URL ?>/docente/editar_curso.php?id=${id}`;
 }
 
 function gestionarModulos(id) {
-    window.location.href = `/imt-cursos/public/docente/modulos_curso.php?id=${id}`;
+    window.location.href = `<?= BASE_URL ?>/docente/modulos_curso.php?id=${id}`;
 }
 
 function confirmarEliminar(id, titulo) {
     if (confirm(`¿Estás seguro de que deseas eliminar el curso "${titulo}"?\n\nEsta acción eliminará permanentemente:\n- El curso y toda su información\n- Todos los módulos y lecciones\n- Las inscripciones de estudiantes\n- Los archivos asociados\n\nEsta acción NO se puede deshacer.`)) {
-        window.location.href = `/imt-cursos/public/docente/eliminar_curso.php?id=${id}`;
+        window.location.href = `<?= BASE_URL ?>/docente/eliminar_curso.php?id=${id}`;
     }
 }
 
 function marcarEnDesarrollo(id) {
     // Lógica para marcar el curso como "en desarrollo"
-    fetch(`/imt-cursos/public/docente/cambiar_estado_curso.php?id=${id}&estado=en_desarrollo`, {
+    fetch(`<?= BASE_URL ?>/docente/cambiar_estado_curso.php?id=${id}&estado=en_desarrollo`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -467,7 +467,7 @@ function marcarEnDesarrollo(id) {
 
 function marcarCompletado(id) {
     // Lógica para marcar el curso como "completado"
-    fetch(`/imt-cursos/public/docente/cambiar_estado_curso.php?id=${id}&estado=completado`, {
+    fetch(`<?= BASE_URL ?>/docente/cambiar_estado_curso.php?id=${id}&estado=completado`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

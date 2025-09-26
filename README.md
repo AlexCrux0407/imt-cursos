@@ -60,13 +60,7 @@ imt-cursos/
 ### ✅ Completado
 - Sistema básico de autenticación por roles
 - Estructura de plantillas reutilizables
-- Página base para visualización de cursos (docentes)
+- Página base para visualización de cursos (docentes y alumnos)
+- Funcionalidad de docentes completada.
 
 
-## Convenciones de Código
-
-- Archivos PHP con extensión `.php`
-- Uso de `require_once` para evitar inclusiones duplicadas
-- Separación de lógica de autenticación en `app/auth.php`
-- Plantillas reutilizables en `public/partials/`
-- Estructura de URLs amigables por módulos

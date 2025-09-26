@@ -21,7 +21,7 @@ $stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id']]);
 $tema = $stmt->fetch();
 
 if (!$tema) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=tema_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=tema_no_encontrado');
     exit;
 }
 
@@ -41,7 +41,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/subtemas.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/subtemas.css">
 
 <div class="contenido">
     <div class="subtemas-header">
@@ -59,11 +59,11 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Navegación -->
     <div class="subtemas-breadcrumb">
         <div class="div-fila-alt-start" style="gap: 10px;">
-            <a href="/imt-cursos/public/docente/admin_cursos.php" class="breadcrumb-link">Mis Cursos</a>
+            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="breadcrumb-link">Mis Cursos</a>
             <span class="breadcrumb-separator"> > </span>
-            <a href="/imt-cursos/public/docente/modulos_curso.php?id=<?= $curso_id ?>" class="breadcrumb-link">Módulos</a>
+            <a href="<?= BASE_URL ?>/docente/modulos_curso.php?id=<?= $curso_id ?>" class="breadcrumb-link">Módulos</a>
             <span class="breadcrumb-separator"> > </span>
-            <a href="/imt-cursos/public/docente/temas_modulo.php?id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>" class="breadcrumb-link">Temas</a>
+            <a href="<?= BASE_URL ?>/docente/temas_modulo.php?id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>" class="breadcrumb-link">Temas</a>
             <span class="breadcrumb-separator"> > </span>
             <span class="breadcrumb-current">Subtemas</span>
         </div>
@@ -75,7 +75,7 @@ require __DIR__ . '/../partials/nav.php';
         
         <?php if (empty($subtemas)): ?>
             <div class="subtemas-empty">
-                <img src="/imt-cursos/public/styles/iconos/config.png" class="empty-icon">
+                <img src="<?= BASE_URL ?>/styles/iconos/config.png" class="empty-icon">
                 <h3>No hay subtemas creados</h3>
                 <p>Comienza agregando el primer subtema a este tema</p>
                 <button onclick="mostrarFormularioNuevoSubtema()" class="btn-crear-primero">
@@ -127,7 +127,7 @@ require __DIR__ . '/../partials/nav.php';
             <button onclick="cerrarModal()" class="modal-close">&times;</button>
         </div>
         
-        <form method="POST" action="/imt-cursos/public/docente/procesar_subtema.php">
+        <form method="POST" action="<?= BASE_URL ?>/docente/procesar_subtema.php">
             <input type="hidden" name="tema_id" value="<?= $tema_id ?>">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
@@ -165,16 +165,16 @@ function cerrarModal() {
 }
 
 function editarSubtema(id) {
-    window.location.href = `/imt-cursos/public/docente/editar_subtema.php?id=${id}&tema_id=<?= $tema_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+    window.location.href = `<?= BASE_URL ?>/docente/editar_subtema.php?id=${id}&tema_id=<?= $tema_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
 }
 
 function gestionarLecciones(id) {
-    window.location.href = `/imt-cursos/public/docente/lecciones_subtema.php?id=${id}&tema_id=<?= $tema_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+    window.location.href = `<?= BASE_URL ?>/docente/lecciones_subtema.php?id=${id}&tema_id=<?= $tema_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
 }
 
 function confirmarEliminarSubtema(id, titulo) {
     if (confirm(`¿Estás seguro de que deseas eliminar el subtema "${titulo}"?\n\nEsta acción eliminará permanentemente:\n- El subtema y su contenido\n- Todas las lecciones asociadas\n- Los archivos asociados\n\nEsta acción NO se puede deshacer.`)) {
-        window.location.href = `/imt-cursos/public/docente/eliminar_subtema.php?id=${id}&tema_id=<?= $tema_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+        window.location.href = `<?= BASE_URL ?>/docente/eliminar_subtema.php?id=${id}&tema_id=<?= $tema_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
     }
 }
 

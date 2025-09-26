@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 $curso_id = (int)($_GET['id'] ?? 0);
 
 if ($curso_id === 0) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=curso_invalido');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=curso_invalido');
     exit;
 }
 
@@ -16,7 +16,7 @@ $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
 $curso = $stmt->fetch();
 
 if (!$curso) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=acceso_denegado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
     exit;
 }
 
@@ -55,7 +55,7 @@ try {
         }
     }
     
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?success=curso_eliminado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?success=curso_eliminado');
     exit;
     
 } catch (Exception $e) {
@@ -67,7 +67,7 @@ try {
     // Log del error para debugging (opcional)
     error_log("Error eliminando curso ID $curso_id: " . $e->getMessage());
     
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=error_eliminar&details=' . urlencode($e->getMessage()));
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=error_eliminar&details=' . urlencode($e->getMessage()));
     exit;
 }
 ?>

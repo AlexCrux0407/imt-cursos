@@ -56,28 +56,28 @@ require __DIR__ . '/../partials/nav.php';
         <h2 style="color: #3498db; margin-bottom: 20px;">Opciones de Reportes</h2>
         <div class="div-fila" style="gap: 20px;">
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 12px; background: white; text-align: center; cursor: pointer; transition: all 0.3s ease;"
-                 onclick="window.location.href='/imt-cursos/public/docente/admin_cursos.php'"
+                 onclick="window.location.href='<?= BASE_URL ?>/docente/admin_cursos.php'"
                  onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.transform='translateY(0)'">
-                <img src="/imt-cursos/public/styles/iconos/desk.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
                 <h4 style="color: #2c3e50; margin-bottom: 10px;">Ver Mis Cursos</h4>
                 <p style="color: #7f8c8d; margin: 0;">Administrar y revisar todos tus cursos</p>
             </div>
             
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 12px; background: white; text-align: center; cursor: pointer; transition: all 0.3s ease;"
-                 onclick="window.location.href='/imt-cursos/public/docente/visualizar_curso.php'"
+                 onclick="window.location.href='<?= BASE_URL ?>/docente/visualizar_curso.php'"
                  onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.transform='translateY(0)'">
-                <img src="/imt-cursos/public/styles/iconos/detalles.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
                 <h4 style="color: #2c3e50; margin-bottom: 10px;">Progreso Estudiantes</h4>
                 <p style="color: #7f8c8d; margin: 0;">Ver el avance de tus estudiantes</p>
             </div>
             
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 12px; background: white; text-align: center; cursor: pointer; transition: all 0.3s ease;"
-                 onclick="window.location.href='/imt-cursos/public/docente/dashboard.php'"
+                 onclick="window.location.href='<?= BASE_URL ?>/docente/dashboard.php'"
                  onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.transform='translateY(0)'">
-                <img src="/imt-cursos/public/styles/iconos/home.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/home.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
                 <h4 style="color: #2c3e50; margin-bottom: 10px;">Dashboard</h4>
                 <p style="color: #7f8c8d; margin: 0;">Volver al panel principal</p>
             </div>

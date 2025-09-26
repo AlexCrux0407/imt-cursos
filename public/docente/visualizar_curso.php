@@ -23,7 +23,7 @@ $stmt->execute([
 $curso = $stmt->fetch();
 
 if (!$curso) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=curso_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=curso_no_encontrado');
     exit;
 }
 
@@ -54,7 +54,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/docente.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/docente.css">
 
 <div class="contenido">
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
@@ -63,7 +63,7 @@ require __DIR__ . '/../partials/nav.php';
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Visualización de Curso</h1>
                 <p style="opacity: 0.9;"><?= htmlspecialchars($curso['titulo']) ?></p>
             </div>
-            <a href="/imt-cursos/public/docente/admin_cursos.php" class="btn" 
+            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="btn" 
                style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; text-decoration: none;">
                 ← Volver
             </a>
@@ -100,7 +100,7 @@ require __DIR__ . '/../partials/nav.php';
         
         <?php if (empty($estudiantes)): ?>
             <div class="empty-state">
-                <img src="/imt-cursos/public/styles/iconos/addicon.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px;">
                 <h3>No hay estudiantes inscritos</h3>
                 <p>Cuando los estudiantes se inscriban aparecerán aquí</p>
             </div>

@@ -19,7 +19,7 @@ $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id'
 $modulo = $stmt->fetch();
 
 if (!$modulo) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=modulo_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=modulo_no_encontrado');
     exit;
 }
 
@@ -42,7 +42,7 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="form-container-body">
-        <form method="POST" action="/imt-cursos/public/docente/actualizar_modulo.php" enctype="multipart/form-data">
+        <form method="POST" action="<?= BASE_URL ?>/docente/actualizar_modulo.php" enctype="multipart/form-data">
             <input type="hidden" name="modulo_id" value="<?= $modulo['id'] ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
             

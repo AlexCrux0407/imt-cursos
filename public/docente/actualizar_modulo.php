@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orden = (int)($_POST['orden'] ?? 1);
     
     if (empty($titulo) || $modulo_id === 0) {
-        header('Location: /imt-cursos/public/docente/modulos_curso.php?id=' . $curso_id . '&error=datos_invalidos');
+        header('Location:'  . BASE_URL . '/docente/modulos_curso.php?id=' . $curso_id . '&error=datos_invalidos');
         exit;
     }
     
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $modulo_actual = $stmt->fetch();
     
     if (!$modulo_actual) {
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=acceso_denegado');
+        header('Location:'  . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
         exit;
     }
     
@@ -102,16 +102,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
         
-        header('Location: /imt-cursos/public/docente/modulos_curso.php?id=' . $curso_id . '&success=modulo_actualizado');
+        header('Location:'  . BASE_URL . '/docente/modulos_curso.php?id=' . $curso_id . '&success=modulo_actualizado');
         exit;
         
     } catch (Exception $e) {
         error_log("Error actualizando módulo: " . $e->getMessage());
-        header('Location: /imt-cursos/public/docente/editar_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_actualizar');
+        header('Location:'  . BASE_URL . '/docente/editar_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_actualizar');
         exit;
     }
 } else {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php');
+    header('Location:'  . BASE_URL . '/docente/admin_cursos.php');
     exit;
 }
 ?>

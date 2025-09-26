@@ -23,7 +23,7 @@ $stmt->execute([':subtema_id' => $subtema_id, ':docente_id' => $_SESSION['user_i
 $subtema = $stmt->fetch();
 
 if (!$subtema) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=subtema_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=subtema_no_encontrado');
     exit;
 }
 
@@ -31,7 +31,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/subtemas.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/subtemas.css">
 
 <div class="contenido">
     <div class="subtemas-header">
@@ -47,7 +47,7 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="subtemas-container">
-        <form method="POST" action="/imt-cursos/public/docente/actualizar_subtema.php" enctype="multipart/form-data">
+        <form method="POST" action="<?= BASE_URL ?>/docente/actualizar_subtema.php" enctype="multipart/form-data">
             <input type="hidden" name="subtema_id" value="<?= $subtema['id'] ?>">
             <input type="hidden" name="tema_id" value="<?= $tema_id ?>">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">

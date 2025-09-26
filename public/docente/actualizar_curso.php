@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("Actualización - Duración recibida: '{$duracion}'");
     
     if (empty($titulo) || $curso_id === 0) {
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=datos_invalidos');
+        header('Location:'  . BASE_URL .'/docente/admin_cursos.php?error=datos_invalidos');
         exit;
     }
     
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
     
     if (!$stmt->fetch()) {
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=acceso_denegado');
+        header('Location:'  . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
         exit;
     }
     
@@ -92,19 +92,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         if ($result) {
-            header('Location: /imt-cursos/public/docente/admin_cursos.php?success=curso_actualizado');
+            header('Location:'  . BASE_URL . '/docente/admin_cursos.php?success=curso_actualizado');
         } else {
-            header('Location: /imt-cursos/public/docente/editar_curso.php?id=' . $curso_id . '&error=no_changes');
+            header('Location:'  . BASE_URL . '/docente/editar_curso.php?id=' . $curso_id . '&error=no_changes');
         }
         exit;
         
     } catch (Exception $e) {
         error_log("Error actualizando curso: " . $e->getMessage());
-        header('Location: /imt-cursos/public/docente/editar_curso.php?id=' . $curso_id . '&error=error_actualizar&details=' . urlencode($e->getMessage()));
+        header('Location:'  . BASE_URL . '/docente/editar_curso.php?id=' . $curso_id . '&error=error_actualizar&details=' . urlencode($e->getMessage()));
         exit;
     }
 } else {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php');
+    header('Location:'  . BASE_URL . '/docente/admin_cursos.php');
     exit;
 }
 ?>

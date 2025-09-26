@@ -11,7 +11,7 @@ $titulo = $_GET['titulo'] ?? 'Recurso del Curso';
 $leccion_id = $_GET['leccion_id'] ?? 0;
 
 if (empty($recurso_url)) {
-    header('Location: /imt-cursos/public/estudiante/dashboard.php?error=recurso_no_encontrado');
+    header('Location: ' . BASE_URL . '/estudiante/dashboard.php?error=recurso_no_encontrado');
     exit;
 }
 
@@ -31,7 +31,7 @@ if ($leccion_id) {
     $leccion = $stmt->fetch();
     
     if (!$leccion) {
-        header('Location: /imt-cursos/public/estudiante/dashboard.php?error=acceso_denegado');
+        header('Location: ' . BASE_URL . '/estudiante/dashboard.php?error=acceso_denegado');
         exit;
     }
     
@@ -45,8 +45,8 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/estudiante.css">
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/resource-viewer.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/resource-viewer.css">
 
 <div class="resource-viewer">
     <div class="resource-header">

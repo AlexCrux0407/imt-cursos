@@ -19,7 +19,7 @@ $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id'
 $modulo = $stmt->fetch();
 
 if (!$modulo) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=modulo_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=modulo_no_encontrado');
     exit;
 }
 
@@ -53,9 +53,9 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Navegación -->
     <div class="form-container-body" style="margin-bottom: 20px;">
         <div class="div-fila-alt-start" style="gap: 10px;">
-            <a href="/imt-cursos/public/docente/admin_cursos.php" style="color: #7f8c8d; text-decoration: none;">Mis Cursos</a>
+            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" style="color: #7f8c8d; text-decoration: none;">Mis Cursos</a>
             <span style="color: #7f8c8d;"> > </span>
-            <a href="/imt-cursos/public/docente/modulos_curso.php?id=<?= $curso_id ?>" style="color: #7f8c8d; text-decoration: none;">Módulos</a>
+            <a href="<?= BASE_URL ?>/docente/modulos_curso.php?id=<?= $curso_id ?>" style="color: #7f8c8d; text-decoration: none;">Módulos</a>
             <span style="color: #7f8c8d;"> > </span>
             <span style="color: #3498db; font-weight: 500;">Lecciones</span>
         </div>
@@ -84,7 +84,7 @@ require __DIR__ . '/../partials/nav.php';
         
         <?php if (empty($lecciones)): ?>
             <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                <img src="/imt-cursos/public/styles/iconos/detalles.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px; filter: brightness(0) saturate(100%) invert(50%);">
+                <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px; filter: brightness(0) saturate(100%) invert(50%);">
                 <h3>No hay lecciones creadas</h3>
                 <p>Comienza agregando la primera lección a este módulo</p>
                 <button onclick="mostrarFormularioNuevaLeccion()" 
@@ -105,7 +105,7 @@ require __DIR__ . '/../partials/nav.php';
                             </div>
                             
                             <div style="width: 50px; height: 50px; background: <?= getTipoColor($leccion['tipo']) ?>; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                <img src="/imt-cursos/public/styles/iconos/<?= getTipoIcono($leccion['tipo'], $leccion['recurso_url']) ?>" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                                <img src="<?= BASE_URL ?>/styles/iconos/<?= getTipoIcono($leccion['tipo'], $leccion['recurso_url']) ?>" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                             </div>
                             
                             <div style="flex: 1;">
@@ -155,7 +155,7 @@ require __DIR__ . '/../partials/nav.php';
             <button onclick="cerrarModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">&times;</button>
         </div>
         
-        <form method="POST" action="/imt-cursos/public/docente/procesar_leccion.php" enctype="multipart/form-data">
+        <form method="POST" action="<?= BASE_URL ?>/docente/procesar_leccion.php" enctype="multipart/form-data">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
             
@@ -229,12 +229,12 @@ function cerrarModal() {
 }
 
 function editarLeccion(id) {
-    window.location.href = `/imt-cursos/public/docente/editar_leccion.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+    window.location.href = `<?= BASE_URL ?>/docente/editar_leccion.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
 }
 
 function eliminarLeccion(id) {
     if (confirm('¿Estás seguro de que deseas eliminar esta lección?')) {
-        window.location.href = `/imt-cursos/public/docente/eliminar_leccion.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
+        window.location.href = `<?= BASE_URL ?>/docente/eliminar_leccion.php?id=${id}&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>`;
     }
 }
 

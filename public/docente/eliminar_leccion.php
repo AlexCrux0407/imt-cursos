@@ -8,7 +8,7 @@ $modulo_id = (int)($_GET['modulo_id'] ?? 0);
 $curso_id = (int)($_GET['curso_id'] ?? 0);
 
 if ($leccion_id === 0 || $modulo_id === 0) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=datos_invalidos');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=datos_invalidos');
     exit;
 }
 
@@ -26,7 +26,7 @@ $stmt->execute([
 ]);
 
 if (!$stmt->fetch()) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=acceso_denegado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
     exit;
 }
 
@@ -34,11 +34,11 @@ try {
     $stmt = $conn->prepare("DELETE FROM lecciones WHERE id = :id");
     $stmt->execute([':id' => $leccion_id]);
     
-    header('Location: /imt-cursos/public/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_eliminada');
+    header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_eliminada');
     exit;
     
 } catch (Exception $e) {
-    header('Location: /imt-cursos/public/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_eliminar');
+    header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_eliminar');
     exit;
 }
 ?>

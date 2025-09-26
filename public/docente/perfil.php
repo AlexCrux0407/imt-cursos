@@ -25,7 +25,7 @@ require __DIR__ . '/../partials/nav.php';
             <!-- Información Personal -->
             <div style="flex: 2;">
                 <h2 style="color: #3498db; margin-bottom: 20px;">Información Personal</h2>
-                <form method="POST" action="/imt-cursos/public/docente/actualizar_perfil.php">
+                <form method="POST" action="<?= BASE_URL ?>/docente/actualizar_perfil.php">
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Nombre Completo</label>
                         <input type="text" name="nombre" value="<?= htmlspecialchars($usuario['nombre']) ?>" 
@@ -79,7 +79,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
                 
                 <div style="margin-top: 20px;">
-                    <button onclick="window.location.href='/imt-cursos/public/docente/dashboard.php'" 
+                    <button onclick="window.location.href='<?= BASE_URL ?>/docente/dashboard.php'" 
                             style="width: 100%; background: transparent; color: #3498db; border: 2px solid #3498db; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 500;">
                         Volver al Dashboard
                     </button>

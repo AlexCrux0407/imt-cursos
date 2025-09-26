@@ -25,7 +25,7 @@ $estadisticas = $stmt->fetch();
 <?php require __DIR__ . '/../partials/header.php'; ?>
 <?php require __DIR__ . '/../partials/nav.php'; ?>
 
-<link rel="stylesheet" href="/imt-cursos/public/styles/css/docente.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/docente.css">
 
 <div class="dashboard-container">
     <div class="teacher-dashboard">
@@ -69,26 +69,26 @@ $estadisticas = $stmt->fetch();
         <div class="feature-grid">
             <div class="feature-card">
                 <div class="feature-icon">
-                    <img src="/imt-cursos/public/styles/iconos/config.png" alt="Administrar">
+                    <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="Administrar">
                 </div>
                 <h3 class="feature-title">Administración de Cursos</h3>
                 <p class="feature-description">
                     Gestiona el contenido de tus cursos, crea nuevas lecciones, actualiza materiales y organiza el contenido educativo.
                 </p>
-                <a href="/imt-cursos/public/docente/admin_cursos.php" class="feature-link">
+                <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="feature-link">
                     Administrar Cursos &rarr;
                 </a>
             </div>
 
             <div class="feature-card">
                 <div class="feature-icon">
-                    <img src="/imt-cursos/public/styles/iconos/detalles.png" alt="Visualizar">
+                    <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="Visualizar">
                 </div>
                 <h3 class="feature-title">Visualización de Progreso</h3>
                 <p class="feature-description">
                     Monitorea el progreso de tus estudiantes, revisa estadísticas de avance y fechas de finalización de cursos.
                 </p>
-                <a href="/imt-cursos/public/docente/visualizar_curso.php" class="feature-link">
+                <a href="<?= BASE_URL ?>/docente/visualizar_curso.php" class="feature-link">
                     Ver Progreso &rarr;
                 </a>
             </div>
@@ -98,16 +98,16 @@ $estadisticas = $stmt->fetch();
         <div class="quick-actions">
             <h3>Acciones Rápidas</h3>
             <div class="action-buttons">
-                <button class="action-btn" onclick="window.location.href='/imt-cursos/public/docente/admin_cursos.php'">
-                    <img src="/imt-cursos/public/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+                <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/docente/admin_cursos.php'">
+                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
                     Nuevo Curso
                 </button>
-                <button class="action-btn" onclick="window.location.href='/imt-cursos/public/docente/perfil.php'">
-                    <img src="/imt-cursos/public/styles/iconos/edit.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+                <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/docente/perfil.php'">
+                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
                     Editar Perfil
                 </button>
-                <button class="action-btn" onclick="window.location.href='/imt-cursos/public/docente/reportes.php'">
-                    <img src="/imt-cursos/public/styles/iconos/detalles.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+                <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/docente/reportes.php'">
+                    <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
                     Reportes
                 </button>
             </div>

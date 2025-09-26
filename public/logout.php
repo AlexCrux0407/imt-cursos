@@ -17,5 +17,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redireccionar al login
-header('Location: /imt-cursos/public/login.php');
+header('Location:' . BASE_URL . '/login.php');
 exit;

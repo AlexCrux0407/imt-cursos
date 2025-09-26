@@ -493,6 +493,53 @@
     font-size: 0.9rem;
 }
 
+/* Contenido de módulos y temas */
+.contenido-modulo-section,
+.contenido-principal {
+    margin-bottom: 40px;
+}
+
+.contenido-texto {
+    color: #5a5c69;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    padding: 25px;
+    background: #f8fbff;
+    border-radius: 12px;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.08);
+    position: relative;
+}
+
+.contenido-texto::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #3498db, #2980b9);
+    border-radius: 12px 12px 0 0;
+}
+
+.contenido-texto p {
+    margin-bottom: 15px;
+}
+
+.contenido-texto p:last-child {
+    margin-bottom: 0;
+}
+
+.contenido-texto strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.contenido-texto em {
+    color: #3498db;
+    font-style: italic;
+}
+
 /* Responsive para estudiantes */
 @media (max-width: 768px) {
     .student-dashboard {
@@ -509,5 +556,10 @@
     
     .courses-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .contenido-texto {
+        padding: 20px;
+        font-size: 1rem;
     }
 }

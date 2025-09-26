@@ -25,7 +25,7 @@ $stmt->execute([
 $leccion = $stmt->fetch();
 
 if (!$leccion) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=leccion_no_encontrada');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=leccion_no_encontrada');
     exit;
 }
 
@@ -65,7 +65,7 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="/imt-cursos/public/docente/actualizar_leccion.php" enctype="multipart/form-data">
+        <form method="POST" action="<?= BASE_URL ?>/docente/actualizar_leccion.php" enctype="multipart/form-data">
             <input type="hidden" name="leccion_id" value="<?= $leccion['id'] ?>">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
@@ -140,7 +140,7 @@ async function validarOrden(orden) {
     if (!orden) return;
     
     try {
-        const response = await fetch('/imt-cursos/public/docente/validar_orden.php', {
+        const response = await fetch('<?= BASE_URL ?>/docente/validar_orden.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

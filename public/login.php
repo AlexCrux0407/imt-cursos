@@ -3,6 +3,11 @@ session_start();
 
 require_once __DIR__ . '/../config/database.php';
 
+// Definir BASE_URL si no está definido
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/imt-cursos/public');
+}
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -44,17 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Redireccionar según el rol
                 switch ($row['role']) {
                     case 'master':
-                        header('Location: /imt-cursos/public/master/dashboard.php');
+                        header('Location:' . BASE_URL .'/master/dashboard.php');
                         break;
                     case 'docente':
-                        header('Location: /imt-cursos/public/docente/dashboard.php');
+                        header('Location:'  . BASE_URL . '/docente/dashboard.php');
                         break;
                     case 'ejecutivo':
-                        header('Location: /imt-cursos/public/ejecutivo/dashboard.php');
+                        header('Location:'  . BASE_URL . '/ejecutivo/dashboard.php');
                         break;
                     case 'estudiante':
                     default:
-                        header('Location: /imt-cursos/public/estudiante/dashboard.php');
+                        header('Location:' . BASE_URL .'/estudiante/dashboard.php');
                         break;
                 }
                 exit;

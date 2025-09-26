@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $estado = $_POST['estado'] ?? 'borrador';
     
     if (empty($titulo)) {
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=titulo_requerido');
+        header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=titulo_requerido');
         exit;
     }
     
@@ -36,24 +36,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result) {
             $curso_id = $conn->lastInsertId();
             error_log("Curso creado exitosamente con ID: " . $curso_id);
-            header('Location: /imt-cursos/public/docente/admin_cursos.php?success=curso_creado');
+            header('Location: ' . BASE_URL . '/docente/admin_cursos.php?success=curso_creado');
         } else {
             error_log("Error: execute() retornó false");
-            header('Location: /imt-cursos/public/docente/admin_cursos.php?error=execute_failed');
+            header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=execute_failed');
         }
         exit;
         
     } catch (PDOException $e) {
         error_log("PDOException: " . $e->getMessage());
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=database_error&details=' . urlencode($e->getMessage()));
+        header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=database_error&details=' . urlencode($e->getMessage()));
         exit;
     } catch (Exception $e) {
         error_log("Exception: " . $e->getMessage());
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=general_error&details=' . urlencode($e->getMessage()));
+        header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=general_error&details=' . urlencode($e->getMessage()));
         exit;
     }
 } else {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=method_not_allowed');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=method_not_allowed');
     exit;
 }
 ?>

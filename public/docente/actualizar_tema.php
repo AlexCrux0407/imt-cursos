@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orden = (int)($_POST['orden'] ?? 1);
     
     if (empty($titulo) || $tema_id === 0) {
-        header('Location: /imt-cursos/public/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_invalidos');
+        header('Location:'  . BASE_URL . '/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_invalidos');
         exit;
     }
     
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tema_actual = $stmt->fetch();
     
     if (!$tema_actual) {
-        header('Location: /imt-cursos/public/docente/admin_cursos.php?error=acceso_denegado');
+        header('Location:'  . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
         exit;
     }
     
@@ -96,16 +96,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
         
-        header('Location: /imt-cursos/public/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=tema_actualizado');
+        header('Location: '  . BASE_URL . '/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=tema_actualizado');
         exit;
         
     } catch (Exception $e) {
         error_log("Error actualizando tema: " . $e->getMessage());
-        header('Location: /imt-cursos/public/docente/editar_tema.php?id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_actualizar');
+        header('Location: '  . BASE_URL . '/docente/editar_tema.php?id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_actualizar');
         exit;
     }
 } else {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php');
+    header('Location:'  . BASE_URL . '/docente/admin_cursos.php');
     exit;
 }
 ?>

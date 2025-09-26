@@ -16,7 +16,7 @@ $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
 $curso = $stmt->fetch();
 
 if (!$curso) {
-    header('Location: /imt-cursos/public/docente/admin_cursos.php?error=curso_no_encontrado');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=curso_no_encontrado');
     exit;
 }
 
@@ -78,7 +78,7 @@ require __DIR__ . '/../partials/nav.php';
         
         <?php if (empty($modulos)): ?>
             <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                <img src="/imt-cursos/public/styles/iconos/config.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px; filter: brightness(0) saturate(100%) invert(50%);">
+                <img src="<?= BASE_URL ?>/styles/iconos/config.png" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 20px; filter: brightness(0) saturate(100%) invert(50%);">
                 <h3>No hay módulos creados</h3>
                 <p>Comienza agregando el primer módulo a tu curso</p>
                 <button onclick="mostrarFormularioNuevoModulo()" 
@@ -139,7 +139,7 @@ require __DIR__ . '/../partials/nav.php';
             <button onclick="cerrarModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">&times;</button>
         </div>
         
-        <form method="POST" action="/imt-cursos/public/docente/procesar_modulo.php" enctype="multipart/form-data">
+        <form method="POST" action="<?= BASE_URL ?>/docente/procesar_modulo.php" enctype="multipart/form-data">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
             
             <div style="margin-bottom: 20px;">
@@ -207,16 +207,16 @@ function cerrarModal() {
 }
 
 function editarModulo(id) {
-    window.location.href = `/imt-cursos/public/docente/editar_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
+    window.location.href = `<?= BASE_URL ?>/docente/editar_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
 }
 
 function gestionarTemas(id) {
-    window.location.href = `/imt-cursos/public/docente/temas_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
+    window.location.href = `<?= BASE_URL ?>/docente/temas_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
 }
 
 function confirmarEliminarModulo(id, titulo) {
     if (confirm(`¿Estás seguro de que deseas eliminar el módulo "${titulo}"?\n\nEsta acción eliminará permanentemente:\n- El módulo y su contenido\n- Todos los temas y subtemas\n- Todas las lecciones asociadas\n- Los archivos asociados\n\nEsta acción NO se puede deshacer.`)) {
-        window.location.href = `/imt-cursos/public/docente/eliminar_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
+        window.location.href = `<?= BASE_URL ?>/docente/eliminar_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
     }
 }
 
