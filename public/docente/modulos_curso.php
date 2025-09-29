@@ -111,9 +111,13 @@ require __DIR__ . '/../partials/nav.php';
                             
                             <div class="div-fila-alt-start" style="gap: 10px;">
                                 <button onclick="gestionarTemas(<?= $modulo['id'] ?>)" 
-                                        style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                                    Temas
-                                </button>
+                                style="background: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            📚 Temas
+                        </button>
+                        <button onclick="gestionarEvaluaciones(<?= $modulo['id'] ?>)" 
+                                style="background: #8e44ad; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            📝 Evaluaciones
+                        </button>
                                 <button onclick="editarModulo(<?= $modulo['id'] ?>)" 
                                         style="background: transparent; color: #3498db; border: 2px solid #3498db; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
                                     Editar
@@ -212,6 +216,10 @@ function editarModulo(id) {
 
 function gestionarTemas(id) {
     window.location.href = `<?= BASE_URL ?>/docente/temas_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
+}
+
+function gestionarEvaluaciones(id) {
+    window.location.href = `<?= BASE_URL ?>/docente/evaluaciones_modulo.php?id=${id}&curso_id=<?= $curso_id ?>`;
 }
 
 function confirmarEliminarModulo(id, titulo) {

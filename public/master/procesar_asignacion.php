@@ -51,29 +51,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':curso_id' => $curso_id
         ]);
         
-        // Crear notificación para el docente
-        $mensaje = "Se te ha asignado el curso '{$curso['titulo']}' para desarrollo de contenido.";
-        if (!empty($instrucciones)) {
-            $mensaje .= "\n\nInstrucciones: {$instrucciones}";
+        try {
+            $mensaje = "Se te ha asignado el curso '{$curso['titulo']}' para desarrollo de contenido.";
+            if (!empty($instrucciones)) {
+                $mensaje .= "\n\nInstrucciones: {$instrucciones}";
+            }
+            
+            $stmt = $conn->prepare("
+                INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, datos_extra) 
+                VALUES (:usuario_id, 'curso_asignado', :titulo, :mensaje, :datos_extra)
+            ");
+            
+            $datos_extra = json_encode([
+                'curso_id' => $curso_id,
+                'asignado_por' => $_SESSION['nombre'] ?? 'Sistema',
+                'fecha_asignacion' => date('Y-m-d H:i:s')
+            ]);
+            
+            $stmt->execute([
+                ':usuario_id' => $docente_id,
+                ':titulo' => "Curso Asignado: {$curso['titulo']}",
+                ':mensaje' => $mensaje,
+                ':datos_extra' => $datos_extra
+            ]);
+        } catch (Exception $notif_error) {
+            // Si falla la notificación, continuar sin interrumpir la asignación
+            error_log("Error al crear notificación: " . $notif_error->getMessage());
         }
-        
-        $stmt = $conn->prepare("
-            INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, datos_extra) 
-            VALUES (:usuario_id, 'curso_asignado', :titulo, :mensaje, :datos_extra)
-        ");
-        
-        $datos_extra = json_encode([
-            'curso_id' => $curso_id,
-            'asignado_por' => $_SESSION['nombre'],
-            'fecha_asignacion' => date('Y-m-d H:i:s')
-        ]);
-        
-        $stmt->execute([
-            ':usuario_id' => $docente_id,
-            ':titulo' => "Curso Asignado: {$curso['titulo']}",
-            ':mensaje' => $mensaje,
-            ':datos_extra' => $datos_extra
-        ]);
         
         $conn->commit();
         

@@ -161,7 +161,7 @@
         left: 0;
         width: 100%;
         box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-        z-index: -1;
+        z-index: 1000;
     }
 
     a {
@@ -223,6 +223,7 @@
       margin-left: 220px;
       padding: 50px;
       padding-top: 80px;
+      padding-bottom: 80px;
       color: #5a5c69;
     }
 
@@ -311,6 +312,7 @@
 
     .contenido {
         margin-left: 180px;
+        padding-bottom: 80px;
     }
     }
 
@@ -338,6 +340,7 @@
     .contenido {
         margin-left: 0;
         padding-top: 20px;
+        padding-bottom: 80px;
     }
     }
 

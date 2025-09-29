@@ -1,7 +1,13 @@
 <?php
 session_start();
 
-// Destruir todas las variables de sesión
+// Definir BASE_URL si no está definida
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/imt-cursos/public');
+}
+
+require_once __DIR__ . '/../config/database.php';
+
 $_SESSION = array();
 
 // Destruir la cookie de sesión si existe
@@ -17,5 +23,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redireccionar al login
-header('Location:' . BASE_URL . '/login.php');
+header('Location: ' . BASE_URL . '/login.php');
 exit;

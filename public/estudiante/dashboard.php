@@ -12,13 +12,21 @@ $stmt = $conn->prepare("
     SELECT 
         COUNT(DISTINCT i.curso_id) as cursos_inscritos,
         COUNT(DISTINCT CASE WHEN i.estado = 'completado' THEN i.curso_id END) as cursos_completados,
-        AVG(COALESCE(i.progreso, 0)) as progreso_promedio,
         COUNT(DISTINCT CASE WHEN i.estado = 'completado' THEN i.id END) as certificados_obtenidos
     FROM inscripciones i
     WHERE i.usuario_id = :estudiante_id
 ");
 $stmt->execute([':estudiante_id' => $estudiante_id]);
 $estadisticas = $stmt->fetch();
+
+// Obtener total de cursos disponibles
+$stmt = $conn->prepare("
+    SELECT COUNT(DISTINCT c.id) as cursos_disponibles
+    FROM cursos c
+    WHERE c.estado = 'activo'
+");
+$stmt->execute();
+$cursos_disponibles = $stmt->fetch()['cursos_disponibles'];
 
 // Obtener cursos en progreso del estudiante
 $stmt = $conn->prepare("
@@ -340,6 +348,13 @@ require __DIR__ . '/../partials/nav.php';
     <div class="stats-overview">
         <div class="stat-card">
             <div class="stat-content">
+                <h3 class="stat-value"><?= $cursos_disponibles ?: 0 ?></h3>
+                <p class="stat-label">Cursos Disponibles</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
                 <h3 class="stat-value"><?= $estadisticas['cursos_inscritos'] ?: 0 ?></h3>
                 <p class="stat-label">Cursos Inscritos</p>
             </div>
@@ -354,60 +369,12 @@ require __DIR__ . '/../partials/nav.php';
 
         <div class="stat-card">
             <div class="stat-content">
-                <h3 class="stat-value"><?= number_format($estadisticas['progreso_promedio'] ?: 0, 0) ?>%</h3>
-                <p class="stat-label">Progreso Promedio</p>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-content">
                 <h3 class="stat-value"><?= $estadisticas['certificados_obtenidos'] ?: 0 ?></h3>
                 <p class="stat-label">Certificados</p>
             </div>
         </div>
     </div>
 
-    <!-- Cursos en progreso -->
-    <div class="dashboard-section">
-        <div class="section-header">
-            <h2 class="section-title">Continúa Aprendiendo</h2>
-            <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="section-link">Ver todos →</a>
-        </div>
-        
-        <?php if (empty($cursos_progreso)): ?>
-            <div class="empty-state">
-                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 15px;">
-                <h4>No tienes cursos en progreso</h4>
-                <p>Explora nuestro catálogo y comienza tu aprendizaje</p>
-                <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="btn-primary">Explorar Cursos</a>
-            </div>
-        <?php else: ?>
-            <div class="courses-grid">
-                <?php foreach ($cursos_progreso as $curso): ?>
-                    <div class="course-card">
-                        <div class="course-header">
-                            <h4 class="course-title"><?= htmlspecialchars($curso['titulo']) ?></h4>
-                            <span class="course-instructor">Por <?= htmlspecialchars($curso['docente_nombre']) ?></span>
-                        </div>
-                        <div class="course-body">
-                            <p class="course-description">
-                                <?= htmlspecialchars(substr($curso['descripcion'], 0, 80)) ?><?= strlen($curso['descripcion']) > 80 ? '...' : '' ?>
-                            </p>
-                            <div class="progress-container">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: <?= $curso['progreso'] ?>%"></div>
-                                </div>
-                                <span class="progress-text"><?= number_format($curso['progreso'], 1) ?>% completado</span>
-                            </div>
-                        </div>
-                        <div class="course-actions">
-                            <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $curso['id'] ?>" class="btn-action">Continuar</a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
 
     <!-- Cursos completados -->
     <?php if (!empty($cursos_completados)): ?>
@@ -469,25 +436,6 @@ require __DIR__ . '/../partials/nav.php';
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
-    </div>
-
-    <!-- Acciones rápidas -->
-    <div class="quick-actions">
-        <h3>Acciones Rápidas</h3>
-        <div class="action-buttons">
-            <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/estudiante/catalogo.php'">
-                <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                Explorar Cursos
-            </button>
-            <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/estudiante/mis_cursos.php'">
-                <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                Mis Cursos
-            </button>
-            <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/estudiante/certificados.php'">
-                <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                Mis Certificados
-            </button>
-        </div>
     </div>
 </div>
 

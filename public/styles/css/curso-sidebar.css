@@ -43,7 +43,7 @@
     align-items: center;
     margin-bottom: 8px;
     font-size: 0.9rem;
-    color: red; /* Texto en blanco */
+    color: gray; /* Texto en blanco */
 }
 
 .progreso-porcentaje {

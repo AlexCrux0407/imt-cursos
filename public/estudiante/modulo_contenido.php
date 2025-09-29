@@ -205,16 +205,15 @@ require __DIR__ . '/../partials/nav.php';
     }
 
     .contenido-principal .contenido-modulo .contenido-texto {
-        background: #f0f8ff !important;
-        border-left: 4px solid #3498db !important;
+        background: transparent !important;
+        border-left: none !important;
         padding: 18px !important;
         border-radius: 10px !important;
     }
 
     .contenido-principal .contenido-modulo .tema-card,
     .contenido-principal .contenido-modulo .leccion-item {
-        border: 2px dashed #3498db !important;
-        /* borde notorio para ver el cambio */
+        border: none !important;
         border-radius: 10px !important;
         padding: 16px !important;
         background: #fff !important;
@@ -248,23 +247,6 @@ require __DIR__ . '/../partials/nav.php';
         </div>
 
         <div class="contenido-modulo">
-            <!-- Progreso del módulo -->
-            <div class="progreso-modulo">
-                <div class="progreso-header">
-                    <h3><i class="icon-chart"></i> Progreso del Módulo</h3>
-                    <div class="course-progress">
-                        <div class="progress-circle">
-                            <span class="progress-value"><?= number_format($porcentaje_completado, 0) ?>%</span>
-                        </div>
-                        <small class="progress-label">Completado</small>
-                    </div>
-                </div>
-                <div class="progreso-info">
-                    <?= (int)$progreso_modulo['lecciones_completadas'] ?> de
-                    <?= (int)$progreso_modulo['total_lecciones'] ?> lecciones completadas
-                </div>
-            </div>
-
             <!-- Contenido textual del módulo -->
             <?php if (!empty($modulo['contenido'])): ?>
                 <div class="contenido-modulo-section">

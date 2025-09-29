@@ -181,6 +181,35 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         </div>
 
+        <!-- Asignación de Cursos -->
+        <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
+             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(46,134,193,0.15)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
+             onclick="window.location.href='<?= BASE_URL ?>/master/asignar_cursos.php'">
+            <div class="div-fila-alt-start" style="margin-bottom: 20px;">
+                <div style="width: 50px; height: 50px; background: #2e86c1; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Asignar" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                </div>
+                <div>
+                    <h3 style="color: #2e86c1; font-size: 1.3rem; margin-bottom: 5px;">Asignación de Cursos</h3>
+                    <p style="color: #7f8c8d; font-size: 0.9rem;">Asignar cursos a docentes</p>
+                </div>
+            </div>
+            <p style="color: #5a5c69; margin-bottom: 20px; line-height: 1.5;">
+                Asigna cursos a docentes para su gestión y desarrollo, controla las asignaciones existentes.
+            </p>
+            <div class="div-fila-alt">
+                <a href="<?= BASE_URL ?>/master/asignar_cursos.php" 
+                   style="background: #2e86c1; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                   onmouseover="this.style.background='#2874a6'"
+                   onmouseout="this.style.background='#2e86c1'">
+                    Asignar →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="div-fila" style="gap: 25px; margin-bottom: 30px;">
         <!-- Configuración del Sistema -->
         <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
              onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(133,193,233,0.15)'"

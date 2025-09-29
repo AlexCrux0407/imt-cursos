@@ -155,78 +155,37 @@ document.querySelectorAll('iframe').forEach(iframe => {
 });
 </script>
 
-<?php require __DIR__ . '/../partials/footer.php'; ?>
-            <?php if ($es_archivo_local): ?>
-                <a href="<?= htmlspecialchars($recurso_url) ?>" download class="btn-download">
-                    📥 Descargar
-                </a>
-            <?php endif; ?>
-            <a href="javascript:history.back()" class="btn-close">
-                ✕ Cerrar
-            </a>
-        </div>
-    </div>
-    
-    <div class="resource-content">
-        <?php if (in_array(strtolower($extension), ['pdf'])): ?>
-            <!-- PDF Viewer -->
-            <iframe class="resource-frame" 
-                    src="<?= htmlspecialchars($recurso_url) ?>#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
-                    title="Visualizador de PDF">
-            </iframe>
-            
-        <?php elseif (in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'webm'])): ?>
-            <!-- Video Player -->
-            <video class="resource-frame" controls preload="metadata" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                <source src="<?= htmlspecialchars($recurso_url) ?>" type="video/<?= $extension ?>">
-                Tu navegador no soporta la reproducción de video.
-            </video>
-            
-        <?php elseif (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
-            <!-- Image Viewer -->
-            <img class="resource-frame" 
-                 src="<?= htmlspecialchars($recurso_url) ?>" 
-                 alt="<?= htmlspecialchars($titulo) ?>"
-                 style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            
-        <?php elseif (filter_var($recurso_url, FILTER_VALIDATE_URL)): ?>
-            <!-- External URL -->
-            <div class="loading-spinner"></div>
-            <iframe class="resource-frame" 
-                    src="<?= htmlspecialchars($recurso_url) ?>" 
-                    title="<?= htmlspecialchars($titulo) ?>"
-                    allowfullscreen="allowfullscreen" 
-                    webkitallowfullscreen="webkitallowfullscreen" 
-                    mozallowfullscreen="mozallowfullscreen"
-                    allow="autoplay *; fullscreen *">
-            </iframe>
-            
-        <?php else: ?>
-            <!-- Unsupported file type -->
-            <div class="resource-message">
-                <h2>Vista previa no disponible</h2>
-                <p>Este tipo de archivo no se puede visualizar en línea.</p>
-                <p>Archivo: <?= htmlspecialchars(basename($recurso_url)) ?></p>
-                <?php if ($es_archivo_local): ?>
-                    <br>
-                    <a href="<?= htmlspecialchars($recurso_url) ?>" download class="btn-download" style="display: inline-block; margin-top: 20px;">
-                        📥 Descargar Archivo
-                    </a>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
+
 
 <script>
-// Ocultar el contenido del body para mostrar solo el visor
+// Aplicar clase especial al body para el visor
 document.addEventListener('DOMContentLoaded', function() {
+    // Agregar clase especial al body
+    document.body.classList.add('resource-viewer-active');
+    
+    // Asegurar estilos del visor
+    const resourceViewer = document.querySelector('.resource-viewer');
+    if (resourceViewer) {
+        resourceViewer.style.position = 'fixed';
+        resourceViewer.style.top = '0';
+        resourceViewer.style.left = '0';
+        resourceViewer.style.width = '100vw';
+        resourceViewer.style.height = '100vh';
+        resourceViewer.style.zIndex = '9999';
+        resourceViewer.style.backgroundColor = '#fff';
+    }
+    
     // Ocultar navegación y otros elementos
     const nav = document.querySelector('nav');
     const contenido = document.querySelector('.contenido');
     
     if (nav) nav.style.display = 'none';
     if (contenido) contenido.style.display = 'none';
+});
+
+// Limpiar al cerrar
+window.addEventListener('beforeunload', function() {
+    document.body.classList.remove('resource-viewer-active');
 });
 
 // Manejar tecla ESC para cerrar
@@ -242,6 +201,20 @@ document.querySelectorAll('iframe').forEach(iframe => {
         const spinner = document.querySelector('.loading-spinner');
         if (spinner) {
             spinner.style.display = 'none';
+        }
+    });
+    
+    iframe.addEventListener('error', function() {
+        console.error('Error cargando el recurso:', iframe.src);
+        const resourceContent = document.querySelector('.resource-content');
+        if (resourceContent) {
+            resourceContent.innerHTML = `
+                <div class="resource-message">
+                    <h2>Error al cargar el recurso</h2>
+                    <p>No se pudo cargar el archivo solicitado.</p>
+                    <p>Verifique que el archivo existe y es accesible.</p>
+                </div>
+            `;
         }
     });
 });

@@ -31,15 +31,15 @@ $nombre = $_SESSION['nombre'] ?? 'Usuario';
             <?php if ($role === 'estudiante'): ?>
                 <a href="<?= BASE_URL ?>/estudiante/dashboard.php" class="nav-link-custom">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
-                    Dashboard
+                    Tablero
                 </a>
-                <a href="<?= BASE_URL ?>/estudiante/cursos_disponibles.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="nav-link-custom">
                     <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" class="nav-icon">
                     Cursos disponibles
                 </a>
-                <a href="<?= BASE_URL ?>/estudiante/cursos_completados.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="nav-link-custom">
                     <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" class="nav-icon">
-                    Cursos completados
+                    Mis cursos
                 </a>
                 <a href="<?= BASE_URL ?>/estudiante/perfil.php" class="nav-link-custom">
                     <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" alt="" class="nav-icon">
@@ -104,6 +104,11 @@ $nombre = $_SESSION['nombre'] ?? 'Usuario';
 <style>
 .responsive-header {
     background-color: #3498db !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 10000 !important;
 }
 
 .header-title {
