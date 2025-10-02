@@ -140,17 +140,14 @@ $nombre = $_SESSION['nombre'] ?? 'Usuario';
     height: 16px;
     opacity: 0.7;
     transition: opacity 0.3s ease;
-    /* Cambiar iconos blancos a color oscuro */
     filter: brightness(0) saturate(100%) invert(26%) sepia(15%) saturate(1487%) hue-rotate(190deg) brightness(95%) contrast(90%);
 }
 
 .header-icon img {
-    /* Aplicar filtro también a los iconos del header para hacerlos blancos */
     filter: brightness(0) invert(1) !important;
 }
 
 .user-title img {
-    /* Aplicar filtro al icono de usuario para hacerlo blanco */
     filter: brightness(0) invert(1) !important;
 }
 
@@ -161,7 +158,6 @@ $nombre = $_SESSION['nombre'] ?? 'Usuario';
 
 .nav-link-custom:hover .nav-icon {
     opacity: 1;
-    /* Cambiar a blanco en hover */
     filter: brightness(0) invert(1);
 }
 
@@ -173,7 +169,6 @@ $nombre = $_SESSION['nombre'] ?? 'Usuario';
 
 .nav-link-custom.active .nav-icon {
     opacity: 1;
-    /* Blanco para el estado activo */
     filter: brightness(0) invert(1);
 }
 

@@ -38,25 +38,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
-    // Manejar subida de archivo
+    // Manejar subida de archivo usando nueva estructura
     $nuevo_archivo = null;
-    if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK && $columnas_nuevas_existen) {
-        $upload_dir = __DIR__ . '/../../uploads/temas/';
+    if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
+        require_once __DIR__ . '/../../app/upload_helper.php';
         
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-        
-        $file_info = pathinfo($_FILES['archivo']['name']);
-        $allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'avi', 'mov', 'jpg', 'jpeg', 'png'];
-        
-        if (in_array(strtolower($file_info['extension']), $allowed_extensions)) {
-            $new_filename = 'tema_' . $tema_id . '_' . time() . '.' . $file_info['extension'];
-            $upload_path = $upload_dir . $new_filename;
+        try {
+            $upload_helper = new UploadHelper($conn);
+            $nuevo_archivo = $upload_helper->handleFileUpload($_FILES['archivo'], 'tema', $tema_id);
             
-            if (move_uploaded_file($_FILES['archivo']['tmp_name'], $upload_path)) {
-                $nuevo_archivo = '/imt-cursos/uploads/temas/' . $new_filename;
+            if ($nuevo_archivo) {
+                // Eliminar archivo anterior si existe y no es una URL externa
+                if ($tema_actual['archivo_actual'] && strpos($tema_actual['archivo_actual'], '/uploads/') === 0) {
+                    $upload_helper->deleteFile($tema_actual['archivo_actual']);
+                }
             }
+        } catch (Exception $e) {
+            error_log("Error actualizando archivo de tema: " . $e->getMessage());
+            // Continuar sin archivo si hay error
         }
     }
     

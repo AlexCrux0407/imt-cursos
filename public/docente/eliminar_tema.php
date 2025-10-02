@@ -30,7 +30,10 @@ if (!$tema) {
 try {
     $conn->beginTransaction();
     
-    // Obtener archivos para eliminar (tema y sus subtemas/lecciones)
+    // Obtener archivos para eliminar (tema y sus subtemas/lecciones) usando UploadHelper
+    require_once __DIR__ . '/../../app/upload_helper.php';
+    $upload_helper = new UploadHelper($conn);
+    
     $stmt = $conn->prepare("
         SELECT t.recurso_url FROM temas t WHERE t.id = :tema_id AND t.recurso_url LIKE '/imt-cursos/uploads/%'
         UNION
@@ -49,13 +52,10 @@ try {
     
     $conn->commit();
     
-    // Eliminar archivos físicos
+    // Eliminar archivos físicos usando UploadHelper
     foreach ($archivos as $archivo) {
         if ($archivo) {
-            $archivo_path = __DIR__ . '/../..' . $archivo;
-            if (file_exists($archivo_path)) {
-                @unlink($archivo_path);
-            }
+            $upload_helper->deleteFile($archivo);
         }
     }
     

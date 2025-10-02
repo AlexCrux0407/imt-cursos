@@ -48,28 +48,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $leccion_id = $conn->lastInsertId();
         
-        // Manejar subida de archivo si existe
+        // Manejar subida de archivo si existe usando la nueva estructura
         if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = __DIR__ . '/../../uploads/lecciones/';
+            require_once __DIR__ . '/../../app/upload_helper.php';
             
-            // Crear directorio si no existe
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
-            
-            $file_info = pathinfo($_FILES['archivo']['name']);
-            $allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'avi', 'mov', 'jpg', 'jpeg', 'png'];
-            
-            if (in_array(strtolower($file_info['extension']), $allowed_extensions)) {
-                $new_filename = 'leccion_' . $leccion_id . '_' . time() . '.' . $file_info['extension'];
-                $upload_path = $upload_dir . $new_filename;
+            try {
+                $upload_helper = new UploadHelper($conn);
+                $archivo_url = $upload_helper->handleFileUpload($_FILES['archivo'], 'leccion', $leccion_id);
                 
-                if (move_uploaded_file($_FILES['archivo']['tmp_name'], $upload_path)) {
+                if ($archivo_url) {
                     // Actualizar la lección con la URL del archivo
-                    $archivo_url = '/imt-cursos/uploads/lecciones/' . $new_filename;
                     $update_stmt = $conn->prepare("UPDATE lecciones SET recurso_url = :archivo_url WHERE id = :id");
                     $update_stmt->execute([':archivo_url' => $archivo_url, ':id' => $leccion_id]);
                 }
+            } catch (Exception $e) {
+                error_log("Error subiendo archivo de lección: " . $e->getMessage());
+                // Continuar sin archivo si hay error
             }
         }
         

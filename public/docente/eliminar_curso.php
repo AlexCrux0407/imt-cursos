@@ -24,7 +24,10 @@ try {
     // Iniciar transacción
     $conn->beginTransaction();
     
-    // 1. Obtener archivos de lecciones para eliminar físicamente
+    // 1. Obtener archivos de lecciones para eliminar físicamente usando UploadHelper
+    require_once __DIR__ . '/../../app/upload_helper.php';
+    $upload_helper = new UploadHelper($conn);
+    
     $stmt = $conn->prepare("
         SELECT l.recurso_url 
         FROM lecciones l
@@ -45,13 +48,10 @@ try {
     // Confirmar transacción
     $conn->commit();
     
-    // 3. Eliminar archivos físicos después de confirmar la transacción
+    // 3. Eliminar archivos físicos usando UploadHelper después de confirmar la transacción
     foreach ($archivos as $archivo) {
         if ($archivo && strpos($archivo, '/uploads/') !== false) {
-            $archivo_path = __DIR__ . '/../..' . $archivo;
-            if (file_exists($archivo_path)) {
-                @unlink($archivo_path); // @ para evitar warnings si el archivo no se puede eliminar
-            }
+            $upload_helper->deleteFile($archivo);
         }
     }
     

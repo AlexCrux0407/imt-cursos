@@ -6,13 +6,13 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
 
-$page_title = 'Estudiante – Contenido del Tema';
+$page_title = 'Estudiante – Contenido del Subtema';
 
-$tema_id       = (int)($_GET['id'] ?? 0);
+$subtema_id    = (int)($_GET['id'] ?? 0);
 $estudiante_id = (int)($_SESSION['user_id'] ?? 0);
 
-if ($tema_id === 0) {
-    header('Location: ' . BASE_URL . '/estudiante/mis_cursos.php?error=tema_no_especificado');
+if ($subtema_id === 0) {
+    header('Location: ' . BASE_URL . '/estudiante/mis_cursos.php?error=subtema_no_especificado');
     exit;
 }
 if ($estudiante_id === 0) {
@@ -20,63 +20,56 @@ if ($estudiante_id === 0) {
     exit;
 }
 
-/* 1) Cargar el TEMA y validar acceso (inscripción en su curso) */
+/* 1) Cargar el SUBTEMA y validar acceso (inscripción en su curso) */
 $stmt = $conn->prepare("
-    SELECT t.*,
+    SELECT st.*,
+           t.id   AS tema_id,     t.titulo AS tema_titulo,     t.orden AS tema_orden,
            m.id   AS modulo_id,   m.titulo AS modulo_titulo,   m.orden AS modulo_orden,
            c.id   AS curso_id,    c.titulo AS curso_titulo
-    FROM temas t
+    FROM subtemas st
+    INNER JOIN temas t   ON st.tema_id = t.id
     INNER JOIN modulos m ON t.modulo_id = m.id
     INNER JOIN cursos  c ON m.curso_id  = c.id
     INNER JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = :uid
-    WHERE t.id = :tema_id
+    WHERE st.id = :subtema_id
     LIMIT 1
 ");
-$stmt->execute([':tema_id' => $tema_id, ':uid' => $estudiante_id]);
-$tema = $stmt->fetch();
+$stmt->execute([':subtema_id' => $subtema_id, ':uid' => $estudiante_id]);
+$subtema = $stmt->fetch();
 
-if (!$tema) {
+if (!$subtema) {
     header('Location: ' . BASE_URL . '/estudiante/catalogo.php?error=acceso_denegado');
     exit;
 }
 
-/* 2) Subtemas del tema */
-$stmt = $conn->prepare("
-    SELECT st.*
-    FROM subtemas st
-    WHERE st.tema_id = :tema_id
-    ORDER BY st.orden
-");
-$stmt->execute([':tema_id' => $tema_id]);
-$subtemas = $stmt->fetchAll();
-
-/* 3) Lecciones del tema (directas por tema_id) */
+/* 2) Lecciones del subtema */
 $stmt = $conn->prepare("
     SELECT l.*, IF(pl.id IS NULL, 0, 1) AS completado
     FROM lecciones l
     LEFT JOIN progreso_lecciones pl
            ON pl.leccion_id = l.id AND pl.usuario_id = :uid
-    WHERE l.tema_id = :tema_id
+    WHERE l.subtema_id = :subtema_id
     ORDER BY l.orden
 ");
-$stmt->execute([':tema_id' => $tema_id, ':uid' => $estudiante_id]);
+$stmt->execute([':subtema_id' => $subtema_id, ':uid' => $estudiante_id]);
 $lecciones = $stmt->fetchAll();
 
-/* 4) Estructura del curso para la sidebar (lecciones cuelgan de TEMA) */
+/* 3) Estructura del curso para la sidebar */
 $stmt = $conn->prepare("
-    SELECT m.id  AS modulo_id, m.titulo AS modulo_titulo, m.orden AS modulo_orden,
-           t.id  AS tema_id,   t.titulo AS tema_titulo,   t.orden AS tema_orden,
-           l.id  AS leccion_id, l.titulo AS leccion_titulo, l.orden AS leccion_orden,
+    SELECT m.id AS modulo_id, m.titulo AS modulo_titulo, m.orden AS modulo_orden,
+           t.id AS tema_id, t.titulo AS tema_titulo, t.orden AS tema_orden,
+           s.id AS subtema_id, s.titulo AS subtema_titulo, s.orden AS subtema_orden,
+           l.id AS leccion_id, l.titulo AS leccion_titulo, l.orden AS leccion_orden,
            IF(pl.id IS NULL, 0, 1) AS leccion_completada
     FROM modulos m
-    LEFT JOIN temas t     ON m.id = t.modulo_id
-    LEFT JOIN lecciones l ON t.id = l.tema_id
-    LEFT JOIN progreso_lecciones pl
-           ON l.id = pl.leccion_id AND pl.usuario_id = :uid
+    LEFT JOIN temas t ON m.id = t.modulo_id
+    LEFT JOIN subtemas s ON t.id = s.tema_id
+    LEFT JOIN lecciones l ON s.id = l.subtema_id
+    LEFT JOIN progreso_lecciones pl ON l.id = pl.leccion_id AND pl.usuario_id = :uid
     WHERE m.curso_id = :curso_id
-    ORDER BY m.orden, t.orden, l.orden
+    ORDER BY m.orden, t.orden, s.orden, l.orden
 ");
-$stmt->execute([':curso_id' => $tema['curso_id'], ':uid' => $estudiante_id]);
+$stmt->execute([':curso_id' => $subtema['curso_id'], ':uid' => $estudiante_id]);
 $rows = $stmt->fetchAll();
 
 $curso_estructura = [];
@@ -99,27 +92,36 @@ foreach ($rows as $r) {
                 'id' => $tid,
                 'titulo' => $r['tema_titulo'],
                 'orden' => (int)$r['tema_orden'],
-                // AQUÍ: soportamos lecciones a nivel de tema
-                'lecciones' => []
+                'subtemas' => []
             ];
         }
-        if (!empty($r['leccion_id'])) {
-            $curso_estructura[$mid]['temas'][$tid]['lecciones'][] = [
-                'id' => (int)$r['leccion_id'],
-                'titulo' => $r['leccion_titulo'],
-                'orden' => (int)$r['leccion_orden'],
-                'completada' => (bool)$r['leccion_completada']
-            ];
-            $curso_estructura[$mid]['total_lecciones']++;
-            if ($r['leccion_completada']) {
-                $curso_estructura[$mid]['lecciones_completadas']++;
+        if (!empty($r['subtema_id'])) {
+            $sid = (int)$r['subtema_id'];
+            if (!isset($curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid])) {
+                $curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid] = [
+                    'id' => $sid,
+                    'titulo' => $r['subtema_titulo'],
+                    'orden' => (int)$r['subtema_orden'],
+                    'lecciones' => []
+                ];
+            }
+            if (!empty($r['leccion_id'])) {
+                $curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid]['lecciones'][] = [
+                    'id' => (int)$r['leccion_id'],
+                    'titulo' => $r['leccion_titulo'],
+                    'orden' => (int)$r['leccion_orden'],
+                    'completada' => (bool)$r['leccion_completada']
+                ];
+                $curso_estructura[$mid]['total_lecciones']++;
+                if ($r['leccion_completada']) {
+                    $curso_estructura[$mid]['lecciones_completadas']++;
+                }
             }
         }
     }
 }
 
-
-/* 5) Header + Nav */
+/* 4) Header + Nav */
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
@@ -129,8 +131,8 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido-con-sidebar" style="display:flex; gap:30px;">
     <?php
-    $cursoTituloSidebar = $tema['curso_titulo'];
-    $moduloActualId     = (int)$tema['modulo_id'];
+    $cursoTituloSidebar = $subtema['curso_titulo'];
+    $moduloActualId     = (int)$subtema['modulo_id'];
     include __DIR__ . '/partials/curso_sidebar.php';
     ?>
 
@@ -138,44 +140,48 @@ require __DIR__ . '/../partials/nav.php';
         <!-- Breadcrumb con fondo azul -->
         <div class="modulo-header">
             <?php
-            $cursoIdLink   = (int)($tema['curso_id'] ?? 0);
-            $cursoTituloBn = htmlspecialchars($tema['curso_titulo'] ?? 'Curso', ENT_QUOTES, 'UTF-8');
+            $cursoIdLink   = (int)($subtema['curso_id'] ?? 0);
+            $cursoTituloBn = htmlspecialchars($subtema['curso_titulo'] ?? 'Curso', ENT_QUOTES, 'UTF-8');
             $hrefCurso     = BASE_URL . '/estudiante/curso_contenido.php?id=' . $cursoIdLink;
-            $moduloIdLink  = (int)($tema['modulo_id'] ?? 0);
-            $moduloTituloBn = htmlspecialchars($tema['modulo_titulo'] ?? 'Módulo', ENT_QUOTES, 'UTF-8');
+            $moduloIdLink  = (int)($subtema['modulo_id'] ?? 0);
+            $moduloTituloBn = htmlspecialchars($subtema['modulo_titulo'] ?? 'Módulo', ENT_QUOTES, 'UTF-8');
             $hrefModulo    = BASE_URL . '/estudiante/modulo_contenido.php?id=' . $moduloIdLink;
+            $temaIdLink    = (int)($subtema['tema_id'] ?? 0);
+            $temaTituloBn  = htmlspecialchars($subtema['tema_titulo'] ?? 'Tema', ENT_QUOTES, 'UTF-8');
+            $hrefTema      = BASE_URL . '/estudiante/tema_contenido.php?id=' . $temaIdLink;
             ?>
             <div class="breadcrumb">
                 <a href="<?= BASE_URL ?>/estudiante/cursos_disponibles.php">Mis Cursos</a> →
                 <a href="<?= $hrefCurso ?>"><?= $cursoTituloBn ?></a> →
                 <a href="<?= $hrefModulo ?>"><?= $moduloTituloBn ?></a> →
-                Tema
+                <a href="<?= $hrefTema ?>"><?= $temaTituloBn ?></a> →
+                Subtema
             </div>
 
             <h1 class="page-title">
-                <?= htmlspecialchars($tema['titulo'] ?? 'Contenido del Tema', ENT_QUOTES, 'UTF-8') ?>
+                <?= htmlspecialchars($subtema['titulo'] ?? 'Contenido del Subtema', ENT_QUOTES, 'UTF-8') ?>
             </h1>
         </div>
 
-        <?php if (!empty($tema['contenido'])): ?>
+        <?php if (!empty($subtema['contenido'])): ?>
             <div class="contenido-modulo-section">
-                <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Tema</h2>
+                <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Subtema</h2>
                 <div class="contenido-texto">
-                    <?= nl2br(htmlspecialchars($tema['contenido'])) ?>
+                    <?= nl2br(htmlspecialchars($subtema['contenido'])) ?>
                 </div>
             </div>
         <?php endif; ?>
 
-        <!-- Recursos del tema -->
-        <?php if (!empty($tema['recurso_url'])): ?>
+        <!-- Recursos del subtema -->
+        <?php if (!empty($subtema['recurso_url'])): ?>
             <div class="contenido-modulo-section">
-                <h2 class="seccion-titulo"><i class="icon-download"></i> Recursos del Tema</h2>
+                <h2 class="seccion-titulo"><i class="icon-download"></i> Recursos del Subtema</h2>
                 <div class="recursos-lista">
                     <?php
-                    $extension = strtolower(pathinfo($tema['recurso_url'], PATHINFO_EXTENSION));
-                    $es_archivo_local = strpos($tema['recurso_url'], '/imt-cursos/uploads/') === 0;
-                    $es_url_externa = filter_var($tema['recurso_url'], FILTER_VALIDATE_URL);
-                    $nombre_archivo = basename($tema['recurso_url']);
+                    $extension = strtolower(pathinfo($subtema['recurso_url'], PATHINFO_EXTENSION));
+                    $es_archivo_local = strpos($subtema['recurso_url'], '/imt-cursos/uploads/') === 0;
+                    $es_url_externa = filter_var($subtema['recurso_url'], FILTER_VALIDATE_URL);
+                    $nombre_archivo = basename($subtema['recurso_url']);
                     
                     // Determinar el tipo de recurso
                     $tipo_recurso = 'archivo';
@@ -212,16 +218,16 @@ require __DIR__ . '/../partials/nav.php';
                         </div>
                         <div class="recurso-acciones">
                             <?php if ($es_url_externa): ?>
-                                <a href="<?= htmlspecialchars($tema['recurso_url']) ?>" target="_blank" class="btn-recurso">
+                                <a href="<?= htmlspecialchars($subtema['recurso_url']) ?>" target="_blank" class="btn-recurso">
                                     <i class="icon-external-link"></i> Abrir enlace
                                 </a>
                             <?php else: ?>
-                                <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($tema['recurso_url']) ?>&titulo=<?= urlencode($tema['titulo']) ?>" 
+                                <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($subtema['recurso_url']) ?>&titulo=<?= urlencode($subtema['titulo']) ?>" 
                                    class="btn-recurso" target="_blank">
                                     <i class="icon-eye"></i> Ver recurso
                                 </a>
                                 <?php if ($es_archivo_local): ?>
-                                    <a href="<?= htmlspecialchars($tema['recurso_url']) ?>" download class="btn-recurso-download">
+                                    <a href="<?= htmlspecialchars($subtema['recurso_url']) ?>" download class="btn-recurso-download">
                                         <i class="icon-download"></i> Descargar
                                     </a>
                                 <?php endif; ?>
@@ -232,38 +238,15 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         <?php endif; ?>
 
-
-        <!-- Título/descr. del tema -->
-        <h1 class="modulo-titulo"><?= htmlspecialchars($tema['titulo'], ENT_QUOTES, 'UTF-8') ?></h1>
-        <?php if (!empty($tema['descripcion'])): ?>
-            <p class="modulo-descripcion"><?= htmlspecialchars($tema['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+        <!-- Título/descr. del subtema -->
+        <h1 class="modulo-titulo"><?= htmlspecialchars($subtema['titulo'], ENT_QUOTES, 'UTF-8') ?></h1>
+        <?php if (!empty($subtema['descripcion'])): ?>
+            <p class="modulo-descripcion"><?= htmlspecialchars($subtema['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
         <?php endif; ?>
 
-        <!-- Subtemas -->
-        <?php if (!empty($subtemas)): ?>
-            <h2 class="seccion-titulo"><i class="icon-book"></i> Subtemas</h2>
-            <div class="temas-lista">
-                <?php foreach ($subtemas as $st): ?>
-                    <div class="tema-card">
-                        <div class="tema-header">
-                            <h3 class="tema-titulo"><?= htmlspecialchars($st['titulo'], ENT_QUOTES, 'UTF-8') ?></h3>
-                        </div>
-                        <?php if (!empty($st['descripcion'])): ?>
-                            <p class="tema-descripcion"><?= htmlspecialchars($st['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
-                        <?php endif; ?>
-                        <div class="tema-acciones">
-                            <a class="btn-tema" href="<?= BASE_URL ?>/estudiante/subtema_contenido.php?id=<?= (int)$st['id'] ?>">
-                                Ver Subtema
-                            </a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Lecciones del tema -->
+        <!-- Lecciones del subtema -->
         <?php if (!empty($lecciones)): ?>
-            <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones del Tema</h2>
+            <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones del Subtema</h2>
             <div class="lecciones-lista">
                 <?php foreach ($lecciones as $l): ?>
                     <div class="leccion-item">
@@ -285,13 +268,21 @@ require __DIR__ . '/../partials/nav.php';
         <?php endif; ?>
 
         <!-- Estado vacío - solo mostrar si realmente no hay contenido -->
-        <?php if (empty($subtemas) && empty($lecciones) && empty($tema['contenido'] ?? '')): ?>
+        <?php if (empty($lecciones) && empty($subtema['contenido'] ?? '') && empty($subtema['recurso_url'])): ?>
             <div class="empty-content">
                 <i class="icon-info"></i>
                 <h3>Contenido en preparación</h3>
-                <p>Este tema aún no tiene contenido publicado.</p>
+                <p>Este subtema aún no tiene contenido publicado.</p>
             </div>
         <?php endif; ?>
+
+        <!-- Botón para volver al tema -->
+        <div class="navegacion-tema" style="margin-top: 30px;">
+            <a href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= (int)$subtema['tema_id'] ?>" 
+               class="btn-volver">
+                ← Volver al tema
+            </a>
+        </div>
     </div> <!-- /.contenido-principal -->
 </div> <!-- /.contenido-con-sidebar -->
 

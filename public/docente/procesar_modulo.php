@@ -42,26 +42,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $modulo_id = $conn->lastInsertId();
         
-        // Handle file upload if exists
+        // Handle file upload if exists using new structure
         if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = __DIR__ . '/../../uploads/modulos/';
+            require_once __DIR__ . '/../../app/upload_helper.php';
             
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
-            
-            $file_info = pathinfo($_FILES['archivo']['name']);
-            $allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'avi', 'mov', 'jpg', 'jpeg', 'png'];
-            
-            if (in_array(strtolower($file_info['extension']), $allowed_extensions)) {
-                $new_filename = 'modulo_' . $modulo_id . '_' . time() . '.' . $file_info['extension'];
-                $upload_path = $upload_dir . $new_filename;
+            try {
+                $upload_helper = new UploadHelper($conn);
+                $archivo_url = $upload_helper->handleFileUpload($_FILES['archivo'], 'modulo', $modulo_id);
                 
-                if (move_uploaded_file($_FILES['archivo']['tmp_name'], $upload_path)) {
-                    $archivo_url = '/imt-cursos/uploads/modulos/' . $new_filename;
+                if ($archivo_url) {
                     $update_stmt = $conn->prepare("UPDATE modulos SET recurso_url = :archivo_url WHERE id = :id");
                     $update_stmt->execute([':archivo_url' => $archivo_url, ':id' => $modulo_id]);
                 }
+            } catch (Exception $e) {
+                error_log("Error subiendo archivo de módulo: " . $e->getMessage());
+                // Continuar sin archivo si hay error
             }
         }
         

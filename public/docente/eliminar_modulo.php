@@ -28,7 +28,10 @@ if (!$modulo) {
 try {
     $conn->beginTransaction();
     
-    // Obtener archivos para eliminar
+    // Obtener archivos para eliminar usando UploadHelper
+    require_once __DIR__ . '/../../app/upload_helper.php';
+    $upload_helper = new UploadHelper($conn);
+    
     $stmt = $conn->prepare("
         SELECT recurso_url FROM lecciones l
         INNER JOIN modulos m ON l.modulo_id = m.id
@@ -50,13 +53,10 @@ try {
     
     $conn->commit();
     
-    // Eliminar archivos físicos
+    // Eliminar archivos físicos usando UploadHelper
     foreach ($archivos as $archivo) {
         if ($archivo) {
-            $archivo_path = __DIR__ . '/../..' . $archivo;
-            if (file_exists($archivo_path)) {
-                @unlink($archivo_path);
-            }
+            $upload_helper->deleteFile($archivo);
         }
     }
     

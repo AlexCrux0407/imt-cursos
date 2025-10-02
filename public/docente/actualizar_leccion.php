@@ -51,34 +51,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Manejar subida de archivo
+    // Manejar subida de archivo usando nueva estructura
     $nuevo_archivo = null;
     if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = __DIR__ . '/../../uploads/lecciones/';
+        require_once __DIR__ . '/../../app/upload_helper.php';
         
-        // Crear directorio si no existe
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-        
-        $file_info = pathinfo($_FILES['archivo']['name']);
-        $allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'avi', 'mov', 'jpg', 'jpeg', 'png'];
-        
-        if (in_array(strtolower($file_info['extension']), $allowed_extensions)) {
-            $new_filename = 'leccion_' . $leccion_id . '_' . time() . '.' . $file_info['extension'];
-            $upload_path = $upload_dir . $new_filename;
+        try {
+            $upload_helper = new UploadHelper($conn);
+            $nuevo_archivo = $upload_helper->handleFileUpload($_FILES['archivo'], 'leccion', $leccion_id);
             
-            if (move_uploaded_file($_FILES['archivo']['tmp_name'], $upload_path)) {
-                $nuevo_archivo = '/imt-cursos/uploads/lecciones/' . $new_filename;
-                
+            if ($nuevo_archivo) {
                 // Eliminar archivo anterior si existe y no es una URL externa
                 if ($leccion_actual['archivo_actual'] && strpos($leccion_actual['archivo_actual'], '/uploads/') === 0) {
-                    $archivo_anterior = __DIR__ . '/../..' . $leccion_actual['archivo_actual'];
-                    if (file_exists($archivo_anterior)) {
-                        unlink($archivo_anterior);
-                    }
+                    $upload_helper->deleteFile($leccion_actual['archivo_actual']);
                 }
             }
+        } catch (Exception $e) {
+            error_log("Error actualizando archivo de lección: " . $e->getMessage());
+            // Continuar sin archivo si hay error
         }
     }
     

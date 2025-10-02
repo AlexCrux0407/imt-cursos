@@ -50,16 +50,19 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="resource-viewer">
     <div class="resource-header">
-        <h1 class="resource-title"><?= htmlspecialchars($titulo) ?></h1>
+        <div class="resource-header-left">
+            <img src="<?= BASE_URL ?>/styles/logos/Logo_blanco.png" alt="IMT Logo" class="resource-logo">
+            <h1 class="resource-title"><?= htmlspecialchars($titulo) ?></h1>
+        </div>
         <div class="resource-controls">
             <?php if ($es_archivo_local): ?>
                 <a href="<?= htmlspecialchars($recurso_url) ?>" download class="btn-download">
                     📥 Descargar
                 </a>
             <?php endif; ?>
-            <a href="javascript:history.back()" class="btn-close">
-                ✕ Cerrar
-            </a>
+            <button onclick="window.close(); if(!window.closed) history.back();" class="btn-close">
+                <span>✕</span> Cerrar
+            </button>
         </div>
     </div>
     

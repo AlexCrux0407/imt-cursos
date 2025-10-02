@@ -47,32 +47,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $subtema_id = $conn->lastInsertId();
         
-        // Handle file upload if exists
+        // Handle file upload if exists using new structure
         if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = __DIR__ . '/../../uploads/subtemas/';
+            require_once __DIR__ . '/../../app/upload_helper.php';
             
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0755, true);
-            }
-            
-            $file_info = pathinfo($_FILES['archivo']['name']);
-            $allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'avi', 'mov', 'jpg', 'jpeg', 'png'];
-            
-            if (in_array(strtolower($file_info['extension']), $allowed_extensions)) {
-                $new_filename = 'subtema_' . $subtema_id . '_' . time() . '.' . $file_info['extension'];
-                $upload_path = $upload_dir . $new_filename;
+            try {
+                $upload_helper = new UploadHelper($conn);
+                $archivo_url = $upload_helper->handleFileUpload($_FILES['archivo'], 'subtema', $subtema_id);
                 
-                if (move_uploaded_file($_FILES['archivo']['tmp_name'], $upload_path)) {
-                    $archivo_url = '/imt-cursos/uploads/subtemas/' . $new_filename;
-                    
+                if ($archivo_url) {
                     // Check if subtemas table has recurso_url column
                     $stmt = $conn->prepare("SHOW COLUMNS FROM subtemas LIKE 'recurso_url'");
                     $stmt->execute();
-                    if ($stmt->fetch()) {
+                    $column_exists = $stmt->fetch();
+                    
+                    if ($column_exists) {
                         $update_stmt = $conn->prepare("UPDATE subtemas SET recurso_url = :archivo_url WHERE id = :id");
                         $update_stmt->execute([':archivo_url' => $archivo_url, ':id' => $subtema_id]);
                     }
                 }
+            } catch (Exception $e) {
+                error_log("Error subiendo archivo de subtema: " . $e->getMessage());
+                // Continuar sin archivo si hay error
             }
         }
         

@@ -1,0 +1,209 @@
+<?php
+/**
+ * Helper para manejo de archivos con estructura organizada por curso
+ * Estructura: uploads/cursos/{nombre_curso}/{modulo}/{tema}-{subtema}-{leccion}/
+ */
+
+require_once __DIR__ . '/../config/database.php';
+
+class UploadHelper {
+    
+    private $conn;
+    private $base_upload_dir;
+    
+    public function __construct($database_connection) {
+        $this->conn = $database_connection;
+        $this->base_upload_dir = __DIR__ . '/../uploads/cursos/';
+    }
+    
+    /**
+     * Obtiene información completa de la jerarquía para crear la ruta
+     */
+    private function getHierarchyInfo($entity_type, $entity_id) {
+        $info = [];
+        
+        switch ($entity_type) {
+            case 'leccion':
+                // Obtener información de la lección y su jerarquía
+                $stmt = $this->conn->prepare("
+                    SELECT l.id as leccion_id, l.titulo as leccion_titulo, l.orden as leccion_orden,
+                           s.id as subtema_id, s.titulo as subtema_titulo, s.orden as subtema_orden,
+                           t.id as tema_id, t.titulo as tema_titulo, t.orden as tema_orden,
+                           m.id as modulo_id, m.titulo as modulo_titulo, m.orden as modulo_orden,
+                           c.id as curso_id, c.titulo as curso_titulo
+                    FROM lecciones l
+                    LEFT JOIN subtemas s ON l.subtema_id = s.id
+                    LEFT JOIN temas t ON (l.tema_id = t.id OR s.tema_id = t.id)
+                    LEFT JOIN modulos m ON (l.modulo_id = m.id OR t.modulo_id = m.id)
+                    LEFT JOIN cursos c ON m.curso_id = c.id
+                    WHERE l.id = :entity_id
+                ");
+                break;
+                
+            case 'subtema':
+                $stmt = $this->conn->prepare("
+                    SELECT s.id as subtema_id, s.titulo as subtema_titulo, s.orden as subtema_orden,
+                           t.id as tema_id, t.titulo as tema_titulo, t.orden as tema_orden,
+                           m.id as modulo_id, m.titulo as modulo_titulo, m.orden as modulo_orden,
+                           c.id as curso_id, c.titulo as curso_titulo
+                    FROM subtemas s
+                    LEFT JOIN temas t ON s.tema_id = t.id
+                    LEFT JOIN modulos m ON t.modulo_id = m.id
+                    LEFT JOIN cursos c ON m.curso_id = c.id
+                    WHERE s.id = :entity_id
+                ");
+                break;
+                
+            case 'tema':
+                $stmt = $this->conn->prepare("
+                    SELECT t.id as tema_id, t.titulo as tema_titulo, t.orden as tema_orden,
+                           m.id as modulo_id, m.titulo as modulo_titulo, m.orden as modulo_orden,
+                           c.id as curso_id, c.titulo as curso_titulo
+                    FROM temas t
+                    LEFT JOIN modulos m ON t.modulo_id = m.id
+                    LEFT JOIN cursos c ON m.curso_id = c.id
+                    WHERE t.id = :entity_id
+                ");
+                break;
+                
+            case 'modulo':
+                $stmt = $this->conn->prepare("
+                    SELECT m.id as modulo_id, m.titulo as modulo_titulo, m.orden as modulo_orden,
+                           c.id as curso_id, c.titulo as curso_titulo
+                    FROM modulos m
+                    LEFT JOIN cursos c ON m.curso_id = c.id
+                    WHERE m.id = :entity_id
+                ");
+                break;
+        }
+        
+        $stmt->execute([':entity_id' => $entity_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Limpia un nombre para usar como nombre de carpeta
+     */
+    private function sanitizeFolderName($name) {
+        // Remover caracteres especiales y espacios
+        $clean = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $name);
+        // Reemplazar espacios con guiones
+        $clean = preg_replace('/\s+/', '-', trim($clean));
+        // Convertir a minúsculas
+        $clean = strtolower($clean);
+        // Limitar longitud
+        return substr($clean, 0, 50);
+    }
+    
+    /**
+     * Construye la ruta de carpeta basada en la jerarquía
+     */
+    public function buildFolderPath($entity_type, $entity_id) {
+        $info = $this->getHierarchyInfo($entity_type, $entity_id);
+        
+        if (!$info) {
+            throw new Exception("No se pudo obtener información de la entidad");
+        }
+        
+        // Nombre del curso (carpeta principal)
+        $curso_folder = $this->sanitizeFolderName($info['curso_titulo']);
+        
+        // Nombre del módulo
+        $modulo_folder = sprintf("%02d-%s", 
+            $info['modulo_orden'], 
+            $this->sanitizeFolderName($info['modulo_titulo'])
+        );
+        
+        $path_parts = [$curso_folder, $modulo_folder];
+        
+        // Agregar tema si existe
+        if (!empty($info['tema_id'])) {
+            $tema_folder = sprintf("%02d-%s", 
+                $info['tema_orden'], 
+                $this->sanitizeFolderName($info['tema_titulo'])
+            );
+            $path_parts[] = $tema_folder;
+            
+            // Agregar subtema si existe
+            if (!empty($info['subtema_id'])) {
+                $subtema_folder = sprintf("%02d-%s", 
+                    $info['subtema_orden'], 
+                    $this->sanitizeFolderName($info['subtema_titulo'])
+                );
+                $path_parts[] = $subtema_folder;
+                
+                // Agregar lección si existe
+                if (!empty($info['leccion_id'])) {
+                    $leccion_folder = sprintf("%02d-%s", 
+                        $info['leccion_orden'], 
+                        $this->sanitizeFolderName($info['leccion_titulo'])
+                    );
+                    $path_parts[] = $leccion_folder;
+                }
+            }
+        }
+        
+        return implode('/', $path_parts);
+    }
+    
+    /**
+     * Maneja la subida de archivo con la nueva estructura
+     */
+    public function handleFileUpload($file_data, $entity_type, $entity_id, $allowed_extensions = null) {
+        if (!isset($file_data) || $file_data['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+        
+        // Extensiones permitidas por defecto
+        if ($allowed_extensions === null) {
+            $allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'avi', 'mov', 'jpg', 'jpeg', 'png'];
+        }
+        
+        $file_info = pathinfo($file_data['name']);
+        $extension = strtolower($file_info['extension']);
+        
+        if (!in_array($extension, $allowed_extensions)) {
+            throw new Exception("Tipo de archivo no permitido: " . $extension);
+        }
+        
+        // Construir ruta de carpeta
+        $folder_path = $this->buildFolderPath($entity_type, $entity_id);
+        $full_upload_dir = $this->base_upload_dir . $folder_path . '/';
+        
+        // Crear directorio si no existe
+        if (!is_dir($full_upload_dir)) {
+            if (!mkdir($full_upload_dir, 0755, true)) {
+                throw new Exception("No se pudo crear el directorio: " . $full_upload_dir);
+            }
+        }
+        
+        // Generar nombre único para el archivo
+        $new_filename = $entity_type . '_' . $entity_id . '_' . time() . '.' . $extension;
+        $upload_path = $full_upload_dir . $new_filename;
+        
+        // Mover archivo
+        if (!move_uploaded_file($file_data['tmp_name'], $upload_path)) {
+            throw new Exception("Error al mover el archivo subido");
+        }
+        
+        // Retornar URL relativa para guardar en base de datos
+        return '/imt-cursos/uploads/cursos/' . $folder_path . '/' . $new_filename;
+    }
+    
+    /**
+     * Elimina un archivo del sistema
+     */
+    public function deleteFile($file_url) {
+        if (empty($file_url) || strpos($file_url, '/uploads/cursos/') !== 0) {
+            return false;
+        }
+        
+        $file_path = __DIR__ . '/../..' . $file_url;
+        
+        if (file_exists($file_path)) {
+            return unlink($file_path);
+        }
+        
+        return false;
+    }
+}
