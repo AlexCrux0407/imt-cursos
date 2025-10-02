@@ -31,7 +31,8 @@ if ($estudiante_id === 0) {
 
 /** Verificar acceso: módulo válido y estudiante inscrito en ese curso */
 $stmt = $conn->prepare("
-    SELECT m.*, c.titulo AS curso_titulo, c.id AS curso_id
+    SELECT m.id, m.titulo, m.descripcion, m.contenido, m.orden, m.curso_id,
+           c.titulo AS curso_titulo, c.descripcion AS curso_descripcion
     FROM modulos m
     INNER JOIN cursos c ON m.curso_id = c.id
     INNER JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = :uid
@@ -40,6 +41,11 @@ $stmt = $conn->prepare("
 ");
 $stmt->execute([':modulo_id' => $modulo_id, ':uid' => $estudiante_id]);
 $modulo = $stmt->fetch();
+
+// DEBUG: Verificar qué datos se están obteniendo
+echo "<!-- DEBUG MODULO: ";
+var_dump($modulo);
+echo " -->";
 
 if (!$modulo) {
     header('Location: ' . BASE_URL . '/estudiante/catalogo.php?error=acceso_denegado');
@@ -265,7 +271,9 @@ require __DIR__ . '/../partials/nav.php';
                         <div class="tema-card">
                             <div class="tema-header">
                                 <div class="tema-numero"><?= (int)$index + 1 ?></div>
-                                <h3 class="tema-titulo"><?= htmlspecialchars($tema['titulo']) ?></h3>
+                                <a href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= (int)$tema['id'] ?>" class="tema-titulo-link">
+                                    <h3 class="tema-titulo"><?= htmlspecialchars($tema['titulo']) ?></h3>
+                                </a>
                                 <?php if ((int)$tema['total_subtemas'] > 0): ?>
                                     <span class="subtemas-count">
                                         <?= (int)$tema['total_subtemas'] ?> subtema<?= ((int)$tema['total_subtemas'] !== 1 ? 's' : '') ?>
@@ -276,9 +284,6 @@ require __DIR__ . '/../partials/nav.php';
                                 <p class="tema-descripcion"><?= htmlspecialchars($tema['descripcion']) ?></p>
                             <?php endif; ?>
                             <div class="tema-acciones">
-                                <a class="btn-tema" href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= (int)$tema['id'] ?>">
-                                    Ver Contenido
-                                </a>
                                 <?php if ((int)$tema['total_subtemas'] > 0): ?>
                                     <a class="btn-tema subtemas" href="<?= BASE_URL ?>/estudiante/subtemas.php?tema_id=<?= (int)$tema['id'] ?>">
                                         Ver Subtemas

@@ -251,6 +251,24 @@
   flex:1 !important; color:#dcdcdc !important; font-weight:700 !important;
 }
 
+.tema-titulo-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.tema-titulo-link:hover {
+  color: #5dade2;
+  text-decoration: none;
+}
+
+.tema-titulo-link:hover .tema-titulo {
+  color: #5dade2 !important;
+  transform: translateX(5px);
+}
+
 .contenido-principal > .modulo-header .page-title {
   color: #fff !important;
 }
