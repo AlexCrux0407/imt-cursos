@@ -339,10 +339,25 @@ require __DIR__ . '/../partials/nav.php';
 
 <script>
 function toggleSection(sectionId) {
-    const content = document.getElementById('content-' + sectionId);
-    const icon = document.getElementById('icon-' + sectionId);
-    const open = content.classList.toggle('show');
-    if (icon) icon.textContent = open ? '▼' : '▶';
+    const allSections = ['descripcion','categoria','duracion','dirigido','objetivo-general','objetivos-especificos','evaluaciones'];
+    const targetContent = document.getElementById('content-' + sectionId);
+    const targetIcon = document.getElementById('icon-' + sectionId);
+    
+    // Cerrar todas las secciones primero
+    allSections.forEach(function(id) {
+        const content = document.getElementById('content-' + id);
+        const icon = document.getElementById('icon-' + id);
+        if (content && id !== sectionId) {
+            content.classList.remove('show');
+            if (icon) icon.textContent = '▶';
+        }
+    });
+    
+    // Alternar la sección seleccionada
+    if (targetContent) {
+        const isOpen = targetContent.classList.toggle('show');
+        if (targetIcon) targetIcon.textContent = isOpen ? '▼' : '▶';
+    }
 }
 
 // Inicializar todas las secciones como colapsadas
@@ -409,13 +424,13 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 /* Modificadores de color (borde izquierdo) */
-.sec-blue   { border-left-color:#3498db; }
-.sec-purple { border-left-color:#9b59b6; }
-.sec-orange { border-left-color:#e67e22; }
-.sec-teal   { border-left-color:#1abc9c; }
-.sec-yellow { border-left-color:#f39c12; }
-.sec-red    { border-left-color:#e74c3c; }
-.sec-slate  { border-left-color:#607d8b; }
+.sec-blue   { border-left-color:#3498db; background-color: rgba(52, 152, 219, 0.05); }
+.sec-purple { border-left-color:#9b59b6; background-color: rgba(155, 89, 182, 0.05); }
+.sec-orange { border-left-color:#e67e22; background-color: rgba(230, 126, 34, 0.05); }
+.sec-teal   { border-left-color:#1abc9c; background-color: rgba(26, 188, 156, 0.05); }
+.sec-yellow { border-left-color:#f39c12; background-color: rgba(243, 156, 18, 0.05); }
+.sec-red    { border-left-color:#e74c3c; background-color: rgba(231, 76, 60, 0.05); }
+.sec-slate  { border-left-color:#607d8b; background-color: rgba(96, 125, 139, 0.05); }
 
 /* Otros estilos existentes (mantenidos) */
 .modules-list{ display:grid; gap:20px }
