@@ -42,11 +42,6 @@ $stmt = $conn->prepare("
 $stmt->execute([':modulo_id' => $modulo_id, ':uid' => $estudiante_id]);
 $modulo = $stmt->fetch();
 
-// DEBUG: Verificar qué datos se están obteniendo
-echo "<!-- DEBUG MODULO: ";
-var_dump($modulo);
-echo " -->";
-
 if (!$modulo) {
     header('Location: ' . BASE_URL . '/estudiante/catalogo.php?error=acceso_denegado');
     exit;
