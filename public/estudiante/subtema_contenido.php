@@ -126,6 +126,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/integrated-resource-viewer.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/curso-sidebar.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/modulo-contenido.css">
 
@@ -222,10 +223,10 @@ require __DIR__ . '/../partials/nav.php';
                                     <i class="icon-external-link"></i> Abrir enlace
                                 </a>
                             <?php else: ?>
-                                <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($subtema['recurso_url']) ?>&titulo=<?= urlencode($subtema['titulo']) ?>" 
-                                   class="btn-recurso" target="_blank">
+                                <button onclick="toggleRecursoViewer('<?= htmlspecialchars($subtema['recurso_url']) ?>', '<?= htmlspecialchars($subtema['titulo']) ?>', '<?= $extension ?>')" 
+                                        class="btn-recurso">
                                     <i class="icon-eye"></i> Ver recurso
-                                </a>
+                                </button>
                                 <?php if ($es_archivo_local): ?>
                                     <a href="<?= htmlspecialchars($subtema['recurso_url']) ?>" download class="btn-recurso-download">
                                         <i class="icon-download"></i> Descargar
@@ -285,5 +286,97 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div> <!-- /.contenido-principal -->
 </div> <!-- /.contenido-con-sidebar -->
+
+<!-- Visor de recursos integrado -->
+<div id="recurso-viewer-overlay" class="recurso-viewer-overlay" style="display: none;">
+    <div class="recurso-viewer-container">
+        <div class="recurso-viewer-header">
+            <div class="recurso-viewer-header-left">
+                <img src="<?= BASE_URL ?>/styles/logos/Logo_blanco.png" alt="IMT Logo" class="recurso-viewer-logo">
+                <h3 id="recurso-viewer-title" class="recurso-viewer-title"></h3>
+            </div>
+            <div class="recurso-viewer-controls">
+                <button onclick="closeRecursoViewer()" class="btn-close-viewer">
+                    <span>✕</span> Cerrar
+                </button>
+            </div>
+        </div>
+        <div id="recurso-viewer-content" class="recurso-viewer-content">
+            <!-- El contenido del recurso se cargará aquí -->
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleRecursoViewer(url, titulo, extension) {
+    const overlay = document.getElementById('recurso-viewer-overlay');
+    const titleElement = document.getElementById('recurso-viewer-title');
+    const contentElement = document.getElementById('recurso-viewer-content');
+    
+    titleElement.textContent = titulo;
+    
+    // Limpiar contenido anterior
+    contentElement.innerHTML = '';
+    
+    // Determinar el tipo de contenido y crear el elemento apropiado
+    const ext = extension.toLowerCase();
+    
+    if (ext === 'pdf') {
+        contentElement.innerHTML = `
+            <iframe src="${url}#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
+                    style="width: 100%; height: 100%; border: none;"
+                    title="Visualizador de PDF">
+            </iframe>
+        `;
+    } else if (['mp4', 'avi', 'mov', 'webm'].includes(ext)) {
+        contentElement.innerHTML = `
+            <video controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain;">
+                <source src="${url}" type="video/${ext}">
+                Tu navegador no soporta la reproducción de video.
+            </video>
+        `;
+    } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+        contentElement.innerHTML = `
+            <img src="${url}" alt="${titulo}" 
+                 style="max-width: 100%; max-height: 100%; object-fit: contain; margin: auto; display: block;">
+        `;
+    } else {
+        contentElement.innerHTML = `
+            <div class="recurso-message">
+                <h3>Vista previa no disponible</h3>
+                <p>Este tipo de archivo no se puede visualizar en línea.</p>
+                <p>Archivo: ${url.split('/').pop()}</p>
+                <a href="${url}" download class="btn-download-inline">
+                    📥 Descargar Archivo
+                </a>
+            </div>
+        `;
+    }
+    
+    // Mostrar el overlay
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeRecursoViewer() {
+    const overlay = document.getElementById('recurso-viewer-overlay');
+    overlay.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Cerrar con tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeRecursoViewer();
+    }
+});
+
+// Cerrar al hacer clic fuera del contenido
+document.getElementById('recurso-viewer-overlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeRecursoViewer();
+    }
+});
+</script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>
