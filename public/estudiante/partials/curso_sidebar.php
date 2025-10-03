@@ -4,7 +4,11 @@ $curso_estructura   = $curso_estructura   ?? [];
 $cursoTituloSidebar = $cursoTituloSidebar ?? 'Curso';
 $moduloActualId     = isset($moduloActualId) ? (int)$moduloActualId : 0;
 
-// Helper: determina si un módulo es accesible (mismo criterio que usas en vistas)
+// Variables para detectar la página actual
+$paginaActual = basename($_SERVER['PHP_SELF']);
+$idActual = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+// Helper: determina si un módulo es accesible 
 $__puedeAcceder = function(array $mods, int $targetId): bool {
     if (empty($mods)) return true;
     $modsOrden = array_values($mods);
@@ -19,6 +23,22 @@ $__puedeAcceder = function(array $mods, int $targetId): bool {
         }
     }
     return true; // fallback
+};
+
+// Helper: determina si un elemento está activo
+$__esActivo = function($tipo, $id) use ($paginaActual, $idActual) {
+    switch ($tipo) {
+        case 'modulo':
+            return $paginaActual === 'modulo_contenido.php' && $idActual === $id;
+        case 'tema':
+            return $paginaActual === 'tema_contenido.php' && $idActual === $id;
+        case 'subtema':
+            return $paginaActual === 'subtema_contenido.php' && $idActual === $id;
+        case 'leccion':
+            return $paginaActual === 'leccion.php' && $idActual === $id;
+        default:
+            return false;
+    }
 };
 ?>
 
@@ -86,41 +106,47 @@ $__puedeAcceder = function(array $mods, int $targetId): bool {
 
           <div class="modulo-contenido" id="contenido-<?= $modId ?>" style="display: none;">
             <?php if ($acceso): ?>
-              <a class="modulo-link" href="<?= BASE_URL ?>/estudiante/modulo_contenido.php?id=<?= $modId ?>">
+              <?php $moduloActivo = $__esActivo('modulo', $modId); ?>
+              <a class="modulo-link <?= $moduloActivo ? 'activo' : '' ?>" href="<?= BASE_URL ?>/estudiante/modulo_contenido.php?id=<?= $modId ?>">
                 📄 Ver contenido del módulo
               </a>
             <?php endif; ?>
 
             <?php if (!empty($modItem['temas'])): ?>
               <?php foreach ($modItem['temas'] as $temaItem): ?>
-                <div class="sidebar-tema">
+                <?php $temaActivo = $__esActivo('tema', (int)($temaItem['id'] ?? 0)); ?>
+                <div class="sidebar-tema <?= $temaActivo ? 'activo' : '' ?>">
                   <div class="tema-header">
                     <span class="tema-numero"><?= (int)($temaItem['orden'] ?? 0) ?>.</span>
                     <span class="tema-titulo"><?= htmlspecialchars($temaItem['titulo'] ?? 'Tema', ENT_QUOTES, 'UTF-8') ?></span>
                     <?php if ($acceso): ?>
-                      <a class="tema-link" href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= (int)($temaItem['id'] ?? 0) ?>">Ver</a>
+                      <a class="tema-link <?= $temaActivo ? 'activo' : '' ?>" href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= (int)($temaItem['id'] ?? 0) ?>">Ver</a>
                     <?php endif; ?>
                   </div>
 
                   <?php if (!empty($temaItem['subtemas'])): ?>
                     <?php foreach ($temaItem['subtemas'] as $subItem): ?>
-                      <div class="sidebar-subtema">
+                      <?php $subtemaActivo = $__esActivo('subtema', (int)($subItem['id'] ?? 0)); ?>
+                      <div class="sidebar-subtema <?= $subtemaActivo ? 'activo' : '' ?>">
                         <div class="subtema-header">
                           <span class="subtema-titulo"><?= htmlspecialchars($subItem['titulo'] ?? 'Subtema', ENT_QUOTES, 'UTF-8') ?></span>
                           <?php if ($acceso): ?>
-                            <a class="subtema-link" href="<?= BASE_URL ?>/estudiante/subtema_contenido.php?id=<?= (int)($subItem['id'] ?? 0) ?>">Ver</a>
+                            <a class="subtema-link <?= $subtemaActivo ? 'activo' : '' ?>" href="<?= BASE_URL ?>/estudiante/subtema_contenido.php?id=<?= (int)($subItem['id'] ?? 0) ?>">Ver</a>
                           <?php endif; ?>
                         </div>
 
                         <?php if (!empty($subItem['lecciones'])): ?>
                           <div class="lecciones-lista">
                             <?php foreach ($subItem['lecciones'] as $lecItem): ?>
-                              <?php $ok = !empty($lecItem['completada']); ?>
-                              <div class="sidebar-leccion <?= $ok ? 'completada' : '' ?>">
+                              <?php 
+                                $ok = !empty($lecItem['completada']); 
+                                $leccionActiva = $__esActivo('leccion', (int)($lecItem['id'] ?? 0));
+                              ?>
+                              <div class="sidebar-leccion <?= $ok ? 'completada' : '' ?> <?= $leccionActiva ? 'activo' : '' ?>">
                                 <span class="leccion-estado"><?= $ok ? '✓' : '○' ?></span>
                                 <span class="leccion-titulo"><?= htmlspecialchars($lecItem['titulo'] ?? 'Lección', ENT_QUOTES, 'UTF-8') ?></span>
                                 <?php if ($acceso): ?>
-                                  <a class="leccion-link" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)($lecItem['id'] ?? 0) ?>">
+                                  <a class="leccion-link <?= $leccionActiva ? 'activo' : '' ?>" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)($lecItem['id'] ?? 0) ?>">
                                     <?= $ok ? 'Revisar' : 'Estudiar' ?>
                                   </a>
                                 <?php endif; ?>

@@ -1,5 +1,58 @@
 /* Sidebar de navegación del curso - Estilo azul */
 
+/* Estilos para elementos activos en la sidebar */
+.sidebar-modulo.actual {
+    background: rgba(52, 152, 219, 0.05);
+    border-left: 4px solid #3498db;
+}
+
+.modulo-link.activo,
+.tema-link.activo,
+.subtema-link.activo,
+.leccion-link.activo {
+    background: #3498db !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-decoration: none;
+}
+
+.sidebar-tema.activo {
+    background: rgba(52, 152, 219, 0.08);
+    border-radius: 8px;
+    padding: 8px;
+    margin: 4px 0;
+}
+
+.sidebar-subtema.activo {
+    background: rgba(52, 152, 219, 0.06);
+    border-radius: 6px;
+    padding: 6px;
+    margin: 2px 0;
+}
+
+.sidebar-leccion.activo {
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 6px;
+    padding: 4px 8px;
+    border-left: 3px solid #3498db;
+}
+
+.sidebar-leccion.activo .leccion-titulo {
+    font-weight: 600;
+    color: #2980b9;
+}
+
+/* Hover effects para elementos activos */
+.modulo-link.activo:hover,
+.tema-link.activo:hover,
+.subtema-link.activo:hover,
+.leccion-link.activo:hover {
+    background: #2980b9 !important;
+    transform: translateY(-1px);
+}
+
 .contenido-con-sidebar {
     display: flex;
     gap: 25px;

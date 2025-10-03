@@ -105,7 +105,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
         <div class="estadistica-card en-progreso">
             <div class="estadistica-numero"><?= $estadisticas['cursos_en_progreso'] ?></div>
-            <div class="estadistica-label">En Progreso</div>
+            <div class="estadistica-label">Sin Completar</div>
         </div>
         <div class="estadistica-card sin-iniciar">
             <div class="estadistica-numero"><?= $estadisticas['cursos_sin_iniciar'] ?></div>
@@ -174,7 +174,7 @@ require __DIR__ . '/../partials/nav.php';
                             <?php if ($curso['progreso'] == 100): ?>
                                 ✓ Completado
                             <?php elseif ($curso['progreso'] > 0): ?>
-                                📚 En Progreso
+                                📚 Sin Completar
                             <?php else: ?>
                                 ⏳ Sin Iniciar
                             <?php endif; ?>
