@@ -9,6 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $titulo = trim($_POST['titulo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
+    $objetivo_general = trim($_POST['objetivo_general'] ?? '');
+    $objetivos_especificos = trim($_POST['objetivos_especificos'] ?? '');
+    $duracion = trim($_POST['duracion'] ?? '');
     $categoria = trim($_POST['categoria'] ?? '');
     $dirigido_a = trim($_POST['dirigido_a'] ?? '');
     $estado = $_POST['estado'] ?? 'borrador';
@@ -19,19 +22,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     try {
-        $stmt = $conn->prepare("
-            INSERT INTO cursos (titulo, descripcion, categoria, dirigido_a, estado, creado_por) 
-            VALUES (:titulo, :descripcion, :categoria, :dirigido_a, :estado, :creado_por)
-        ");
+        // Debug: Verificar estructura de la tabla
+        $describe_stmt = $conn->query("DESCRIBE cursos");
+        $columns = $describe_stmt->fetchAll(PDO::FETCH_ASSOC);
+        error_log("Estructura de tabla cursos: " . print_r($columns, true));
         
-        $result = $stmt->execute([
+        $sql = "INSERT INTO cursos (titulo, descripcion, objetivo_general, objetivos_especificos, duracion, categoria, dirigido_a, estado, creado_por) 
+                VALUES (:titulo, :descripcion, :objetivo_general, :objetivos_especificos, :duracion, :categoria, :dirigido_a, :estado, :creado_por)";
+        
+        error_log("SQL Query: " . $sql);
+        
+        $stmt = $conn->prepare($sql);
+        
+        $params = [
             ':titulo' => $titulo,
             ':descripcion' => $descripcion,
+            ':objetivo_general' => $objetivo_general ?: null,
+            ':objetivos_especificos' => $objetivos_especificos ?: null,
+            ':duracion' => $duracion ?: null,
             ':categoria' => $categoria ?: null,
             ':dirigido_a' => $dirigido_a ?: null,
             ':estado' => $estado,
             ':creado_por' => $_SESSION['user_id']
-        ]);
+        ];
+        
+        error_log("Parámetros para execute: " . print_r($params, true));
+        error_log("Número de parámetros: " . count($params));
+        
+        // Contar placeholders en la query
+        $placeholder_count = substr_count($sql, ':');
+        error_log("Número de placeholders en SQL: " . $placeholder_count);
+        
+        $result = $stmt->execute($params);
         
         if ($result) {
             $curso_id = $conn->lastInsertId();

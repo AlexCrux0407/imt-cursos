@@ -182,7 +182,7 @@ require __DIR__ . '/../partials/nav.php';
                     </div>
                     
                     <h3 class="curso-titulo"><?= htmlspecialchars($curso['titulo']) ?></h3>
-                    <p class="curso-descripcion"><?= htmlspecialchars(substr($curso['descripcion'], 0, 100)) ?>...</p>
+                    <p class="curso-descripcion"><?= htmlspecialchars(substr($curso['descripcion'] ?? '', 0, 100)) ?>...</p>
                     
                     <?php if (!empty($curso['docente_nombre'])): ?>
                         <div class="curso-instructor">

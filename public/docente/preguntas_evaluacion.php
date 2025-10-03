@@ -15,7 +15,7 @@ $stmt = $conn->prepare("
     FROM evaluaciones_modulo e
     INNER JOIN modulos m ON e.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE e.id = :evaluacion_id AND c.creado_por = :docente_id
+    WHERE e.id = :evaluacion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id']]);
 $evaluacion = $stmt->fetch();
@@ -31,7 +31,7 @@ $stmt = $conn->prepare("
     WHERE evaluacion_id = :evaluacion_id 
     ORDER BY orden ASC, id ASC
 ");
-$stmt->execute([':evaluacion_id' => $evaluacion_id]);
+$stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id2' => $_SESSION['user_id']]);
 $preguntas = $stmt->fetchAll();
 
 require __DIR__ . '/../partials/header.php';

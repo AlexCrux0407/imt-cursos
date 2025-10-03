@@ -17,7 +17,7 @@ $stmt = $conn->prepare("
     SELECT l.id FROM lecciones l
     INNER JOIN modulos m ON l.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE l.id = :leccion_id AND l.modulo_id = :modulo_id AND c.creado_por = :docente_id
+    WHERE l.id = :leccion_id AND l.modulo_id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([
     ':leccion_id' => $leccion_id,
@@ -32,7 +32,7 @@ if (!$stmt->fetch()) {
 
 try {
     $stmt = $conn->prepare("DELETE FROM lecciones WHERE id = :id");
-    $stmt->execute([':id' => $leccion_id]);
+    $stmt->execute([':id' => $leccion_id, ':docente_id2' => $_SESSION['user_id']]);
     
     header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_eliminada');
     exit;

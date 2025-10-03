@@ -259,7 +259,7 @@ require __DIR__ . '/../partials/nav.php';
                                 </div>
                                 
                                 <p style="color: #5a5c69; margin-bottom: 15px; line-height: 1.5;">
-                                    <?= htmlspecialchars(substr($curso['descripcion'], 0, 150)) ?><?= strlen($curso['descripcion']) > 150 ? '...' : '' ?>
+                                    <?= htmlspecialchars(substr($curso['descripcion'] ?? '', 0, 150)) ?><?= strlen($curso['descripcion'] ?? '') > 150 ? '...' : '' ?>
                                 </p>
                                 
                                 <?php if ($nuevas_columnas_existen && isset($curso['creado_por_nombre'])): ?>
@@ -292,6 +292,11 @@ require __DIR__ . '/../partials/nav.php';
                                             style="background: transparent; color: #3498db; border: 2px solid #3498db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
                                         Gestionar Contenido
                                     </button>
+                                    
+                                    <button onclick="mostrarModalCargarZip(<?= $curso['id'] ?>)" 
+                                            style="background: transparent; color: #27ae60; border: 2px solid #27ae60; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                        📁 Cargar ZIP
+                                    </button>
                                 <?php else: ?>
                                     <button onclick="editarCurso(<?= $curso['id'] ?>)" 
                                             style="background: transparent; color: #3498db; border: 2px solid #3498db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
@@ -301,6 +306,11 @@ require __DIR__ . '/../partials/nav.php';
                                     <button onclick="gestionarModulos(<?= $curso['id'] ?>)" 
                                             style="background: transparent; color: #7f8c8d; border: 2px solid #e8ecef; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
                                         Módulos
+                                    </button>
+                                    
+                                    <button onclick="mostrarModalCargarZip(<?= $curso['id'] ?>)" 
+                                            style="background: transparent; color: #27ae60; border: 2px solid #27ae60; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                        📁 Cargar ZIP
                                     </button>
                                     
                                     <button onclick="confirmarEliminar(<?= $curso['id'] ?>, '<?= addslashes($curso['titulo']) ?>')" 
@@ -417,6 +427,74 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 <?php endif; ?>
 
+<!-- Modal para Cargar ZIP -->
+<div id="modalCargarZip" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 30px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <div class="div-fila" style="justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #27ae60; margin: 0;">📁 Cargar Contenido desde ZIP</h2>
+            <button onclick="cerrarModalZip()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d;">&times;</button>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #27ae60;">
+            <h4 style="color: #27ae60; margin: 0 0 10px 0;">📋 Estructura requerida del ZIP:</h4>
+            <div style="font-family: monospace; font-size: 14px; color: #2c3e50; line-height: 1.6;">
+                <div>📁 <strong>contenido/</strong></div>
+                <div>&nbsp;&nbsp;📁 <strong>modulo-01/</strong></div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;📁 <strong>tema-01/</strong></div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📁 <strong>subtema-01/</strong></div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 leccion-01.html</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 leccion-02.html</div>
+                <div>📁 <strong>tema/</strong> (opcional)</div>
+                <div>&nbsp;&nbsp;📄 tema.css</div>
+            </div>
+            <p style="margin: 15px 0 0 0; color: #6c757d; font-size: 14px;">
+                <strong>Nota:</strong> El sistema procesará automáticamente la estructura y creará los módulos, temas, subtemas y lecciones correspondientes.
+            </p>
+        </div>
+        
+        <form id="formCargarZip" enctype="multipart/form-data">
+            <input type="hidden" id="cursoIdZip" name="curso_id" value="">
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Seleccionar archivo ZIP</label>
+                <input type="file" id="archivoZip" name="archivo_zip" accept=".zip" required
+                       style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
+                       onfocus="this.style.borderColor='#27ae60'" 
+                       onblur="this.style.borderColor='#e8ecef'">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; gap: 8px; color: #2c3e50; cursor: pointer;">
+                    <input type="checkbox" name="reemplazar_contenido" value="1" style="transform: scale(1.2);">
+                    <span>Reemplazar contenido existente (si existe)</span>
+                </label>
+                <small style="color: #6c757d; margin-left: 28px; display: block; margin-top: 5px;">
+                    Si está marcado, eliminará todo el contenido actual del curso antes de importar el nuevo.
+                </small>
+            </div>
+            
+            <!-- Barra de progreso -->
+            <div id="progressContainer" style="display: none; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; border-radius: 8px; padding: 4px; border: 1px solid #e9ecef;">
+                    <div id="progressBar" style="background: #27ae60; height: 20px; border-radius: 4px; width: 0%; transition: width 0.3s ease;"></div>
+                </div>
+                <p id="progressText" style="text-align: center; margin: 10px 0 0 0; color: #6c757d; font-size: 14px;"></p>
+            </div>
+            
+            <div class="div-fila" style="gap: 15px; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalZip()" 
+                        style="background: transparent; color: #6c757d; border: 2px solid #e8ecef; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                    Cancelar
+                </button>
+                <button type="button" onclick="procesarZip()" 
+                        style="background: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                    📁 Procesar ZIP
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function mostrarFormularioNuevoCurso() {
     document.getElementById('modalNuevoCurso').style.display = 'flex';
@@ -489,6 +567,105 @@ function marcarCompletado(id) {
         alert('Error al cambiar el estado del curso. Inténtalo nuevamente.');
     });
 }
+
+// Modal para cargar ZIP
+function mostrarModalCargarZip(cursoId) {
+    const modal = document.getElementById('modalCargarZip');
+    document.getElementById('cursoIdZip').value = cursoId;
+    modal.style.display = 'flex';
+}
+
+function cerrarModalZip() {
+    const modal = document.getElementById('modalCargarZip');
+    modal.style.display = 'none';
+    document.getElementById('formCargarZip').reset();
+    document.getElementById('progressContainer').style.display = 'none';
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('progressText').textContent = '';
+}
+
+function procesarZip() {
+    const form = document.getElementById('formCargarZip');
+    const formData = new FormData(form);
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    // Validar que se haya seleccionado un archivo
+    const archivoZip = document.getElementById('archivoZip').files[0];
+    if (!archivoZip) {
+        alert('Por favor selecciona un archivo ZIP');
+        return;
+    }
+    
+    // Validar que sea un archivo ZIP
+    if (!archivoZip.name.toLowerCase().endsWith('.zip')) {
+        alert('Por favor selecciona un archivo ZIP válido');
+        return;
+    }
+    
+    // Mostrar barra de progreso
+    progressContainer.style.display = 'block';
+    progressText.textContent = 'Subiendo archivo...';
+    
+    // Crear XMLHttpRequest para mostrar progreso
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressBar.style.width = percentComplete + '%';
+            progressText.textContent = `Subiendo: ${Math.round(percentComplete)}%`;
+        }
+    });
+    
+    xhr.addEventListener('load', function() {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    progressText.textContent = 'Procesamiento completado exitosamente';
+                    progressBar.style.width = '100%';
+                    progressBar.style.background = '#27ae60';
+                    
+                    setTimeout(() => {
+                        cerrarModalZip();
+                        location.reload();
+                    }, 2000);
+                } else {
+                    progressText.textContent = 'Error: ' + (response.message || 'Error desconocido');
+                    progressBar.style.background = '#e74c3c';
+                }
+            } catch (e) {
+                progressText.textContent = 'Error al procesar la respuesta del servidor';
+                progressBar.style.background = '#e74c3c';
+            }
+        } else {
+            progressText.textContent = 'Error de conexión con el servidor';
+            progressBar.style.background = '#e74c3c';
+        }
+    });
+    
+    xhr.addEventListener('error', function() {
+        progressText.textContent = 'Error de conexión';
+        progressBar.style.background = '#e74c3c';
+    });
+    
+    xhr.open('POST', '<?= BASE_URL ?>/docente/procesar_zip_curso.php');
+    xhr.send(formData);
+}
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('DOMContentLoaded', function() {
+    const modalZip = document.getElementById('modalCargarZip');
+    if (modalZip) {
+        modalZip.addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalZip();
+            }
+        });
+    }
+});
 
 // Cerrar modal al hacer clic fuera
 document.getElementById('modalNuevoCurso').addEventListener('click', function(e) {

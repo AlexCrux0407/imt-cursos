@@ -13,7 +13,7 @@ $stmt = $conn->prepare("
     SELECT m.*, c.titulo as curso_titulo
     FROM modulos m
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE m.id = :modulo_id AND c.creado_por = :docente_id
+    WHERE m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id']]);
 $modulo = $stmt->fetch();
@@ -29,7 +29,7 @@ $stmt = $conn->prepare("
     WHERE modulo_id = :modulo_id 
     ORDER BY orden ASC
 ");
-$stmt->execute([':modulo_id' => $modulo_id]);
+$stmt->execute([':modulo_id' => $modulo_id, ':docente_id2' => $_SESSION['user_id']]);
 $lecciones = $stmt->fetchAll();
 
 require __DIR__ . '/../partials/header.php';
@@ -116,7 +116,7 @@ require __DIR__ . '/../partials/nav.php';
                                     </span>
                                 </div>
                                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;">
-                                    <?= htmlspecialchars(substr($leccion['contenido'], 0, 100)) ?><?= strlen($leccion['contenido']) > 100 ? '...' : '' ?>
+                                    <?= htmlspecialchars(substr($leccion['contenido'] ?? '', 0, 100)) ?><?= strlen($leccion['contenido'] ?? '') > 100 ? '...' : '' ?>
                                 </p>
                                 <?php if ($leccion['recurso_url']): ?>
                                     <div style="margin-bottom: 5px;">

@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SELECT e.id FROM evaluaciones_modulo e
             INNER JOIN modulos m ON e.modulo_id = m.id
             INNER JOIN cursos c ON m.curso_id = c.id
-            WHERE e.id = :evaluacion_id AND c.creado_por = :docente_id
+            WHERE e.id = :evaluacion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
         ");
         $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id']]);
         
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SET activo = :activo, fecha_actualizacion = CURRENT_TIMESTAMP
             WHERE id = :evaluacion_id
         ");
-        $stmt->execute([':activo' => $activo ? 1 : 0, ':evaluacion_id' => $evaluacion_id]);
+        $stmt->execute([':activo' => $activo ? 1 : 0, ':evaluacion_id' => $evaluacion_id, ':docente_id2' => $_SESSION['user_id']]);
         
         echo json_encode(['success' => true, 'message' => 'Estado actualizado correctamente']);
         

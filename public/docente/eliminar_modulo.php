@@ -15,7 +15,7 @@ if ($modulo_id === 0 || $curso_id === 0) {
 $stmt = $conn->prepare("
     SELECT m.id, m.recurso_url FROM modulos m
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE m.id = :modulo_id AND c.creado_por = :docente_id
+    WHERE m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id']]);
 $modulo = $stmt->fetch();
@@ -40,7 +40,7 @@ try {
         SELECT recurso_url FROM temas t
         WHERE t.modulo_id = :modulo_id AND t.recurso_url LIKE '/imt-cursos/uploads/%'
     ");
-    $stmt->execute([':modulo_id' => $modulo_id]);
+    $stmt->execute([':modulo_id' => $modulo_id, ':docente_id2' => $_SESSION['user_id']]);
     $archivos = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
     if ($modulo['recurso_url'] && strpos($modulo['recurso_url'], '/uploads/') === 0) {
@@ -49,7 +49,7 @@ try {
     
     // Eliminar módulo (CASCADE eliminará temas, subtemas y lecciones)
     $stmt = $conn->prepare("DELETE FROM modulos WHERE id = :id");
-    $stmt->execute([':id' => $modulo_id]);
+    $stmt->execute([':id' => $modulo_id, ':docente_id2' => $_SESSION['user_id']]);
     
     $conn->commit();
     

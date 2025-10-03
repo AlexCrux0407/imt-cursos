@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             INNER JOIN evaluaciones_modulo e ON p.evaluacion_id = e.id
             INNER JOIN modulos m ON e.modulo_id = m.id
             INNER JOIN cursos c ON m.curso_id = c.id
-            WHERE p.id = :pregunta_id AND c.creado_por = :docente_id
+            WHERE p.id = :pregunta_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
         ");
         $stmt->execute([':pregunta_id' => $pregunta_id, ':docente_id' => $_SESSION['user_id']]);
         $pregunta = $stmt->fetch();
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SELECT COUNT(*) as total FROM preguntas_evaluacion 
             WHERE evaluacion_id = :evaluacion_id
         ");
-        $stmt->execute([':evaluacion_id' => $evaluacion_id]);
+        $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id2' => $_SESSION['user_id']]);
         $total_preguntas = $stmt->fetch()['total'];
         
         if ($nuevo_orden < 1 || $nuevo_orden > $total_preguntas) {
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SELECT id FROM preguntas_evaluacion 
             WHERE evaluacion_id = :evaluacion_id AND orden = :nuevo_orden
         ");
-        $stmt->execute([':evaluacion_id' => $evaluacion_id, ':nuevo_orden' => $nuevo_orden]);
+        $stmt->execute([':evaluacion_id' => $evaluacion_id, ':nuevo_orden' => $nuevo_orden, ':docente_id2' => $_SESSION['user_id']]);
         $pregunta_destino = $stmt->fetch();
         
         if ($pregunta_destino) {
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([
             ':nuevo_orden' => $nuevo_orden,
             ':pregunta_id' => $pregunta_id
-        ]);
+        , ':docente_id2' => $_SESSION['user_id']]);
         
         $conn->commit();
         

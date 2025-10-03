@@ -15,9 +15,13 @@ $stmt = $conn->prepare("
     FROM temas t
     INNER JOIN modulos m ON t.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE t.id = :tema_id AND c.creado_por = :docente_id
+    WHERE t.id = :tema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
-$stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id']]);
+$stmt->execute([
+    ':tema_id' => $tema_id, 
+    ':docente_id' => $_SESSION['user_id'],
+    ':docente_id2' => $_SESSION['user_id']
+]);
 $tema = $stmt->fetch();
 
 if (!$tema) {
@@ -92,7 +96,7 @@ require __DIR__ . '/../partials/nav.php';
                             <div style="flex: 1;">
                                 <h4 class="subtema-title"><?= htmlspecialchars($subtema['titulo']) ?></h4>
                                 <p class="subtema-desc">
-                                    <?= htmlspecialchars(substr($subtema['descripcion'], 0, 100)) ?><?= strlen($subtema['descripcion']) > 100 ? '...' : '' ?>
+                                    <?= htmlspecialchars(substr($subtema['descripcion'] ?? '', 0, 100)) ?><?= strlen($subtema['descripcion'] ?? '') > 100 ? '...' : '' ?>
                                 </p>
                                 <div class="div-fila-alt-start" style="gap: 15px;">
                                     <span class="subtema-lecciones"><?= $subtema['total_lecciones'] ?> lecciones</span>

@@ -19,7 +19,7 @@ $stmt = $conn->prepare("
     INNER JOIN evaluaciones_modulo e ON p.evaluacion_id = e.id
     INNER JOIN modulos m ON e.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE p.id = :pregunta_id AND c.creado_por = :docente_id
+    WHERE p.id = :pregunta_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([':pregunta_id' => $pregunta_id, ':docente_id' => $_SESSION['user_id']]);
 $pregunta = $stmt->fetch();
@@ -34,11 +34,11 @@ try {
     
     // Eliminar respuestas asociadas a esta pregunta
     $stmt = $conn->prepare("DELETE FROM respuestas WHERE pregunta_id = :pregunta_id");
-    $stmt->execute([':pregunta_id' => $pregunta_id]);
+    $stmt->execute([':pregunta_id' => $pregunta_id, ':docente_id2' => $_SESSION['user_id']]);
     
     // Eliminar la pregunta
     $stmt = $conn->prepare("DELETE FROM preguntas_evaluacion WHERE id = :pregunta_id");
-    $stmt->execute([':pregunta_id' => $pregunta_id]);
+    $stmt->execute([':pregunta_id' => $pregunta_id, ':docente_id2' => $_SESSION['user_id']]);
     
     // Reordenar las preguntas restantes
     $stmt = $conn->prepare("
@@ -60,7 +60,7 @@ try {
         )
         WHERE id = :evaluacion_id
     ");
-    $stmt->execute([':evaluacion_id' => $evaluacion_id]);
+    $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id2' => $_SESSION['user_id']]);
     
     $conn->commit();
     

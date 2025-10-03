@@ -17,7 +17,7 @@ $stmt = $conn->prepare("
     SELECT t.id, t.recurso_url FROM temas t
     INNER JOIN modulos m ON t.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE t.id = :tema_id AND c.creado_por = :docente_id
+    WHERE t.id = :tema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id']]);
 $tema = $stmt->fetch();
@@ -43,12 +43,12 @@ try {
         INNER JOIN subtemas s ON l.subtema_id = s.id
         WHERE s.tema_id = :tema_id AND l.recurso_url LIKE '/imt-cursos/uploads/%'
     ");
-    $stmt->execute([':tema_id' => $tema_id]);
+    $stmt->execute([':tema_id' => $tema_id, ':docente_id2' => $_SESSION['user_id']]);
     $archivos = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
     // Eliminar tema (CASCADE eliminará subtemas y lecciones)
     $stmt = $conn->prepare("DELETE FROM temas WHERE id = :id");
-    $stmt->execute([':id' => $tema_id]);
+    $stmt->execute([':id' => $tema_id, ':docente_id2' => $_SESSION['user_id']]);
     
     $conn->commit();
     

@@ -11,7 +11,7 @@ if ($curso_id === 0) {
 }
 
 // Verificar que el curso pertenece al docente
-$stmt = $conn->prepare("SELECT titulo FROM cursos WHERE id = :id AND creado_por = :docente_id");
+$stmt = $conn->prepare("SELECT titulo FROM cursos WHERE id = :id AND (creado_por = :docente_id OR asignado_a = :docente_id)");
 $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
 $curso = $stmt->fetch();
 
@@ -38,7 +38,7 @@ try {
     $archivos = $stmt->fetchAll(PDO::FETCH_COLUMN);
     
     // 2. Eliminar registros de la base de datos (el ON DELETE CASCADE se encarga de la cascada)
-    $stmt = $conn->prepare("DELETE FROM cursos WHERE id = :id AND creado_por = :docente_id");
+    $stmt = $conn->prepare("DELETE FROM cursos WHERE id = :id AND (creado_por = :docente_id OR asignado_a = :docente_id)");
     $result = $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
     
     if ($stmt->rowCount() === 0) {

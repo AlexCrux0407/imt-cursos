@@ -8,10 +8,24 @@ $page_title = 'Docente – Módulos del Curso';
 $curso_id = $_GET['id'] ?? 0;
 
 // Verificar que el curso pertenece al docente y obtener información
-$stmt = $conn->prepare("
-    SELECT * FROM cursos 
-    WHERE id = :id AND creado_por = :docente_id
-");
+// Verificar si las nuevas columnas existen
+$stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'asignado_a'");
+$stmt->execute();
+$nuevas_columnas_existen = $stmt->fetch();
+
+if ($nuevas_columnas_existen) {
+    // Sistema nuevo: verificar por asignación
+    $stmt = $conn->prepare("
+        SELECT * FROM cursos 
+        WHERE id = :id AND asignado_a = :docente_id
+    ");
+} else {
+    // Sistema anterior: verificar por creador
+    $stmt = $conn->prepare("
+        SELECT * FROM cursos 
+        WHERE id = :id AND creado_por = :docente_id
+    ");
+}
 $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
 $curso = $stmt->fetch();
 
@@ -101,7 +115,7 @@ require __DIR__ . '/../partials/nav.php';
                             <div style="flex: 1;">
                                 <h4 style="color: #2c3e50; margin-bottom: 8px;"><?= htmlspecialchars($modulo['titulo']) ?></h4>
                                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;">
-                                    <?= htmlspecialchars(substr($modulo['descripcion'], 0, 100)) ?><?= strlen($modulo['descripcion']) > 100 ? '...' : '' ?>
+                                    <?= htmlspecialchars(substr($modulo['descripcion'] ?? '', 0, 100)) ?><?= strlen($modulo['descripcion'] ?? '') > 100 ? '...' : '' ?>
                                 </p>
                                 <div class="div-fila-alt-start" style="gap: 15px;">
                                     <span style="color: #3498db; font-weight: 500;"><?= $modulo['total_lecciones'] ?> lecciones</span>

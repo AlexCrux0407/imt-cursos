@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         SELECT t.id FROM temas t
         INNER JOIN modulos m ON t.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
-        WHERE t.id = :tema_id AND c.creado_por = :docente_id
+        WHERE t.id = :tema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
     $stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id']]);
     $tema_actual = $stmt->fetch();
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':recurso_url' => $url_final ?: null,
                 ':orden' => $orden,
                 ':id' => $tema_id
-            ]);
+            , ':docente_id2' => $_SESSION['user_id']]);
         } else {
             // Actualizar solo los campos básicos
             $stmt = $conn->prepare("
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':descripcion' => $descripcion ?: null,
                 ':orden' => $orden,
                 ':id' => $tema_id
-            ]);
+            , ':docente_id2' => $_SESSION['user_id']]);
         }
         
         header('Location: '  . BASE_URL . '/docente/temas_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=tema_actualizado');

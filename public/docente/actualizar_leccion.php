@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         SELECT l.id, l.recurso_url as archivo_actual, l.orden as orden_actual FROM lecciones l
         INNER JOIN modulos m ON l.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
-        WHERE l.id = :leccion_id AND c.creado_por = :docente_id
+        WHERE l.id = :leccion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
     $stmt->execute([':leccion_id' => $leccion_id, ':docente_id' => $_SESSION['user_id']]);
     $leccion_actual = $stmt->fetch();
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':modulo_id' => $modulo_id,
             ':orden' => $orden,
             ':leccion_id' => $leccion_id
-        ]);
+        , ':docente_id2' => $_SESSION['user_id']]);
         
         if ($stmt->fetch()) {
             header('Location: ' . BASE_URL . '/docente/editar_leccion.php?id=' . $leccion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=orden_duplicado');
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':recurso_url' => $url_final ?: null,
             ':orden' => $orden,
             ':id' => $leccion_id
-        ]);
+        , ':docente_id2' => $_SESSION['user_id']]);
         
         header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_actualizada');
         exit;

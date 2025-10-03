@@ -13,7 +13,7 @@ $stmt = $conn->prepare("
     SELECT m.*, c.titulo as curso_titulo
     FROM modulos m
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE m.id = :modulo_id AND c.creado_por = :docente_id
+    WHERE m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id']]);
 $modulo = $stmt->fetch();
@@ -36,7 +36,7 @@ $stmt = $conn->prepare("
     GROUP BY e.id
     ORDER BY e.orden ASC, e.fecha_creacion DESC
 ");
-$stmt->execute([':modulo_id' => $modulo_id]);
+$stmt->execute([':modulo_id' => $modulo_id, ':docente_id2' => $_SESSION['user_id']]);
 $evaluaciones = $stmt->fetchAll();
 
 require __DIR__ . '/../partials/header.php';

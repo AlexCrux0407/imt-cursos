@@ -153,7 +153,7 @@ require __DIR__ . '/../partials/nav.php';
                             <h3 class="curso-titulo"><?= htmlspecialchars($curso['titulo']) ?></h3>
                             
                             <div class="curso-descripcion">
-                                <?= htmlspecialchars(substr($curso['descripcion'], 0, 120)) ?><?= strlen($curso['descripcion']) > 120 ? '...' : '' ?>
+                                <?= htmlspecialchars(substr($curso['descripcion'] ?? '', 0, 120)) ?><?= strlen($curso['descripcion'] ?? '') > 120 ? '...' : '' ?>
                             </div>
                             
                             <div class="curso-detalles">

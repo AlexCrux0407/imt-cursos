@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         SELECT e.id FROM evaluaciones_modulo e
         INNER JOIN modulos m ON e.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
-        WHERE e.id = :evaluacion_id AND c.creado_por = :docente_id
+        WHERE e.id = :evaluacion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
     $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id']]);
     
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':explicacion' => $explicacion,
                 ':pregunta_id' => $pregunta_id,
                 ':evaluacion_id' => $evaluacion_id
-            ]);
+            , ':docente_id2' => $_SESSION['user_id']]);
             
             $mensaje = 'pregunta_actualizada';
         } else {
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':puntaje' => $puntaje,
                 ':orden' => $orden,
                 ':explicacion' => $explicacion
-            ]);
+            , ':docente_id2' => $_SESSION['user_id']]);
             
             $mensaje = 'pregunta_creada';
         }
@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             )
             WHERE id = :evaluacion_id
         ");
-        $stmt->execute([':evaluacion_id' => $evaluacion_id]);
+        $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id2' => $_SESSION['user_id']]);
         
         header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=' . $mensaje);
         exit;
