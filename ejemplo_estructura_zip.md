@@ -99,4 +99,4 @@ curso-ejemplo.zip
 5. Haz clic en "Procesar ZIP"
 6. El sistema procesará automáticamente toda la estructura
 
-¡Listo! Tu contenido estará disponible inmediatamente para los estudiantes.
+¡Listo! El contenido estará disponible inmediatamente para los estudiantes.
