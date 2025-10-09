@@ -91,12 +91,12 @@ curso-ejemplo.zip
 4. **Validación:** El sistema validará la estructura antes de procesar el contenido
 
 ## Proceso de Importación
+1. Solicita al máster que cree un curso
+2. Selecciona el curso al que quieres agregar contenido
+3. Haz clic en "📁 Cargar ZIP"
+4. Selecciona tu archivo ZIP con la estructura correcta
+5. Elige si reemplazar el contenido existente
+6. Haz clic en "Procesar ZIP"
+7. El sistema procesará automáticamente toda la estructura 
 
-1. Selecciona el curso al que quieres agregar contenido
-2. Haz clic en "📁 Cargar ZIP"
-3. Selecciona tu archivo ZIP con la estructura correcta
-4. Elige si reemplazar el contenido existente
-5. Haz clic en "Procesar ZIP"
-6. El sistema procesará automáticamente toda la estructura
-
-¡Listo! Tu contenido estará disponible inmediatamente para los estudiantes.
+¡Listo! El contenido estará disponible inmediatamente para los estudiantes.
