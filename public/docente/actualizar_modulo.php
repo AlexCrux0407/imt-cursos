@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         INNER JOIN cursos c ON m.curso_id = c.id
         WHERE m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
-    $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id']]);
+    $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
     $modulo_actual = $stmt->fetch();
     
     if (!$modulo_actual) {
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':recurso_url' => $url_final ?: null,
                 ':orden' => $orden,
                 ':id' => $modulo_id
-            , ':docente_id2' => $_SESSION['user_id']]);
+            ]);
         } else {
             // Actualizar solo los campos básicos
             $stmt = $conn->prepare("
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':descripcion' => $descripcion ?: null,
                 ':orden' => $orden,
                 ':id' => $modulo_id
-            , ':docente_id2' => $_SESSION['user_id']]);
+            ]);
         }
         
         header('Location:'  . BASE_URL . '/docente/modulos_curso.php?id=' . $curso_id . '&success=modulo_actualizado');

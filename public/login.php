@@ -49,17 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Redireccionar según el rol
                 switch ($row['role']) {
                     case 'master':
-                        header('Location:' . BASE_URL .'/master/dashboard.php');
+                        header('Location: ' . BASE_URL .'/master/dashboard.php');
                         break;
                     case 'docente':
-                        header('Location:'  . BASE_URL . '/docente/dashboard.php');
+                        header('Location: '  . BASE_URL . '/docente/dashboard.php');
                         break;
                     case 'ejecutivo':
-                        header('Location:'  . BASE_URL . '/ejecutivo/dashboard.php');
+                        header('Location: '  . BASE_URL . '/ejecutivo/dashboard.php');
                         break;
                     case 'estudiante':
                     default:
-                        header('Location:' . BASE_URL .'/estudiante/dashboard.php');
+                        header('Location: ' . BASE_URL .'/estudiante/dashboard.php');
                         break;
                 }
                 exit;

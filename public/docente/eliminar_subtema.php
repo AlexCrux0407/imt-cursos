@@ -33,7 +33,7 @@ try {
     
     // Eliminar subtema (CASCADE eliminará lecciones)
     $stmt = $conn->prepare("DELETE FROM subtemas WHERE id = :id");
-    $stmt->execute([':id' => $subtema_id, ':docente_id2' => $_SESSION['user_id']]);
+    $stmt->execute([':id' => $subtema_id]);
     
     $conn->commit();
     

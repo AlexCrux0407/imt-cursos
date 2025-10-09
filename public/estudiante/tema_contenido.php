@@ -50,7 +50,7 @@ $stmt = $conn->prepare("
 $stmt->execute([':tema_id' => $tema_id]);
 $subtemas = $stmt->fetchAll();
 
-/* 3) Lecciones del tema (directas por tema_id) */
+/* 3) Lecciones del tema  */
 $stmt = $conn->prepare("
     SELECT l.*, IF(pl.id IS NULL, 0, 1) AS completado
     FROM lecciones l
@@ -62,7 +62,7 @@ $stmt = $conn->prepare("
 $stmt->execute([':tema_id' => $tema_id, ':uid' => $estudiante_id]);
 $lecciones = $stmt->fetchAll();
 
-/* 4) Estructura del curso para la sidebar (lecciones cuelgan de TEMA) */
+/* 4) Estructura del curso para la sidebar */
 $stmt = $conn->prepare("
     SELECT m.id  AS modulo_id, m.titulo AS modulo_titulo, m.orden AS modulo_orden,
            t.id  AS tema_id,   t.titulo AS tema_titulo,   t.orden AS tema_orden,
@@ -99,7 +99,6 @@ foreach ($rows as $r) {
                 'id' => $tid,
                 'titulo' => $r['tema_titulo'],
                 'orden' => (int)$r['tema_orden'],
-                // AQUÍ: soportamos lecciones a nivel de tema
                 'lecciones' => []
             ];
         }
@@ -285,7 +284,7 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         <?php endif; ?>
 
-        <!-- Estado vacío - solo mostrar si realmente no hay contenido -->
+        <!-- Estado vacío  -->
         <?php if (empty($subtemas) && empty($lecciones) && empty($tema['contenido'] ?? '')): ?>
             <div class="empty-content">
                 <i class="icon-info"></i>
@@ -311,7 +310,7 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         </div>
         <div id="recurso-viewer-content" class="recurso-viewer-content">
-            <!-- El contenido del recurso se cargará aquí -->
+            <!-- Contenido del recurso -->
         </div>
     </div>
 </div>

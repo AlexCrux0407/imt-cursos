@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         INNER JOIN cursos c ON m.curso_id = c.id
         WHERE m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
-    $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id']]);
+    $stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
     
     if (!$stmt->fetch()) {
         header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':tipo' => $tipo,
             ':recurso_url' => $recurso_url ?: null,
             ':orden' => $orden
-        , ':docente_id2' => $_SESSION['user_id']]);
+        ]);
         
         $leccion_id = $conn->lastInsertId();
         

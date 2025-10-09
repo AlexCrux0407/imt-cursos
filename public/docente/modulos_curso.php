@@ -51,6 +51,57 @@ require __DIR__ . '/../partials/nav.php';
 ?>
 
 <div class="contenido">
+    <!-- Mensajes de éxito o error -->
+    <?php if (isset($_GET['success']) || isset($_GET['error'])): ?>
+        <div style="margin-bottom: 20px;">
+            <?php if (isset($_GET['success'])): ?>
+                <div style="background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; border: 1px solid #c3e6cb;">
+                    <?php
+                    switch($_GET['success']) {
+                        case 'modulo_eliminado':
+                            echo 'Módulo eliminado exitosamente.';
+                            break;
+                        case 'modulo_creado':
+                            echo 'Módulo creado exitosamente.';
+                            break;
+                        case 'modulo_actualizado':
+                            echo 'Módulo actualizado exitosamente.';
+                            break;
+                        default:
+                            echo 'Operación completada exitosamente.';
+                    }
+                    ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_GET['error'])): ?>
+                <div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border: 1px solid #f5c6cb;">
+                    <?php
+                    switch($_GET['error']) {
+                         case 'error_eliminar':
+                             echo 'Error al eliminar el módulo. Por favor, inténtelo de nuevo.';
+                             if (isset($_GET['details'])) {
+                                 echo '<br><small>Detalles: ' . htmlspecialchars($_GET['details']) . '</small>';
+                             }
+                             break;
+                        case 'error_crear':
+                            echo 'Error al crear el módulo. Por favor, inténtelo de nuevo.';
+                            break;
+                        case 'datos_invalidos':
+                            echo 'Los datos proporcionados no son válidos.';
+                            break;
+                        case 'curso_no_encontrado':
+                            echo 'El curso especificado no fue encontrado.';
+                            break;
+                        default:
+                            echo 'Ha ocurrido un error. Por favor, inténtelo de nuevo.';
+                    }
+                    ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
         <div class="div-fila-alt-start">
             <div>
@@ -69,7 +120,7 @@ require __DIR__ . '/../partials/nav.php';
         <div class="div-fila" style="gap: 20px; align-items: center;">
             <div style="flex: 1;">
                 <h3 style="color: #2c3e50; margin-bottom: 10px;">Información del Curso</h3>
-                <p style="color: #7f8c8d; margin-bottom: 5px;"><?= htmlspecialchars($curso['descripcion']) ?></p>
+                <p style="color: #7f8c8d; margin-bottom: 5px;"><?= htmlspecialchars($curso['descripcion'] ?? '') ?></p>
                 <div class="div-fila-alt-start" style="gap: 15px;">
                     <span style="background: <?= $curso['estado'] === 'activo' ? '#27ae60' : ($curso['estado'] === 'borrador' ? '#f39c12' : '#e74c3c') ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
                         <?= ucfirst($curso['estado']) ?>
@@ -78,10 +129,10 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
             </div>
             <div>
-                <button onclick="window.history.back()" 
-                        style="background: #e8ecef; color: #5a5c69; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                <a href="admin_cursos.php" 
+                   style="background: #e8ecef; color: #5a5c69; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block;">
                     ← Volver
-                </button>
+                </a>
             </div>
         </div>
     </div>
