@@ -34,4 +34,3 @@ Esta documentación describe la estructura de archivos del proyecto **imt-cursos
 - `public/master/editar_curso.php`: Permite editar información de cursos.
 - [Ver archivo en GitHub](https://github.com/AlexCrux0407/imt-cursos/blob/main/public/master/editar_curso.php)
 
-**Nota**: Para más detalles sobre otros archivos, revisa directamente el repositorio.
