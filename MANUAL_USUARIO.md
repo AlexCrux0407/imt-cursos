@@ -15,7 +15,7 @@ Este manual tiene como propósito guiar a los **empleados del IMT** en el uso ef
 - Instrucciones claras y paso a paso para utilizar cada funcionalidad del sistema
 - Explicaciones sobre cómo navegar por las diferentes vistas y módulos
 - Información sobre cómo aprovechar al máximo las herramientas disponibles
-- Consejos para gestionar tu aprendizaje y dar seguimiento al progreso académico
+- Consejos para gestionar el aprendizaje y dar seguimiento al progreso académico
 
 El objetivo es que cualquier usuario, sin conocimientos técnicos avanzados, pueda utilizar la plataforma de manera eficiente y aprovechar todas sus funcionalidades para alcanzar sus objetivos educativos.
 
@@ -48,11 +48,11 @@ La plataforma IMT Cursos está organizada en módulos principales que facilitan 
 **¿Qué es?**  
 El tablero es la página de inicio después de iniciar sesión. Es el centro de control desde donde se puede ver un resumen completo de la actividad académica.
 
-**¿Qué puedes hacer aquí?**
+**¿Qué se puede hacer aquí?**
 
 - **Ver estadísticas generales:**
   - Total de cursos disponibles en la plataforma
-  - Cantidad de cursos en los que estás inscrito
+  - Cantidad de cursos en los que se está inscrito
   - Número de cursos completados
   - Certificados obtenidos
 
@@ -63,27 +63,25 @@ El tablero es la página de inicio después de iniciar sesión. Es el centro de 
 
 - **Navegar hacia:**
   - Catálogo completo de cursos
-  - Tus cursos inscritos
-  - Tu perfil de usuario
+  - Cursos inscritos
+  - Perfil de usuario
 
 **Cómo utilizarlo:**
 
-1. Al iniciar sesión, serás dirigido automáticamente al tablero
-2. Revisa las tarjetas de estadísticas en la parte superior para conocer tu progreso general
-3. En la sección "Cursos en Progreso", haz clic en cualquier curso para continuar donde lo dejaste
-4. Explora los "Cursos Completados" para revisar tu historial académico
-5. Utiliza los botones de acción rápida para navegar a otras secciones
-
-**Tip:** El tablero se actualiza automáticamente, por lo que siempre verás tu información más reciente.
+1. Al iniciar sesión, se re dirigirá automáticamente al tablero
+2. Revisar las tarjetas de estadísticas en la parte superior para conocer el progreso general
+3. En la sección "Cursos en Progreso", al hacer clic en cualquier curso se podrá continuar donde se dejó por última vez
+4. Explorar los "Cursos Completados" para revisar el historial académico
+5. Utilizar los botones de acción rápida para navegar a otras secciones
 
 ---
 
 ### 4.2 Catálogo de Cursos
 
 **¿Qué es?**  
-El Catálogo es tu biblioteca de cursos disponibles. Aquí puedes explorar todos los cursos activos ofrecidos en la plataforma y decidir en cuáles inscribirte.
+El Catálogo es la biblioteca de cursos disponibles. Aquí se pueden explorar todos los cursos activos ofrecidos en la plataforma y decidir en cuáles inscribirse.
 
-**¿Qué puedes hacer aquí?**
+**¿Qué se puede hacer aquí?**
 
 - **Explorar cursos disponibles:** Ver todos los cursos activos con su información básica
 - **Buscar cursos:** Utilizar el buscador para encontrar cursos por nombre, descripción o palabras clave
@@ -93,35 +91,33 @@ El Catálogo es tu biblioteca de cursos disponibles. Aquí puedes explorar todos
   - Nombre del docente
   - Cantidad de estudiantes inscritos
   - Número de módulos
-  - Si ya estás inscrito
+  - Si ya se está inscrito
 
-- **Inscribirte en cursos:** Registrarte en los cursos de tu interés
+- **Inscribirse en cursos:** Registrarse en los cursos de interés
 
 **Cómo utilizarlo:**
 
-1. Accede al Catálogo desde el menú de navegación o desde el tablero
-2. Navega por la lista de cursos disponibles
-3. Utiliza los filtros en la parte superior para refinar tu búsqueda:
-   - **Categoría:** Selecciona un área específica de conocimiento
-   - **Buscar:** Escribe palabras clave relacionadas con el curso que buscas
-   - **Ordenar:** Organiza los resultados por fecha, alfabéticamente o popularidad
-4. Haz clic en un curso para ver más detalles
-5. Si el curso te interesa, haz clic en el botón "Inscribirse"
-6. Una vez inscrito, el curso aparecerá en tu sección "Mis Cursos"
-
-**Tip:** Revisa la cantidad de estudiantes inscritos para conocer los cursos más populares.
+1. Acceder al Catálogo desde el menú de navegación o desde el tablero
+2. Navegar por la lista de cursos disponibles
+3. Utilizar los filtros en la parte superior para refinar la búsqueda:
+   - **Categoría:** Seleccionar un área específica de conocimiento
+   - **Buscar:** Escribir palabras clave relacionadas con el curso que se busca
+   - **Ordenar:** Organizar los resultados por fecha, alfabéticamente o popularidad
+4. Hacer clic en un curso para ver más detalles
+5. Hacer clic en inscribir o volver a la lista de cursos
+6. Una vez inscrito, el curso aparecerá en la sección "Mis Cursos"
 
 ---
 
 ### 4.3 Mis Cursos
 
 **¿Qué es?**  
-Mis Cursos es tu espacio personal donde gestionas todos los cursos en los que estás inscrito. Aquí puedes dar seguimiento a tu progreso y acceder al contenido de cada curso.
+Mis Cursos es un espacio personal donde se gestionan todos los cursos en los que se está inscrito. Aquí se puede dar seguimiento al progreso y acceder al contenido de cada curso.
 
-**¿Qué puedes hacer aquí?**
+**¿Qué se puede hacer aquí?**
 
-- **Ver todos tus cursos inscritos:** Lista completa de cursos activos y completados
-- **Monitorear tu progreso:** Barra de progreso visual para cada curso con porcentaje exacto
+- **Ver todos los cursos inscritos:** Lista completa de cursos activos y completados
+- **Monitorear progreso:** Barra de progreso visual para cada curso con porcentaje exacto
 - **Filtrar cursos por estado:**
   - Completados (100% de progreso)
   - En progreso (1-99% de progreso)
@@ -135,18 +131,18 @@ Mis Cursos es tu espacio personal donde gestionas todos los cursos en los que es
   - Módulos completados
   - Progreso actual
 
-- **Buscar entre tus cursos:** Buscar por título, descripción o categoría
+- **Buscar entre los cursos:** Buscar por título, descripción o categoría
 - **Ordenar cursos:** Por fecha de inscripción, progreso o alfabéticamente
 - **Acceder al contenido:** Hacer clic en cualquier curso para ver sus lecciones
 
 **Cómo utilizarlo:**
 
-1. Accede a "Mis Cursos" desde el menú de navegación
-2. Revisa las estadísticas generales en la parte superior:
+1. Acceder a "Mis Cursos" desde el menú de navegación
+2. Revisar las estadísticas generales en la parte superior:
    - Cursos inscritos
    - Cursos completados
    - Certificados obtenidos
-3. Utiliza los filtros para organizar tu vista:
+3. Utilizae los filtros para organizar la vista:
    - **Estado:** Filtra por completados, en progreso o sin iniciar
    - **Buscar:** Encuentra un curso específico
    - **Ordenar:** Organiza según tus preferencias
@@ -155,10 +151,10 @@ Mis Cursos es tu espacio personal donde gestionas todos los cursos en los que es
    - Información del docente
    - Barra de progreso visual
    - Fecha de inscripción
-5. Haz clic en "Ver Curso" para acceder al contenido y lecciones
-6. Haz clic en "Continuar Aprendiendo" para retomar donde lo dejaste
+5. Hacer clic en "Ver Curso" para acceder al contenido y lecciones
+6. Hacer clic en "Continuar Aprendiendo" para retomar donde se dejó por última vez
 
-**Tip:** Los cursos se ordenan por defecto con los más recientes primero, para que siempre veas tus inscripciones actuales.
+**Tip:** Los cursos se ordenan por defecto con los más recientes primero, para que siempre veas las inscripciones actuales.
 
 ---
 
@@ -179,24 +175,24 @@ Esta sección te permite acceder y navegar por todo el contenido educativo de un
 - **Navegar entre lecciones:** Avanzar o retroceder usando controles de navegación
 - **Marcar progreso:** El sistema registra automáticamente las lecciones completadas
 - **Descargar recursos:** Acceder a materiales complementarios si están disponibles
-- **Realizar evaluaciones:** Tomar exámenes cuando completes un módulo o curso
+- **Realizar evaluaciones:** Tomar exámenes cuando se complete un módulo o curso
 
 **Cómo utilizarlo:**
 
-1. Desde "Mis Cursos", haz clic en el curso que deseas estudiar
+1. Desde "Mis Cursos", hacer clic en el curso que se desea estudiar
 2. Se mostrará la estructura completa del curso:
    - Lista de módulos en orden secuencial
    - Cada módulo contiene temas
    - Cada tema contiene subtemas
    - Cada subtema contiene lecciones
-3. Haz clic en cualquier lección para visualizar su contenido
+3. Hacer clic en cualquier lección para visualizar su contenido
 4. Dentro de una lección puedes:
    - Leer el contenido educativo
    - Ver imágenes, diagramas o recursos multimedia
    - Usar los botones "Anterior" y "Siguiente" para navegar
    - El progreso se marca automáticamente al avanzar
-5. Completa todas las lecciones de un módulo para avanzar al siguiente
-6. Al finalizar un curso, podrás acceder a tu certificado
+5. Completar todas las lecciones de un módulo para avanzar al siguiente
+6. Al finalizar un curso, se podrá acceder al certificado
 
 **Navegación:**
 - **Módulo:** Unidad principal del curso (ej: "Módulo 1: Introducción")
@@ -217,7 +213,6 @@ Tu perfil personal donde puedes ver y gestionar tu información de usuario.
 
 - **Ver información personal:**
   - Nombre de usuario
-  - Correo electrónico
   - Rol en el sistema (Estudiante)
 
 - **Revisar actividad académica:**
@@ -227,12 +222,11 @@ Tu perfil personal donde puedes ver y gestionar tu información de usuario.
 
 **Cómo utilizarlo:**
 
-1. Accede a "Perfil" desde el menú de navegación
-2. Revisa tu información personal
-3. Verifica tus datos de contacto
-4. Consulta tu historial académico
+1. Acceder a "Perfil" desde el menú de navegación
+2. Revisar la información personal
+3. Consulta tu historial académico
 
-**Tip:** Mantén tu información de perfil actualizada para recibir notificaciones importantes sobre tus cursos.
+
 
 ---
 
@@ -240,27 +234,24 @@ Tu perfil personal donde puedes ver y gestionar tu información de usuario.
 
 **¿Cómo funciona el progreso?**
 
-El sistema calcula tu progreso automáticamente basándose en:
-- Lecciones completadas vs. lecciones totales
-- Módulos finalizados
-- Evaluaciones aprobadas (si aplica)
+El sistema calcula el progreso automáticamente basándose en:
+- Evaluaciones/actividades aprobadas, al completar una evaluación se asignará el porcentaje de avance correspondiente.
 
 **Indicadores de progreso:**
-- **0%:** Sin iniciar - No has accedido al contenido del curso
-- **1-99%:** En progreso - Has comenzado pero no has completado el curso
-- **100%:** Completado - Has finalizado todas las lecciones del curso
+- **0%:** Sin iniciar - No se he accedido al contenido del curso
+- **1-99%:** En progreso -  A partir de que se realice la primer evaluación/actividad
+- **100%:** Completado -  Al haber finalizado todas las lecciones del curso
 
 **Certificados:**
 
-Cuando completes un curso al 100%, podrás:
+Cuando se complete un curso al 100%, se podrá:
 1. Acceder a tu certificado de finalización
 2. Descargar el certificado en formato digital
-3. Ver el certificado en tu sección de "Cursos Completados"
+3. Ver el certificado en la sección de "Cursos Completados"
 4. El certificado incluirá:
-   - Tu nombre
+   - Nombre
    - Nombre del curso
    - Fecha de finalización
-   - Información del docente
 
 **Tip:** Los certificados son generados automáticamente al alcanzar el 100% de progreso en un curso.
 
@@ -281,26 +272,26 @@ El menú principal está siempre visible en la parte superior de la plataforma y
 
 **Cómo navegar:**
 
-1. Utiliza el menú superior para moverte entre las diferentes secciones
+1. Utilizar el menú superior para moverse entre las diferentes secciones
 2. Los enlaces están claramente etiquetados con iconos descriptivos
-3. La sección actual se resalta en el menú para que sepas dónde estás
-4. Puedes regresar al Tablero en cualquier momento haciendo clic en "Tablero"
+3. La sección actual se resalta en el menú para saber la pestaña activa
+4. Se puede regresar al Tablero en cualquier momento haciendo clic en "Tablero"
 
 **Consejos de navegación:**
-- Usa el logo de IMT para volver rápidamente a la página principal
-- El menú permanece fijo en la parte superior mientras haces scroll
-- Cada página muestra claramente su título para que sepas dónde estás
+- Usar el logo de IMT para volver rápidamente a la página principal
+- El menú permanece fijo en la parte superior mientras se hace scroll
+- Cada página muestra claramente su título para saber la pestaña activa
 - Los botones de acción (como "Ver Curso" o "Inscribirse") son visibles y fáciles de identificar
 
 ---
 
 ## 5. Glosario
 
-**Tablero:**  Panel principal que muestra un resumen de tu actividad académica, estadísticas y accesos rápidos a funcionalidades importantes.
+**Tablero:**  Panel principal que muestra un resumen de la actividad académica, estadísticas y accesos rápidos a funcionalidades importantes.
 
 **Progreso:** Porcentaje de avance en un curso, calculado en base a las lecciones completadas del total de lecciones disponibles.
 
-**Inscripción:** Acción de registrarte en un curso para poder acceder a su contenido educativo.
+**Inscripción:** Acción de registrarse en un curso para poder acceder a su contenido educativo.
 
 **Módulo:** Unidad principal de organización dentro de un curso, que agrupa contenido relacionado en temas específicos.
 
@@ -312,21 +303,21 @@ El menú principal está siempre visible en la parte superior de la plataforma y
 
 **Certificado:** Documento digital que acredita la finalización exitosa de un curso al alcanzar el 100% de progreso.
 
-**Catálogo:** Listado completo de todos los cursos disponibles en la plataforma que puedes explorar e inscribirte.
+**Catálogo:** Listado completo de todos los cursos disponibles en la plataforma que se puede explorar e inscribirse.
 
 **Curso Activo:** Curso que está disponible para inscripción y que cuenta con contenido educativo accesible.
 
-**Curso Completado:** Curso en el que has alcanzado el 100% de progreso al finalizar todas las lecciones y actividades requeridas.
+**Curso Completado:** Curso en el que se ha alcanzado el 100% de progreso al finalizar todas las lecciones y actividades requeridas.
 
-**Curso en Progreso:** Curso en el que te has inscrito y has comenzado a estudiar, pero aún no has completado todo el contenido (1-99% de progreso).
+**Curso en Progreso:** Curso inscrito y con progreso iniciado , pero aún no completado (1-99% de progreso).
 
 **Docente:** Instructor o profesor responsable de crear y gestionar el contenido de un curso.
 
-**Estudiante:** Usuario registrado en la plataforma con el rol de aprendiz, quien accede a los cursos para su formación académica.
+**Estudiante:** Usuario registrado en la plataforma con el rol de aprendiz, quien accede a los cursos.
 
-**Perfil:** Sección personal donde se almacena y visualiza tu información de usuario y configuración.
+**Perfil:** Sección personal donde se almacena y visualiza la información de usuario y configuración.
 
-**Estado de Inscripción:** Indicador que muestra tu situación actual en un curso (Sin iniciar, En progreso, o Completado).
+**Estado de Inscripción:** Indicador que muestra la situación actual en un curso (Sin iniciar, En progreso, o Completado).
 
 **Recursos:** Materiales complementarios descargables que acompañan las lecciones, como documentos PDF, imágenes o archivos de apoyo.
 
@@ -334,7 +325,7 @@ El menú principal está siempre visible en la parte superior de la plataforma y
 
 **Navegación:** Proceso de moverse entre las diferentes páginas, secciones y contenidos de la plataforma.
 
-**Sesión:** Período de tiempo en el que permaneces conectado a la plataforma después de iniciar sesión con tus credenciales.
+**Sesión:** Período de tiempo en el que se permanece conectado a la plataforma después de iniciar sesión.
 
 ---
 
@@ -342,30 +333,30 @@ El menú principal está siempre visible en la parte superior de la plataforma y
 
 La plataforma **IMT Cursos** ha sido diseñada para proporcionar una experiencia de aprendizaje intuitiva, accesible y eficiente. Como estudiante, tienes a tu disposición herramientas que te permiten:
 
-- **Gestionar tu aprendizaje de forma autónoma:** Decide cuándo y cómo avanzar en tus cursos
-- **Dar seguimiento a tu progreso:** Visualiza en tiempo real tu avance académico
-- **Acceder a contenido de calidad:** Explora diversos cursos organizados de manera estructurada
-- **Obtener certificaciones:** Acredita tus conocimientos al completar cursos
+- **Gestionar tu aprendizaje de forma autónoma:**  Decidir cuándo y cómo avanzar en los cursos
+- **Dar seguimiento al progreso:** Visualizar en tiempo real el avance académico
+- **Acceder a contenido de calidad:** Explorar diversos cursos organizados de manera estructurada
+- **Obtener certificaciones:** Acreditar tus conocimientos al completar cursos
 
 ### Beneficios Clave:
 
-1. **Flexibilidad:** Estudia a tu propio ritmo y en el horario que mejor se adapte a tus necesidades
-2. **Organización:** Todo tu contenido educativo está estructurado y fácil de encontrar
-3. **Seguimiento claro:** El sistema de progreso te permite saber exactamente dónde estás en cada curso
-4. **Acceso permanente:** Una vez inscrito, puedes acceder al contenido cuando lo necesites
-5. **Certificación:** Obtén reconocimiento formal por tus logros académicos
+1. **Flexibilidad:** Estudiar a un ritmo propio  y en el horario que mejor se adapte a las necesidades
+2. **Organización:** Todo el contenido educativo está estructurado y fácil de encontrar
+3. **Seguimiento claro:** El sistema de progreso permite saber exactamente el punto en que se encuentra en cada curso
+4. **Acceso permanente:** Una vez inscrito, se puede acceder al contenido cuando lo necesites
+5. **Certificación:**  Obtención reconocimiento formal por los logros académicos
 
 ### Recomendaciones Finales:
 
-- **Explora el tablero regularmente** para mantenerte al día con tus cursos
-- **Utiliza los filtros y búsquedas** para encontrar rápidamente lo que necesitas
-- **Completa las lecciones en orden** para un mejor aprovechamiento del contenido
-- **Revisa tu progreso frecuentemente** para mantener el ritmo de estudio
-- **Aprovecha todos los recursos** disponibles en cada lección
+- **Explorar el tablero regularmente** para mantenerse al día con los cursos
+- **Utilizar los filtros y búsquedas** para encontrar rápidamente lo que se busca
+- **Completar las lecciones en orden** para un mejor aprovechamiento del contenido
+- **Revisar el progreso frecuentemente** para mantener el ritmo de estudio
+- **Aprovechar todos los recursos** disponibles en cada lección
 
-IMT Cursos está comprometido con tu éxito académico. Esperamos que este manual te ayude a aprovechar al máximo todas las funcionalidades de la plataforma y que tu experiencia de aprendizaje sea enriquecedora y satisfactoria.
+IMT Cursos está comprometido con tu éxito académico. Esperamos que este manual ayude a aprovechar al máximo todas las funcionalidades de la plataforma y que la experiencia de aprendizaje sea enriquecedora y satisfactoria.
 
-**¡Éxito en tu camino educativo!**
+**¡Éxito en el camino educativo!**
 
 ---
 
