@@ -4,7 +4,7 @@
 
 Bienvenido al **Manual de Usuario de IMT Cursos**, una plataforma educativa en línea diseñada para facilitar el aprendizaje y la gestión de cursos. Este sistema permite a los estudiantes acceder a contenido educativo de manera estructurada, realizar un seguimiento de su progreso académico y obtener certificados al completar los cursos.
 
-IMT Cursos es una solución integral que conecta a estudiantes con contenido educativo de calidad, permitiendo un aprendizaje flexible y autodirigido. La plataforma está diseñada con una interfaz intuitiva que facilita la navegación y el acceso a todos los recursos educativos disponibles.
+IMT Cursos es una solución integral que conecta a empleados con contenido educativo proporcionado por la institución, permitiendo un aprendizaje flexible y autodirigido. La plataforma está diseñada con una interfaz intuitiva que facilita la navegación y el acceso a todos los recursos educativos disponibles.
 
 ---
 
@@ -27,11 +27,11 @@ La plataforma IMT Cursos está organizada en módulos principales que facilitan 
 
 ### Módulos para Estudiantes
 
-1. **Dashboard del Estudiante** - Vista principal con resumen de tu actividad académica
+1. ** Tablero del Estudiante** - Vista principal con resumen de tu actividad académica
 2. **Catálogo de Cursos** - Exploración y búsqueda de cursos disponibles
 3. **Mis Cursos** - Gestión de cursos en los que estás inscrito
 4. **Contenido del Curso** - Visualización de lecciones y materiales educativos
-5. **Perfil de Usuario** - Gestión de información personal y configuración
+5. **Perfil de Usuario** - Gestión de información personal
 
 ### Funcionalidades Complementarias
 
@@ -43,7 +43,7 @@ La plataforma IMT Cursos está organizada en módulos principales que facilitan 
 
 ## 4. Módulos y Procedimientos
 
-### 4.1 Dashboard del Estudiante
+### 4.1 Tablero del Estudiante
 
 **¿Qué es?**  
 El Dashboard es tu página de inicio después de iniciar sesión. Es el centro de control desde donde puedes ver un resumen completo de tu actividad académica.
