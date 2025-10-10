@@ -27,7 +27,7 @@ La plataforma IMT Cursos está organizada en módulos principales que facilitan 
 
 ### Módulos para Estudiantes
 
-1. ** Tablero del Estudiante** - Vista principal con resumen de tu actividad académica
+1. **Tablero del Estudiante** - Vista principal con resumen de tu actividad académica
 2. **Catálogo de Cursos** - Exploración y búsqueda de cursos disponibles
 3. **Mis Cursos** - Gestión de cursos en los que estás inscrito
 4. **Contenido del Curso** - Visualización de lecciones y materiales educativos
