@@ -1,7 +1,5 @@
 # Documentación de la Estructura de Archivos
 
-Esta documentación describe la estructura de archivos del proyecto **imt-cursos** y explica la funcionalidad de sus carpetas y archivos principales.
-
 ## Estructura Principal
 
 ### `app/auth.php`
