@@ -65,7 +65,7 @@ $estadisticas = $stmt->fetch();
             </div>
         </div>
 
-        <!-- Feature Cards -->
+        <!-- Tarjetas -->
         <div class="feature-grid">
             <div class="feature-card">
                 <div class="feature-icon">
@@ -94,7 +94,7 @@ $estadisticas = $stmt->fetch();
             </div>
         </div>
 
-        <!-- Quick Actions -->
+        <!--  Acciones rápidas  -->
         <div class="quick-actions">
             <h3>Acciones Rápidas</h3>
             <div class="action-buttons">
