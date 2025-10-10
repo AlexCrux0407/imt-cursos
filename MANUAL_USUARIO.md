@@ -2,20 +2,20 @@
 
 ## 1. Introducción
 
-Bienvenido al **Manual de Usuario de IMT Cursos**, una plataforma educativa en línea diseñada para facilitar el aprendizaje y la gestión de cursos. Este sistema permite a los estudiantes acceder a contenido educativo de manera estructurada, realizar un seguimiento de su progreso académico y obtener certificados al completar los cursos.
+Bienvenido al **Manual de Usuario de IMT Cursos**, una plataforma educativa en línea diseñada para facilitar el aprendizaje y la gestión de cursos. Este sistema permite a los empleados del IMT acceder a contenido educativo de manera estructurada, realizar un seguimiento de su progreso académico y obtener certificados al completar los cursos.
 
-IMT Cursos es una solución integral que conecta a empleados con contenido educativo proporcionado por la institución, permitiendo un aprendizaje flexible y autodirigido. La plataforma está diseñada con una interfaz intuitiva que facilita la navegación y el acceso a todos los recursos educativos disponibles.
+IMT Cursos es una solución integral que conecta a empleados con contenido educativo proporcionado por el Instituto Mexicano del Transporte, permitiendo un aprendizaje flexible y autodirigido. La plataforma está diseñada con una interfaz intuitiva que facilita la navegación y el acceso a todos los recursos educativos disponibles.
 
 ---
 
 ## 2. Objetivo del Manual
 
-Este manual tiene como propósito guiar a los **estudiantes** en el uso efectivo de la plataforma IMT Cursos. Aquí encontrarás:
+Este manual tiene como propósito guiar a los **empleados del IMT** en el uso efectivo de la plataforma IMT Cursos. Aquí se encuentran:
 
 - Instrucciones claras y paso a paso para utilizar cada funcionalidad del sistema
 - Explicaciones sobre cómo navegar por las diferentes vistas y módulos
 - Información sobre cómo aprovechar al máximo las herramientas disponibles
-- Consejos para gestionar tu aprendizaje y dar seguimiento a tu progreso académico
+- Consejos para gestionar tu aprendizaje y dar seguimiento al progreso académico
 
 El objetivo es que cualquier usuario, sin conocimientos técnicos avanzados, pueda utilizar la plataforma de manera eficiente y aprovechar todas sus funcionalidades para alcanzar sus objetivos educativos.
 
@@ -27,9 +27,9 @@ La plataforma IMT Cursos está organizada en módulos principales que facilitan 
 
 ### Módulos para Estudiantes
 
-1. **Tablero del Estudiante** - Vista principal con resumen de tu actividad académica
+1. **Tablero del Estudiante** - Vista principal con resumen de la actividad académica
 2. **Catálogo de Cursos** - Exploración y búsqueda de cursos disponibles
-3. **Mis Cursos** - Gestión de cursos en los que estás inscrito
+3. **Mis Cursos** - Gestión de cursos en los que se está inscrito
 4. **Contenido del Curso** - Visualización de lecciones y materiales educativos
 5. **Perfil de Usuario** - Gestión de información personal
 
@@ -46,7 +46,7 @@ La plataforma IMT Cursos está organizada en módulos principales que facilitan 
 ### 4.1 Tablero del Estudiante
 
 **¿Qué es?**  
-El Dashboard es tu página de inicio después de iniciar sesión. Es el centro de control desde donde puedes ver un resumen completo de tu actividad académica.
+El tablero es la página de inicio después de iniciar sesión. Es el centro de control desde donde se puede ver un resumen completo de la actividad académica.
 
 **¿Qué puedes hacer aquí?**
 
@@ -68,13 +68,13 @@ El Dashboard es tu página de inicio después de iniciar sesión. Es el centro d
 
 **Cómo utilizarlo:**
 
-1. Al iniciar sesión, serás dirigido automáticamente al Dashboard
+1. Al iniciar sesión, serás dirigido automáticamente al tablero
 2. Revisa las tarjetas de estadísticas en la parte superior para conocer tu progreso general
 3. En la sección "Cursos en Progreso", haz clic en cualquier curso para continuar donde lo dejaste
 4. Explora los "Cursos Completados" para revisar tu historial académico
 5. Utiliza los botones de acción rápida para navegar a otras secciones
 
-**Tip:** El Dashboard se actualiza automáticamente, por lo que siempre verás tu información más reciente.
+**Tip:** El tablero se actualiza automáticamente, por lo que siempre verás tu información más reciente.
 
 ---
 
@@ -99,7 +99,7 @@ El Catálogo es tu biblioteca de cursos disponibles. Aquí puedes explorar todos
 
 **Cómo utilizarlo:**
 
-1. Accede al Catálogo desde el menú de navegación o desde el Dashboard
+1. Accede al Catálogo desde el menú de navegación o desde el tablero
 2. Navega por la lista de cursos disponibles
 3. Utiliza los filtros en la parte superior para refinar tu búsqueda:
    - **Categoría:** Selecciona un área específica de conocimiento
@@ -273,7 +273,7 @@ Cuando completes un curso al 100%, podrás:
 El menú principal está siempre visible en la parte superior de la plataforma y contiene:
 
 - **Logo IMT Cursos:** Haz clic para volver al inicio
-- **Dashboard:** Acceso a tu página principal
+- **Tablero:** Acceso a tu página principal
 - **Catálogo de Cursos:** Explorar cursos disponibles
 - **Mis Cursos:** Ver tus cursos inscritos
 - **Perfil:** Gestionar tu información personal
@@ -284,7 +284,7 @@ El menú principal está siempre visible en la parte superior de la plataforma y
 1. Utiliza el menú superior para moverte entre las diferentes secciones
 2. Los enlaces están claramente etiquetados con iconos descriptivos
 3. La sección actual se resalta en el menú para que sepas dónde estás
-4. Puedes regresar al Dashboard en cualquier momento haciendo clic en "Dashboard"
+4. Puedes regresar al Tablero en cualquier momento haciendo clic en "Tablero"
 
 **Consejos de navegación:**
 - Usa el logo de IMT para volver rápidamente a la página principal
@@ -296,7 +296,7 @@ El menú principal está siempre visible en la parte superior de la plataforma y
 
 ## 5. Glosario
 
-**Dashboard:** Tablero o panel principal que muestra un resumen de tu actividad académica, estadísticas y accesos rápidos a funcionalidades importantes.
+**Tablero:**  Panel principal que muestra un resumen de tu actividad académica, estadísticas y accesos rápidos a funcionalidades importantes.
 
 **Progreso:** Porcentaje de avance en un curso, calculado en base a las lecciones completadas del total de lecciones disponibles.
 
@@ -357,7 +357,7 @@ La plataforma **IMT Cursos** ha sido diseñada para proporcionar una experiencia
 
 ### Recomendaciones Finales:
 
-- **Explora el Dashboard regularmente** para mantenerte al día con tus cursos
+- **Explora el tablero regularmente** para mantenerte al día con tus cursos
 - **Utiliza los filtros y búsquedas** para encontrar rápidamente lo que necesitas
 - **Completa las lecciones en orden** para un mejor aprovechamiento del contenido
 - **Revisa tu progreso frecuentemente** para mantener el ritmo de estudio
