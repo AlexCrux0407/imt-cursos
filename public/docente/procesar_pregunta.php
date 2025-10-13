@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         INNER JOIN cursos c ON m.curso_id = c.id
         WHERE e.id = :evaluacion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
-    $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id']]);
+    $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
     
     if (!$stmt->fetch()) {
         header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
@@ -77,6 +77,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $respuesta_correcta = trim($_POST['respuesta_texto'] ?? '');
             // Para preguntas de texto, la respuesta puede estar vacía (revisión manual)
             break;
+
+        case 'emparejar_columnas':
+            $col_izquierda = $_POST['col_izquierda'] ?? [];
+            $col_derecha = $_POST['col_derecha'] ?? [];
+            if (empty($col_izquierda) || empty($col_derecha) || count($col_izquierda) !== count($col_derecha)) {
+                header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=opciones_insuficientes');
+                exit;
+            }
+            $pairs = [];
+            foreach ($col_izquierda as $i => $left) {
+                $pairs[] = ['left' => trim($left), 'right' => trim($col_derecha[$i] ?? '')];
+            }
+            $opciones = json_encode(['pairs' => $pairs]);
+            // Guardamos como respuestas correctas el arreglo de la columna derecha en el mismo orden
+            $respuesta_correcta = json_encode(array_column($pairs, 'right'));
+            break;
+
+        case 'completar_espacios':
+            $texto = trim($_POST['texto_completar'] ?? '');
+            $respuestas = $_POST['blancos_respuestas'] ?? [];
+            $opciones = json_encode(['texto' => $texto, 'blancos' => count($respuestas)]);
+            $respuesta_correcta = json_encode(array_values($respuestas));
+            break;
     }
     
     try {
@@ -100,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':explicacion' => $explicacion,
                 ':pregunta_id' => $pregunta_id,
                 ':evaluacion_id' => $evaluacion_id
-            , ':docente_id2' => $_SESSION['user_id']]);
+            ]);
             
             $mensaje = 'pregunta_actualizada';
         } else {
@@ -124,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':puntaje' => $puntaje,
                 ':orden' => $orden,
                 ':explicacion' => $explicacion
-            , ':docente_id2' => $_SESSION['user_id']]);
+            ]);
             
             $mensaje = 'pregunta_creada';
         }
@@ -138,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             )
             WHERE id = :evaluacion_id
         ");
-        $stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id2' => $_SESSION['user_id']]);
+        $stmt->execute([':evaluacion_id' => $evaluacion_id]);
         
         header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=' . $mensaje);
         exit;

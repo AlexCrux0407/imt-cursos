@@ -1,6 +1,14 @@
 <?php
 $role = $_SESSION['role'] ?? null;
 $nombre = $_SESSION['nombre'] ?? 'Usuario';
+
+// Detectar ruta actual (sin query string)
+$current_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+
+// Helper para aplicar clase activa si coincide con el href
+function nav_active_class(string $href, string $current_path): string {
+    return ($current_path === $href) ? ' active' : '';
+}
 ?>
 <header class="responsive-header">
     <div class="header-icon left-icon">
@@ -29,70 +37,74 @@ $nombre = $_SESSION['nombre'] ?? 'Usuario';
     <div class="contenido" style="padding: 10px 50px; margin-top: 0;">
         <div class="div-fila-alt-start" style="flex-wrap: wrap;">
             <?php if ($role === 'estudiante'): ?>
-                <a href="<?= BASE_URL ?>/estudiante/dashboard.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/estudiante/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/estudiante/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
                     Tablero
                 </a>
-                <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/estudiante/catalogo.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" class="nav-icon">
                     Cursos disponibles
                 </a>
-                <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/estudiante/mis_cursos.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" class="nav-icon">
                     Mis cursos
                 </a>
-                <a href="<?= BASE_URL ?>/estudiante/perfil.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/estudiante/perfil.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/estudiante/perfil.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" alt="" class="nav-icon">
                     Perfil
                 </a>
             <?php elseif ($role === 'docente'): ?>
-                <a href="<?= BASE_URL ?>/docente/dashboard.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/docente/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
                     Dashboard
                 </a>
-                <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/admin_cursos.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="" class="nav-icon">
                     Administración de cursos
                 </a>
-                <a href="<?= BASE_URL ?>/docente/visualizar_curso.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/docente/visualizar_curso.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/visualizar_curso.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" class="nav-icon">
                     Visualización de curso
                 </a>
+                <a href="<?= BASE_URL ?>/docente/revisar_evaluaciones.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/revisar_evaluaciones.php', $current_path) ?>">
+                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" class="nav-icon">
+                    Revisar Evaluaciones
+                </a>
             <?php elseif ($role === 'ejecutivo'): ?>
-                <a href="<?= BASE_URL ?>/ejecutivo/dashboard.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/ejecutivo/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
                     Dashboard
                 </a>
-                <a href="<?= BASE_URL ?>/ejecutivo/reportes_estudiantes.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/ejecutivo/reportes_estudiantes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/reportes_estudiantes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" class="nav-icon">
                     Reportes Estudiantes
                 </a>
-                <a href="<?= BASE_URL ?>/ejecutivo/reportes_docentes.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/ejecutivo/reportes_docentes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/reportes_docentes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" class="nav-icon">
                     Reportes Docentes
                 </a>
-                <a href="<?= BASE_URL ?>/ejecutivo/reportes_cursos.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/ejecutivo/reportes_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/reportes_cursos.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" class="nav-icon">
                     Reportes Cursos
                 </a>
             <?php elseif ($role === 'master'): ?>
-                <a href="<?= BASE_URL ?>/master/dashboard.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/master/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
                     Dashboard
                 </a>
-                <a href="<?= BASE_URL ?>/master/admin_estudiantes.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/master/admin_estudiantes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_estudiantes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" class="nav-icon">
                     Admin Estudiantes
                 </a>
-                <a href="<?= BASE_URL ?>/master/admin_docentes.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/master/admin_docentes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_docentes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" class="nav-icon">
                     Admin Docentes
                 </a>
-                <a href="<?= BASE_URL ?>/master/admin_cursos.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/master/admin_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_cursos.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" class="nav-icon">
                     Admin Cursos
                 </a>
-                <a href="<?= BASE_URL ?>/master/admin_plataforma.php" class="nav-link-custom">
+                <a href="<?= BASE_URL ?>/master/admin_plataforma.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_plataforma.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="" class="nav-icon">
                     Admin plataforma
                 </a>

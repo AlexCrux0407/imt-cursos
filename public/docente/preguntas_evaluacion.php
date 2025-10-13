@@ -17,7 +17,7 @@ $stmt = $conn->prepare("
     INNER JOIN cursos c ON m.curso_id = c.id
     WHERE e.id = :evaluacion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
-$stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id']]);
+$stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
 $evaluacion = $stmt->fetch();
 
 if (!$evaluacion) {
@@ -31,7 +31,7 @@ $stmt = $conn->prepare("
     WHERE evaluacion_id = :evaluacion_id 
     ORDER BY orden ASC, id ASC
 ");
-$stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id2' => $_SESSION['user_id']]);
+$stmt->execute([':evaluacion_id' => $evaluacion_id]);
 $preguntas = $stmt->fetchAll();
 
 require __DIR__ . '/../partials/header.php';
@@ -47,7 +47,7 @@ require __DIR__ . '/../partials/nav.php';
     padding: 24px;
     margin-bottom: 20px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    border-left: 4px solid #27ae60;
+    border-left: 4px solid #3498db;
     transition: all 0.3s ease;
 }
 
@@ -228,7 +228,7 @@ require __DIR__ . '/../partials/nav.php';
 }
 
 .btn-add-opcion {
-    background: #27ae60;
+    background: #3498db;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -249,7 +249,7 @@ require __DIR__ . '/../partials/nav.php';
 </style>
 
 <div class="contenido">
-    <div class="form-container-head" style="background: linear-gradient(135deg, #27ae60, #229954); color: white;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
         <div class="div-fila-alt-start">
             <div>
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Gestionar Preguntas</h1>
@@ -261,7 +261,7 @@ require __DIR__ . '/../partials/nav.php';
                     ← Volver a Evaluaciones
                 </button>
                 <button onclick="mostrarFormularioNuevaPregunta()" 
-                        style="background: white; color: #27ae60; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        class="btn-action btn-primary">
                     + Nueva Pregunta
                 </button>
             </div>
@@ -370,7 +370,7 @@ require __DIR__ . '/../partials/nav.php';
     <div class="modal-content">
         <h2 id="modalTitulo">Nueva Pregunta</h2>
         
-        <form id="formPregunta" action="<?= BASE_URL ?>/docente/procesar_pregunta.php" method="POST">
+        <form id="formPregunta" action="<?= BASE_URL ?>/docente/procesar_pregunta.php" method="POST" novalidate>
             <input type="hidden" name="evaluacion_id" value="<?= $evaluacion_id ?>">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
@@ -389,6 +389,8 @@ require __DIR__ . '/../partials/nav.php';
                     <option value="texto_corto">Texto Corto</option>
                     <option value="texto_largo">Texto Largo</option>
                     <option value="seleccion_multiple">Selección Múltiple</option>
+                    <option value="emparejar_columnas">Emparejar Columnas</option>
+                    <option value="completar_espacios">Completar Espacios</option>
                 </select>
             </div>
 
@@ -420,6 +422,22 @@ require __DIR__ . '/../partials/nav.php';
                 <textarea name="respuesta_texto" id="respuesta_texto" class="form-control" rows="2" 
                           placeholder="Deja vacío para revisión manual"></textarea>
             </div>
+
+            <!-- Emparejar Columnas -->
+            <div id="emparejarContainer" class="opciones-container" style="display:none;">
+                <label>Relación de Columnas</label>
+                <div id="parejasList"></div>
+                <button type="button" class="btn-add-opcion" onclick="agregarPareja()">+ Agregar Pareja</button>
+                <p style="margin-top:8px;color:#6c757d;">Se guardará como pares izquierda-derecha.</p>
+            </div>
+
+            <!-- Completar Espacios -->
+            <div id="completarContainer" class="opciones-container" style="display:none;">
+                <label>Texto con espacios</label>
+                <textarea name="texto_completar" id="texto_completar" class="form-control" rows="3" placeholder="Usa {{blank}} para marcar espacios a completar" oninput="detectarBlancos()"></textarea>
+                <div id="blancosList" style="margin-top:10px;"></div>
+                <p style="margin-top:8px;color:#6c757d;">Detectamos espacios y generamos campos de respuesta.</p>
+            </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
@@ -442,7 +460,7 @@ require __DIR__ . '/../partials/nav.php';
                 <button type="button" onclick="cerrarModal()" class="btn-action btn-secondary">
                     Cancelar
                 </button>
-                <button type="submit" class="btn-action btn-success">
+                <button type="submit" class="btn-action btn-primary">
                     Guardar Pregunta
                 </button>
             </div>
@@ -479,16 +497,38 @@ function cambiarTipoPregunta() {
     // Ocultar todos los contenedores
     containers.forEach(container => {
         container.style.display = 'none';
+        // Deshabilitar inputs dentro de contenedores ocultos para evitar bloqueo por required
+        container.querySelectorAll('input, textarea, select').forEach(el => {
+            el.disabled = true;
+        });
     });
     
     // Mostrar el contenedor apropiado
     if (tipo === 'multiple_choice' || tipo === 'seleccion_multiple') {
-        document.getElementById('opcionesContainer').style.display = 'block';
+        const c = document.getElementById('opcionesContainer');
+        c.style.display = 'block';
+        c.querySelectorAll('input, textarea, select').forEach(el => { el.disabled = false; });
         inicializarOpciones();
     } else if (tipo === 'verdadero_falso') {
-        document.getElementById('verdaderoFalsoContainer').style.display = 'block';
+        const c = document.getElementById('verdaderoFalsoContainer');
+        c.style.display = 'block';
+        c.querySelectorAll('input, textarea, select').forEach(el => { el.disabled = false; });
+        inicializarVerdaderoFalso();
     } else if (tipo === 'texto_corto' || tipo === 'texto_largo') {
-        document.getElementById('textoContainer').style.display = 'block';
+        const c = document.getElementById('textoContainer');
+        c.style.display = 'block';
+        c.querySelectorAll('input, textarea, select').forEach(el => { el.disabled = false; });
+        inicializarTexto();
+    } else if (tipo === 'emparejar_columnas') {
+        const c = document.getElementById('emparejarContainer');
+        c.style.display = 'block';
+        c.querySelectorAll('input, textarea, select').forEach(el => { el.disabled = false; });
+        inicializarParejas();
+    } else if (tipo === 'completar_espacios') {
+        const c = document.getElementById('completarContainer');
+        c.style.display = 'block';
+        c.querySelectorAll('input, textarea, select').forEach(el => { el.disabled = false; });
+        inicializarBlancos();
     }
 }
 
@@ -526,6 +566,70 @@ function eliminarOpcion(btn) {
     if (opciones.length > 2) { // Mantener al menos 2 opciones
         btn.parentElement.remove();
         actualizarLetrasOpciones();
+    }
+}
+
+// Inicializar Verdadero/Falso por defecto
+function inicializarVerdaderoFalso() {
+    const verdadero = document.querySelector('input[name="respuesta_vf"][value="1"]');
+    if (verdadero) verdadero.checked = true;
+}
+
+// Inicializar campos de texto para asegurar presencia
+function inicializarTexto() {
+    const campo = document.getElementById('respuesta_texto');
+    if (campo && campo.value === '') {
+        campo.value = '';
+    }
+}
+
+// Emparejar Columnas
+function inicializarParejas() {
+    const lista = document.getElementById('parejasList');
+    lista.innerHTML = '';
+    // Crear dos parejas por defecto
+    for (let i = 0; i < 2; i++) agregarPareja();
+}
+
+function agregarPareja() {
+    const lista = document.getElementById('parejasList');
+    const div = document.createElement('div');
+    div.className = 'opcion-input';
+    div.style.display = 'grid';
+    div.style.gridTemplateColumns = '1fr 1fr auto';
+    div.style.gap = '10px';
+    div.innerHTML = `
+        <input type="text" name="col_izquierda[]" placeholder="Columna izquierda" required>
+        <input type="text" name="col_derecha[]" placeholder="Columna derecha" required>
+        <button type="button" class="btn-remove-opcion" onclick="this.parentElement.remove()">×</button>
+    `;
+    lista.appendChild(div);
+}
+
+// Completar Espacios
+function inicializarBlancos() {
+    document.getElementById('blancosList').innerHTML = '';
+}
+
+function detectarBlancos() {
+    const texto = document.getElementById('texto_completar').value;
+    const cont = document.getElementById('blancosList');
+    cont.innerHTML = '';
+    const regex = /\{\{blank\}\}/g;
+    const matches = texto.match(regex) || [];
+    if (matches.length === 0) return;
+    const info = document.createElement('div');
+    info.style.marginBottom = '8px';
+    info.textContent = `Espacios detectados: ${matches.length}`;
+    cont.appendChild(info);
+    for (let i = 0; i < matches.length; i++) {
+        const div = document.createElement('div');
+        div.className = 'opcion-input';
+        div.innerHTML = `
+            <label>Respuesta ${i + 1}</label>
+            <input type="text" name="blancos_respuestas[]" placeholder="Respuesta correcta para el espacio ${i + 1}" required>
+        `;
+        cont.appendChild(div);
     }
 }
 
@@ -579,6 +683,112 @@ function confirmarEliminarPregunta(id, numero) {
 // Inicializar el formulario
 document.addEventListener('DOMContentLoaded', function() {
     cambiarTipoPregunta();
+    const form = document.getElementById('formPregunta');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('tipo').value;
+            const pregunta = document.getElementById('pregunta');
+            const puntaje = document.getElementById('puntaje');
+            const orden = document.getElementById('orden');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Guardando...';
+            }
+
+            if (!pregunta.value.trim()) {
+                alert('La pregunta es obligatoria.');
+                pregunta.focus();
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                return;
+            }
+            if (!puntaje.value || Number(puntaje.value) <= 0) {
+                alert('El puntaje debe ser mayor a 0.');
+                puntaje.focus();
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                return;
+            }
+            if (!orden.value || Number(orden.value) < 1) {
+                alert('El orden debe ser al menos 1.');
+                orden.focus();
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                return;
+            }
+
+            if (tipo === 'multiple_choice' || tipo === 'seleccion_multiple') {
+                const opciones = document.querySelectorAll('#opcionesList .opcion-input input[type="text"]');
+                if (opciones.length < 2) {
+                    alert('Agrega al menos 2 opciones.');
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                    return;
+                }
+                for (const op of opciones) {
+                    if (!op.value.trim()) {
+                        alert('Todas las opciones deben tener texto.');
+                        op.focus();
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                        return;
+                    }
+                }
+                if (tipo === 'multiple_choice') {
+                    const radios = document.querySelectorAll('#opcionesList input[type="radio"]');
+                    const alguno = Array.from(radios).some(r => r.checked);
+                    if (!alguno) {
+                        alert('Selecciona una opción correcta.');
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                        return;
+                    }
+                }
+            } else if (tipo === 'verdadero_falso') {
+                const elegido = document.querySelector('input[name="respuesta_vf"]:checked');
+                if (!elegido) {
+                    alert('Selecciona Verdadero o Falso.');
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                    return;
+                }
+            } else if (tipo === 'emparejar_columnas') {
+                const izquierdas = document.querySelectorAll('input[name="col_izquierda[]"]');
+                const derechas = document.querySelectorAll('input[name="col_derecha[]"]');
+                if (izquierdas.length < 1 || derechas.length < 1) {
+                    alert('Agrega al menos una pareja.');
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                    return;
+                }
+                for (let i = 0; i < izquierdas.length; i++) {
+                    if (!izquierdas[i].value.trim() || !derechas[i].value.trim()) {
+                        alert('Completa ambas columnas en cada pareja.');
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                        return;
+                    }
+                }
+            } else if (tipo === 'completar_espacios') {
+                const texto = document.getElementById('texto_completar').value;
+                const blanks = (texto.match(/\{\{blank\}\}/g) || []).length;
+                const respuestas = document.querySelectorAll('input[name="blancos_respuestas[]"]');
+                if (blanks === 0) {
+                    alert('Incluye al menos un {{blank}} en el texto.');
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                    return;
+                }
+                if (respuestas.length !== blanks) {
+                    alert('Proporciona respuestas para todos los espacios.');
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                    return;
+                }
+                for (const r of respuestas) {
+                    if (!r.value.trim()) {
+                        alert('Completa las respuestas de los espacios.');
+                        r.focus();
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Pregunta'; }
+                        return;
+                    }
+                }
+            }
+            // Envío programático tras validar
+            form.submit();
+        });
+    }
 });
 
 // Cerrar modal al hacer clic fuera

@@ -316,7 +316,7 @@ require __DIR__ . '/../partials/nav.php';
                                         <span>⏱️ Tiempo límite: <?= (int)$evaluacion['tiempo_limite'] ?> minutos</span>
                                         <span>📊 Intentos realizados: <?= (int)$evaluacion['intentos_realizados'] ?></span>
                                         <?php if ($evaluacion['mejor_calificacion'] !== null): ?>
-                                            <span>🏆 Mejor calificación: <?= number_format($evaluacion['mejor_calificacion'], 1) ?>%</span>
+                                            <span>🏆 Mejor calificación: <?= number_format((float)$evaluacion['mejor_calificacion'], 1) ?>%</span>
                                         <?php endif; ?>
                                     </div>
 

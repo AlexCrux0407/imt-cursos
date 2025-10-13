@@ -92,6 +92,19 @@ if ((int)$progreso_modulo['total_lecciones'] > 0) {
 $porcentaje_completado = max(0, min(100, $porcentaje_completado));
 $modulo_completado = $porcentaje_completado >= 100.0;
 
+// Si la evaluación del módulo fue aprobada, considerar el módulo como completado
+$stmt = $conn->prepare("
+    SELECT evaluacion_completada, completado
+    FROM progreso_modulos
+    WHERE usuario_id = :uid AND modulo_id = :modulo_id
+");
+$stmt->execute([':uid' => $estudiante_id, ':modulo_id' => $modulo_id]);
+$pm = $stmt->fetch();
+if ($pm && ((int)$pm['evaluacion_completada'] === 1 || (int)$pm['completado'] === 1)) {
+    $modulo_completado = true;
+    $porcentaje_completado = 100.0;
+}
+
 /** Siguiente módulo del curso */
 $stmt = $conn->prepare("
     SELECT m.*

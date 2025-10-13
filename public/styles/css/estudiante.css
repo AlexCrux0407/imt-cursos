@@ -1,4 +1,5 @@
 /* CSS base para estudiantes - Esquema azul */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
     --estudiante-primary: #3498db;
@@ -6,6 +7,11 @@
     --estudiante-accent: #2c3e50;
     --estudiante-light: #e3f2fd;
     --estudiante-bg: #f8fbff;
+    /* Aliases esperados por componentes del perfil */
+    --student-primary: var(--estudiante-primary);
+    --student-secondary: var(--estudiante-secondary);
+    --student-accent: var(--estudiante-accent);
+    --student-bg: var(--estudiante-bg);
 }
 
 /* Animaciones para estudiantes */
@@ -61,11 +67,15 @@
     min-height: 100vh;
     padding: 20px 50px;
     margin-top: 0;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .student-welcome {
     background: linear-gradient(135deg, var(--student-primary), var(--student-secondary));
     color: white;
+    text-align: center;
     padding: 30px;
     border-radius: 20px;
     margin-bottom: 30px;
@@ -109,13 +119,17 @@
 }
 
 .progress-card {
-    background: white;
+    background: linear-gradient(135deg, var(--student-primary), var(--student-secondary));
+    color: #ffffff;
     border-radius: 15px;
     padding: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 18px rgba(41, 128, 185, 0.25);
     animation: bounceIn 0.6s ease-out;
     transition: all 0.3s ease;
-    border-top: 4px solid var(--student-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .progress-card:nth-child(2) { animation-delay: 0.1s; }
@@ -123,13 +137,14 @@
 
 .progress-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.15);
+    box-shadow: 0 10px 28px rgba(41, 128, 185, 0.35);
 }
 
 .progress-icon {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, var(--student-accent), #e67e22);
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -143,22 +158,26 @@
 }
 
 .progress-title {
-    color: #2c3e50;
+    color: #ffffff;
     font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-top: 6px;
+    margin-bottom: 0;
+    order: 2;
 }
 
 .progress-value {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--student-primary);
+    color: #ffffff;
     margin-bottom: 5px;
+    order: 1;
 }
 
 .progress-description {
-    color: #7f8c8d;
+    color: rgba(255, 255, 255, 0.85);
     font-size: 0.9rem;
+    order: 3;
 }
 
 /* Course Grid */
@@ -563,3 +582,66 @@
         font-size: 1rem;
     }
 }
+
+/* Perfil: secciones y tarjetas de información */
+.profile-section {
+    margin: 30px 0;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 900px;
+}
+
+.profile-info-card {
+    background: #ffffff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profile-info-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 35px rgba(39, 174, 96, 0.15);
+}
+
+.profile-info-card .card-top {
+    background: linear-gradient(135deg, var(--student-primary), var(--student-secondary));
+    color: white;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-label {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.info-value {
+    padding: 16px 20px;
+    color: #2c3e50;
+    font-size: 1.05rem;
+}
+
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+}
+

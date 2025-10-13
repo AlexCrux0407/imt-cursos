@@ -64,7 +64,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido">
     <!-- Header Principal -->
-    <div class="form-container-head" style="background: linear-gradient(135deg, #0066cc, #004d99); color: white; text-align: center;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; text-align: center;">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px; font-weight: 600;">Panel de Administración</h1>
         <p style="font-size: 1.1rem; opacity: 0.9;">Sistema de gestión integral IMT Cursos</p>
         <small style="opacity: 0.8;">Último acceso: <?= date('d/m/Y H:i') ?></small>
@@ -73,22 +73,22 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Métricas Principales -->
     <div class="form-container-body" style="margin-bottom: 20px;">
         <div class="div-fila" style="gap: 20px;">
-            <div style="background: linear-gradient(135deg, #0066cc, #004d99); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_usuarios['total_usuarios'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Total Usuarios</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;">Estudiantes y Docentes</small>
             </div>
-            <div style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_usuarios['total_docentes'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Docentes</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;"><?= $stats_usuarios['docentes_activos'] ?: 0 ?> activos este mes</small>
             </div>
-            <div style="background: linear-gradient(135deg, #5dade2, #3498db); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_usuarios['total_estudiantes'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Estudiantes</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;">Registrados</small>
             </div>
-            <div style="background: linear-gradient(135deg, #85c1e9, #5dade2); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_cursos['cursos_activos'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Cursos Activos</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;"><?= $stats_cursos['cursos_borrador'] ?: 0 ?> en borrador</small>
@@ -104,11 +104,11 @@ require __DIR__ . '/../partials/nav.php';
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
              onclick="window.location.href='<?= BASE_URL ?>/master/admin_estudiantes.php'">
             <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: #0066cc; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Estudiantes" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </div>
                 <div>
-                    <h3 style="color: #0066cc; font-size: 1.3rem; margin-bottom: 5px;">Gestión de Estudiantes</h3>
+                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Estudiantes</h3>
                     <p style="color: #7f8c8d; font-size: 0.9rem;"><?= $stats_usuarios['total_estudiantes'] ?> estudiantes registrados</p>
                 </div>
             </div>
@@ -117,9 +117,9 @@ require __DIR__ . '/../partials/nav.php';
             </p>
             <div class="div-fila-alt">
                 <a href="<?= BASE_URL ?>/master/admin_estudiantes.php" 
-                   style="background: #0066cc; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='#004d99'"
-                   onmouseout="this.style.background='#0066cc'">
+                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                   onmouseover="this.style.background='var(--master-secondary)'"
+                   onmouseout="this.style.background='var(--master-primary)'">
                     Administrar →
                 </a>
             </div>
@@ -131,11 +131,11 @@ require __DIR__ . '/../partials/nav.php';
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
              onclick="window.location.href='<?= BASE_URL ?>/master/admin_docentes.php'">
             <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: #3498db; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="Docentes" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </div>
                 <div>
-                    <h3 style="color: #3498db; font-size: 1.3rem; margin-bottom: 5px;">Gestión de Docentes</h3>
+                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Docentes</h3>
                     <p style="color: #7f8c8d; font-size: 0.9rem;"><?= $stats_usuarios['total_docentes'] ?> docentes activos</p>
                 </div>
             </div>
@@ -144,9 +144,9 @@ require __DIR__ . '/../partials/nav.php';
             </p>
             <div class="div-fila-alt">
                 <a href="<?= BASE_URL ?>/master/admin_docentes.php" 
-                   style="background: #3498db; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='#2980b9'"
-                   onmouseout="this.style.background='#3498db'">
+                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                   onmouseover="this.style.background='var(--master-secondary)'"
+                   onmouseout="this.style.background='var(--master-primary)'">
                     Administrar →
                 </a>
             </div>
@@ -160,11 +160,11 @@ require __DIR__ . '/../partials/nav.php';
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
              onclick="window.location.href='<?= BASE_URL ?>/master/admin_cursos.php'">
             <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: #5dade2; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="Cursos" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </div>
                 <div>
-                    <h3 style="color: #5dade2; font-size: 1.3rem; margin-bottom: 5px;">Gestión de Cursos</h3>
+                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Cursos</h3>
                     <p style="color: #7f8c8d; font-size: 0.9rem;"><?= $stats_cursos['total_cursos'] ?> cursos en el catálogo</p>
                 </div>
             </div>
@@ -173,9 +173,9 @@ require __DIR__ . '/../partials/nav.php';
             </p>
             <div class="div-fila-alt">
                 <a href="<?= BASE_URL ?>/master/admin_cursos.php" 
-                   style="background: #5dade2; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='#3498db'"
-                   onmouseout="this.style.background='#5dade2'">
+                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                   onmouseover="this.style.background='var(--master-secondary)'"
+                   onmouseout="this.style.background='var(--master-primary)'">
                     Administrar →
                 </a>
             </div>
@@ -187,11 +187,11 @@ require __DIR__ . '/../partials/nav.php';
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
              onclick="window.location.href='<?= BASE_URL ?>/master/asignar_cursos.php'">
             <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: #2e86c1; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Asignar" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </div>
                 <div>
-                    <h3 style="color: #2e86c1; font-size: 1.3rem; margin-bottom: 5px;">Asignación de Cursos</h3>
+                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Asignación de Cursos</h3>
                     <p style="color: #7f8c8d; font-size: 0.9rem;">Asignar cursos a docentes</p>
                 </div>
             </div>
@@ -200,9 +200,9 @@ require __DIR__ . '/../partials/nav.php';
             </p>
             <div class="div-fila-alt">
                 <a href="<?= BASE_URL ?>/master/asignar_cursos.php" 
-                   style="background: #2e86c1; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='#2874a6'"
-                   onmouseout="this.style.background='#2e86c1'">
+                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                   onmouseover="this.style.background='var(--master-secondary)'"
+                   onmouseout="this.style.background='var(--master-primary)'">
                     Asignar →
                 </a>
             </div>
@@ -216,11 +216,11 @@ require __DIR__ . '/../partials/nav.php';
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
              onclick="window.location.href='<?= BASE_URL ?>/master/admin_plataforma.php'">
             <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: #85c1e9; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="Sistema" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </div>
                 <div>
-                    <h3 style="color: #85c1e9; font-size: 1.3rem; margin-bottom: 5px;">Configuración</h3>
+                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Configuración</h3>
                     <p style="color: #7f8c8d; font-size: 0.9rem;">Parámetros del sistema</p>
                 </div>
             </div>
@@ -229,9 +229,9 @@ require __DIR__ . '/../partials/nav.php';
             </p>
             <div class="div-fila-alt">
                 <a href="<?= BASE_URL ?>/master/admin_plataforma.php" 
-                   style="background: #85c1e9; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='#5dade2'"
-                   onmouseout="this.style.background='#85c1e9'">
+                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                   onmouseover="this.style.background='var(--master-secondary)'"
+                   onmouseout="this.style.background='var(--master-primary)'">
                     Configurar →
                 </a>
             </div>
@@ -240,32 +240,32 @@ require __DIR__ . '/../partials/nav.php';
 
     <!-- Panel de Estado del Sistema -->
     <div class="form-container-body">
-        <h2 style="color: #0066cc; font-size: 1.5rem; margin-bottom: 25px; border-bottom: 2px solid #e8ecef; padding-bottom: 15px;">
+        <h2 style="color: var(--master-primary); font-size: 1.5rem; margin-bottom: 25px; border-bottom: 2px solid #e8ecef; padding-bottom: 15px;">
             Estado del Sistema
         </h2>
         <div class="div-fila" style="gap: 20px;">
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: #fafbfc; transition: all 0.3s ease;"
-                 onmouseover="this.style.borderColor='#0066cc'; this.style.background='white'"
+                 onmouseover="this.style.borderColor='var(--master-primary)'; this.style.background='white'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.background='#fafbfc'">
-                <h4 style="color: #0066cc; margin-bottom: 8px;">Registros Recientes</h4>
+                <h4 style="color: var(--master-primary); margin-bottom: 8px;">Registros Recientes</h4>
                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;"><?= $solicitudes['solicitudes_pendientes'] ?> nuevos usuarios esta semana</p>
                 <small style="color: <?= $solicitudes['solicitudes_pendientes'] > 0 ? '#e74c3c' : '#27ae60' ?>; font-weight: 500;">
                     <?= $solicitudes['solicitudes_pendientes'] > 0 ? 'Requiere revisión' : 'Todo al día' ?>
                 </small>
             </div>
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: #fafbfc; transition: all 0.3s ease;"
-                 onmouseover="this.style.borderColor='#3498db'; this.style.background='white'"
+                 onmouseover="this.style.borderColor='var(--master-primary)'; this.style.background='white'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.background='#fafbfc'">
-                <h4 style="color: #3498db; margin-bottom: 8px;">Cursos en Revisión</h4>
+                <h4 style="color: var(--master-primary); margin-bottom: 8px;">Cursos en Revisión</h4>
                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;"><?= $revision['cursos_revision'] ?> cursos pendientes de publicación</p>
                 <small style="color: <?= $revision['cursos_revision'] > 0 ? '#f39c12' : '#27ae60' ?>; font-weight: 500;">
                     <?= $revision['cursos_revision'] > 0 ? 'En proceso' : 'Todo publicado' ?>
                 </small>
             </div>
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: #fafbfc; transition: all 0.3s ease;"
-                 onmouseover="this.style.borderColor='#5dade2'; this.style.background='white'"
+                 onmouseover="this.style.borderColor='var(--master-primary)'; this.style.background='white'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.background='#fafbfc'">
-                <h4 style="color: #5dade2; margin-bottom: 8px;">Sistema</h4>
+                <h4 style="color: var(--master-primary); margin-bottom: 8px;">Sistema</h4>
                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;">Funcionando correctamente</p>
                 <small style="color: #27ae60; font-weight: 500;">Operativo</small>
             </div>
@@ -274,7 +274,7 @@ require __DIR__ . '/../partials/nav.php';
         <!-- Actividad Reciente -->
         <?php if (!empty($actividad_reciente)): ?>
         <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e8ecef;">
-            <h3 style="color: #0066cc; margin-bottom: 15px;">Actividad Reciente</h3>
+            <h3 style="color: var(--master-primary); margin-bottom: 15px;">Actividad Reciente</h3>
             <div style="display: grid; gap: 10px;">
                 <?php foreach ($actividad_reciente as $actividad): ?>
                 <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
@@ -289,33 +289,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
         <?php endif; ?>
 
-        <!-- Acciones Rápidas -->
-        <div style="margin-top: 30px; padding-top: 25px; border-top: 2px solid #e8ecef;">
-            <h3 style="color: #0066cc; margin-bottom: 20px;">Acciones Rápidas</h3>
-            <div class="div-fila-alt-start" style="gap: 15px; flex-wrap: wrap;">
-                <button onclick="window.location.href='<?= BASE_URL ?>/master/crear_curso.php'" 
-                        style="background: #0066cc; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;"
-                        onmouseover="this.style.background='#004d99'; this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.background='#0066cc'; this.style.transform='translateY(0)'">
-                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                    Crear Curso
-                </button>
-                <button onclick="window.location.href='<?= BASE_URL ?>/master/admin_usuarios.php'" 
-                        style="background: #3498db; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;"
-                        onmouseover="this.style.background='#2980b9'; this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.background='#3498db'; this.style.transform='translateY(0)'">
-                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                    Gestionar Usuarios
-                </button>
-                <button onclick="window.location.href='<?= BASE_URL ?>/master/reportes.php'" 
-                        style="background: #5dade2; color: white; padding: 12px 20px; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;"
-                        onmouseover="this.style.background='#3498db'; this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.background='#5dade2'; this.style.transform='translateY(0)'">
-                    <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                    Ver Reportes
-                </button>
-            </div>
-        </div>
+        
     </div>
 </div>
 

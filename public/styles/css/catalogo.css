@@ -8,6 +8,17 @@
     --catalogo-light: #ecf0f1;
 }
 
+/* Animaciones de entrada */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-18px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
 /* Header del catálogo */
 .catalogo-header {
     background: linear-gradient(135deg, var(--catalogo-primary), var(--catalogo-secondary));
@@ -16,6 +27,7 @@
     border-radius: 15px;
     margin-bottom: 30px;
     text-align: center;
+    animation: fadeInUp 0.8s ease-out;
 }
 
 .catalogo-title {
@@ -36,6 +48,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     margin-bottom: 30px;
+    animation: fadeInUp 0.6s ease-out both;
 }
 
 .filtros-form {
@@ -107,6 +120,7 @@
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    animation: fadeInUp 0.6s ease-out both;
 }
 
 .resultados-titulo {
@@ -131,6 +145,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    animation: fadeInUp 0.6s ease-out both;
+    will-change: transform, opacity;
 }
 
 .curso-card:hover {
@@ -138,6 +154,11 @@
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(52, 152, 219, 0.15);
 }
+/* Escalonar la entrada de las tarjetas del catálogo */
+.cursos-grid .curso-card:nth-child(2) { animation-delay: 0.05s; }
+.cursos-grid .curso-card:nth-child(3) { animation-delay: 0.1s; }
+.cursos-grid .curso-card:nth-child(4) { animation-delay: 0.15s; }
+.cursos-grid .curso-card:nth-child(5) { animation-delay: 0.2s; }
 
 .curso-header {
     display: flex;
@@ -146,6 +167,7 @@
     padding: 15px 20px;
     background: #f8f9fa;
     border-bottom: 1px solid #e8ecef;
+    animation: slideInLeft 0.6s ease-out both;
 }
 
 .curso-categoria {

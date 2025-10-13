@@ -378,7 +378,7 @@ require __DIR__ . '/../partials/nav.php';
             </div>
 
             <?php foreach ($preguntas as $index => $pregunta): ?>
-                <div class="question-container">
+                <div class="question-container" data-pregunta-id="<?= $pregunta['id'] ?>" data-tipo="<?= $pregunta['tipo'] ?>">
                     <div class="question-header">
                         <div class="question-number"><?= $index + 1 ?></div>
                         <div style="flex: 1; margin-left: 15px;">
@@ -401,17 +401,60 @@ require __DIR__ . '/../partials/nav.php';
                                 endforeach;
                             endif;
                             ?>
-                        <?php elseif ($pregunta['tipo'] === 'true_false'): ?>
+                        <?php elseif ($pregunta['tipo'] === 'seleccion_multiple'): ?>
+                            <?php
+                            $opciones = json_decode($pregunta['opciones'], true);
+                            if ($opciones):
+                                foreach ($opciones as $key => $opcion):
+                            ?>
+                                <label class="answer-option" onclick="selectOption(this)">
+                                    <input type="checkbox" name="respuesta_<?= $pregunta['id'] ?>[]" value="<?= $key ?>" onchange="updateProgress()">
+                                    <span><?= htmlspecialchars($opcion) ?></span>
+                                </label>
+                            <?php 
+                                endforeach;
+                            endif;
+                            ?>
+                        <?php elseif ($pregunta['tipo'] === 'verdadero_falso'): ?>
                             <label class="answer-option" onclick="selectOption(this)">
-                                <input type="radio" name="respuesta_<?= $pregunta['id'] ?>" value="true" onchange="updateProgress()">
+                                <input type="radio" name="respuesta_<?= $pregunta['id'] ?>" value="1" onchange="updateProgress()">
                                 <span>Verdadero</span>
                             </label>
                             <label class="answer-option" onclick="selectOption(this)">
-                                <input type="radio" name="respuesta_<?= $pregunta['id'] ?>" value="false" onchange="updateProgress()">
+                                <input type="radio" name="respuesta_<?= $pregunta['id'] ?>" value="0" onchange="updateProgress()">
                                 <span>Falso</span>
                             </label>
-                        <?php elseif ($pregunta['tipo'] === 'short_answer'): ?>
-                            <textarea name="respuesta_<?= $pregunta['id'] ?>" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-family: inherit;" placeholder="Escribe tu respuesta aquí..." onchange="updateProgress()"></textarea>
+                        <?php elseif ($pregunta['tipo'] === 'texto_corto' || $pregunta['tipo'] === 'texto_largo'): ?>
+                            <textarea name="respuesta_<?= $pregunta['id'] ?>" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-family: inherit;" placeholder="Escribe tu respuesta aquí..." onchange="updateProgress()" oninput="updateProgress()"></textarea>
+                        <?php elseif ($pregunta['tipo'] === 'emparejar_columnas'): ?>
+                            <?php $data = json_decode($pregunta['opciones'], true); $pairs = $data['pairs'] ?? []; $derecha = array_column($pairs, 'right'); shuffle($derecha); ?>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                <div>
+                                    <?php foreach ($pairs as $idx => $pair): ?>
+                                    <div class="answer-option" style="display:flex;align-items:center;gap:8px;">
+                                        <span style="min-width:20px;"><?= $idx + 1 ?>.</span>
+                                        <span><?= htmlspecialchars($pair['left']) ?></span>
+                                        <select name="respuesta_<?= $pregunta['id'] ?>[<?= $idx ?>]" onchange="updateProgress()" style="margin-left:auto;">
+                                            <option value="">Selecciona</option>
+                                            <?php foreach ($derecha as $opt): ?>
+                                                <option value="<?= htmlspecialchars($opt) ?>"><?= htmlspecialchars($opt) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php elseif ($pregunta['tipo'] === 'completar_espacios'): ?>
+                            <?php $data = json_decode($pregunta['opciones'], true); $texto = $data['texto'] ?? ''; $blancos = $data['blancos'] ?? 0; ?>
+                            <div style="background:#f8f9fa;padding:12px;border-radius:8px;margin-bottom:8px;">
+                                <?= nl2br(htmlspecialchars($texto)) ?>
+                            </div>
+                            <?php for ($i = 0; $i < (int)$blancos; $i++): ?>
+                                <div class="answer-option">
+                                    <label>Espacio <?= $i + 1 ?></label>
+                                    <input type="text" name="respuesta_<?= $pregunta['id'] ?>[<?= $i ?>]" onchange="updateProgress()" oninput="updateProgress()" placeholder="Completa la palabra faltante">
+                                </div>
+                            <?php endfor; ?>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -435,40 +478,51 @@ let timeRemaining = timeLimit * 60; // Convertir a segundos
 let timerInterval;
 
 function selectOption(label) {
-    // Remover selección previa en el mismo grupo
+    const input = label.querySelector('input');
     const container = label.closest('.question-container');
+    if (input && input.type === 'checkbox') {
+        // Para selección múltiple, alternar solo este label
+        label.classList.toggle('selected', input.checked);
+        // Actualizar progreso inmediatamente al hacer clic
+        updateProgress();
+        return;
+    }
+    // Para radios, marcar solo uno
     container.querySelectorAll('.answer-option').forEach(opt => {
         opt.classList.remove('selected');
     });
-    
-    // Seleccionar la opción actual
     label.classList.add('selected');
+    // Actualizar progreso para radios
+    updateProgress();
 }
 
 function updateProgress() {
-    const totalQuestions = <?= count($preguntas) ?>;
-    const form = document.getElementById('evaluation-form');
-    const formData = new FormData(form);
+    const containers = document.querySelectorAll('.question-container');
+    const totalQuestions = containers.length;
     let answeredQuestions = 0;
-    
-    // Contar preguntas respondidas
-    for (let i = 0; i < totalQuestions; i++) {
-        const questionId = <?= json_encode(array_column($preguntas, 'id')) ?>[i];
-        if (formData.get('respuesta_' + questionId)) {
-            answeredQuestions++;
+    containers.forEach(container => {
+        const id = container.dataset.preguntaId;
+        const tipo = container.dataset.tipo;
+        let answered = false;
+        if (tipo === 'multiple_choice' || tipo === 'verdadero_falso') {
+            answered = !!container.querySelector(`input[type="radio"][name="respuesta_${id}"]:checked`);
+        } else if (tipo === 'seleccion_multiple') {
+            answered = container.querySelectorAll(`input[type="checkbox"][name="respuesta_${id}[]"]:checked`).length > 0;
+        } else if (tipo === 'texto_corto' || tipo === 'texto_largo') {
+            const ta = container.querySelector(`textarea[name="respuesta_${id}"]`);
+            answered = !!(ta && ta.value.trim() !== '');
+        } else if (tipo === 'emparejar_columnas') {
+            const selects = container.querySelectorAll(`select[name^="respuesta_${id}["]`);
+            answered = selects.length > 0 && Array.from(selects).every(s => s.value && s.value.trim() !== '');
+        } else if (tipo === 'completar_espacios') {
+            const inputs = container.querySelectorAll(`input[name^="respuesta_${id}["]`);
+            answered = inputs.length > 0 && Array.from(inputs).every(inp => inp.value && inp.value.trim() !== '');
         }
-    }
-    
+        if (answered) answeredQuestions++;
+    });
     const progress = (answeredQuestions / totalQuestions) * 100;
     document.getElementById('progress-fill').style.width = progress + '%';
-    
-    // Habilitar botón de envío si todas las preguntas están respondidas
-    const submitBtn = document.getElementById('submit-btn');
-    if (answeredQuestions === totalQuestions) {
-        submitBtn.disabled = false;
-    } else {
-        submitBtn.disabled = true;
-    }
+    document.getElementById('submit-btn').disabled = answeredQuestions !== totalQuestions;
 }
 
 function startTimer() {

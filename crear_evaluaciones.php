@@ -40,8 +40,8 @@ try {
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         evaluacion_id INT UNSIGNED NOT NULL,
         pregunta TEXT NOT NULL,
-        tipo ENUM('multiple_choice', 'verdadero_falso', 'texto_corto', 'texto_largo', 'seleccion_multiple') NOT NULL,
-        opciones JSON NULL COMMENT 'Opciones para preguntas de opción múltiple',
+        tipo ENUM('multiple_choice', 'verdadero_falso', 'texto_corto', 'texto_largo', 'seleccion_multiple', 'emparejar_columnas', 'completar_espacios') NOT NULL,
+        opciones JSON NULL COMMENT 'Opciones para preguntas (estructura depende del tipo)',
         respuesta_correcta TEXT NULL COMMENT 'Respuesta correcta o clave de respuesta',
         puntaje DECIMAL(5,2) NOT NULL DEFAULT 1.00,
         orden INT NOT NULL DEFAULT 1,
@@ -54,6 +54,15 @@ try {
     
     $conn->exec($sql_preguntas);
     echo "✓ Tabla 'preguntas_evaluacion' creada exitosamente.\n";
+
+    // Asegurar que el ENUM incluya los nuevos tipos en instalaciones existentes
+    try {
+        $conn->exec("ALTER TABLE preguntas_evaluacion 
+            MODIFY COLUMN tipo ENUM('multiple_choice','verdadero_falso','texto_corto','texto_largo','seleccion_multiple','emparejar_columnas','completar_espacios') NOT NULL");
+        echo "✓ Campo 'tipo' de 'preguntas_evaluacion' actualizado con nuevos tipos.\n";
+    } catch (PDOException $e) {
+        echo "ℹ️ No se pudo alterar ENUM (posible coincidencia o permisos): " . $e->getMessage() . "\n";
+    }
     
     // Tabla de intentos de evaluación por estudiante
     $sql_intentos = "

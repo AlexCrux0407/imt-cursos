@@ -17,7 +17,25 @@ if ($evaluacion_id <= 0 || $usuario_id <= 0) {
 }
 
 try {
+    // Debug: Log para verificar que se está procesando
+    error_log("Procesando evaluación - ID: $evaluacion_id, Usuario: $usuario_id");
+    
     $conn->beginTransaction();
+    
+    // Asegurar existencia de la tabla de respuestas del estudiante
+    $conn->exec("CREATE TABLE IF NOT EXISTS respuestas_estudiante (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        intento_id INT UNSIGNED NOT NULL,
+        pregunta_id INT UNSIGNED NOT NULL,
+        respuesta TEXT NULL,
+        es_correcta TINYINT(1) NULL,
+        requiere_revision TINYINT(1) NOT NULL DEFAULT 0,
+        fecha_respuesta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (intento_id) REFERENCES intentos_evaluacion(id) ON DELETE CASCADE,
+        FOREIGN KEY (pregunta_id) REFERENCES preguntas_evaluacion(id) ON DELETE CASCADE,
+        INDEX idx_intento (intento_id),
+        INDEX idx_pregunta (pregunta_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
     
     // Obtener información de la evaluación
     $stmt = $conn->prepare("
@@ -82,12 +100,14 @@ try {
     
     // Crear nuevo intento
     $stmt = $conn->prepare("
-        INSERT INTO intentos_evaluacion (usuario_id, evaluacion_id, fecha_intento, estado)
-        VALUES (:usuario_id, :evaluacion_id, NOW(), 'en_progreso')
+        INSERT INTO intentos_evaluacion (usuario_id, evaluacion_id, numero_intento, fecha_inicio, estado, puntaje_maximo)
+        VALUES (:usuario_id, :evaluacion_id, :numero_intento, NOW(), 'en_progreso', :puntaje_maximo)
     ");
     $stmt->execute([
         ':usuario_id' => $usuario_id,
-        ':evaluacion_id' => $evaluacion_id
+        ':evaluacion_id' => $evaluacion_id,
+        ':numero_intento' => ($intentos_realizados + 1),
+        ':puntaje_maximo' => $evaluacion['puntaje_maximo']
     ]);
     $intento_id = $conn->lastInsertId();
     
@@ -108,14 +128,42 @@ try {
                 $es_correcta = ($respuesta_estudiante === $respuesta_correcta);
                 break;
                 
-            case 'true_false':
+            case 'verdadero_falso':
                 $respuesta_correcta = $pregunta['respuesta_correcta'];
                 $es_correcta = ($respuesta_estudiante === $respuesta_correcta);
                 break;
                 
-            case 'short_answer':
+            case 'texto_corto':
+            case 'texto_largo':
                 // Para respuestas cortas, marcar como pendiente de revisión manual
                 $es_correcta = null; // null indica que requiere revisión manual
+                break;
+
+            case 'seleccion_multiple':
+                $opciones = json_decode($pregunta['opciones'], true) ?: [];
+                $correctas = json_decode($pregunta['respuesta_correcta'], true) ?: [];
+                // respuesta_estudiante puede ser string o array, normalizar a array de índices
+                $resp = $_POST['respuesta_' . $pregunta['id']] ?? [];
+                if (!is_array($resp)) $resp = [$resp];
+                sort($resp);
+                sort($correctas);
+                $es_correcta = ($resp == $correctas);
+                $respuesta_estudiante = json_encode($resp);
+                break;
+
+            case 'emparejar_columnas':
+                // respuesta es un array mapping índice -> valor derecha seleccionado
+                $resp = $_POST['respuesta_' . $pregunta['id']] ?? [];
+                $correctas = json_decode($pregunta['respuesta_correcta'], true) ?: [];
+                $es_correcta = is_array($resp) && count($resp) === count($correctas) && array_values($resp) === array_values($correctas);
+                $respuesta_estudiante = json_encode($resp);
+                break;
+
+            case 'completar_espacios':
+                $resp = $_POST['respuesta_' . $pregunta['id']] ?? [];
+                $correctas = json_decode($pregunta['respuesta_correcta'], true) ?: [];
+                $es_correcta = is_array($resp) && count($resp) === count($correctas) && array_map('strtolower', array_map('trim', $resp)) === array_map('strtolower', array_map('trim', $correctas));
+                $respuesta_estudiante = json_encode($resp);
                 break;
         }
         
@@ -154,19 +202,21 @@ try {
     });
     
     if (count($preguntas_manuales) > 0) {
-        // Hay preguntas que requieren revisión manual
-        $estado_intento = 'pendiente_revision';
+        // Hay preguntas que requieren revisión manual; el ENUM de estado no incluye 'pendiente_revision'
         $puntaje_obtenido = null;
+        $estado_intento = 'completado';
     } else {
-        // Todas las preguntas son automáticas
-        $puntaje_obtenido = ($respuestas_correctas / $total_preguntas) * $evaluacion['puntaje_maximo'];
+        // Todas las preguntas son automáticas: calcular como porcentaje (0-100)
+        $puntaje_obtenido = ($total_preguntas > 0)
+            ? (($respuestas_correctas / $total_preguntas) * 100.0)
+            : 0.0;
         $estado_intento = 'completado';
     }
     
     // Actualizar intento con el resultado
     $stmt = $conn->prepare("
         UPDATE intentos_evaluacion 
-        SET estado = :estado, puntaje_obtenido = :puntaje, fecha_completado = NOW()
+        SET estado = :estado, puntaje_obtenido = :puntaje, fecha_fin = NOW()
         WHERE id = :intento_id
     ");
     $stmt->execute([
@@ -178,7 +228,7 @@ try {
     $conn->commit();
     
     // Redirigir según el resultado
-    if ($estado_intento === 'pendiente_revision') {
+    if (count($preguntas_manuales) > 0) {
         $mensaje = 'Tu evaluación ha sido enviada y está pendiente de revisión por el docente.';
         $tipo = 'info';
     } else {
@@ -243,14 +293,41 @@ try {
     }
     
     // Redirigir con mensaje
+    error_log("Redirigiendo a resultado_evaluacion.php con intento_id: $intento_id");
     $redirect_url = BASE_URL . '/estudiante/resultado_evaluacion.php?intento_id=' . $intento_id . '&mensaje=' . urlencode($mensaje) . '&tipo=' . $tipo;
     header('Location: ' . $redirect_url);
     exit;
     
 } catch (Exception $e) {
-    $conn->rollBack();
+    // Debug: Log del error
+    error_log("Error en procesar_intento_evaluacion: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+    
+    // Asegurar que solo se haga rollback si la transacción está activa
+    if (isset($conn) && method_exists($conn, 'inTransaction') && $conn->inTransaction()) {
+        try {
+            $conn->rollBack();
+        } catch (Exception $ignored) {
+            // Ignorar cualquier error adicional de rollback
+        }
+    }
     $error_message = 'Error al procesar la evaluación: ' . $e->getMessage();
-    $redirect_url = BASE_URL . '/estudiante/curso_contenido.php?id=' . $evaluacion['curso_id'] . '&error=' . urlencode($error_message);
+    $curso_id = isset($evaluacion['curso_id']) ? $evaluacion['curso_id'] : null;
+    if (!$curso_id && !empty($evaluacion_id)) {
+        try {
+            $stmt = $conn->prepare("SELECT m.curso_id FROM evaluaciones_modulo e INNER JOIN modulos m ON e.modulo_id = m.id WHERE e.id = :evaluacion_id");
+            $stmt->execute([':evaluacion_id' => $evaluacion_id]);
+            $row = $stmt->fetch();
+            if ($row && isset($row['curso_id'])) {
+                $curso_id = $row['curso_id'];
+            }
+        } catch (Exception $ignored) {
+            // Ignorar errores al intentar obtener curso_id en el manejo de errores
+        }
+    }
+    $redirect_url = $curso_id
+        ? BASE_URL . '/estudiante/curso_contenido.php?id=' . $curso_id . '&error=' . urlencode($error_message)
+        : BASE_URL . '/estudiante/dashboard.php?error=' . urlencode($error_message);
     header('Location: ' . $redirect_url);
     exit;
 }

@@ -60,13 +60,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$evaluacion_info) {
                     $response['message'] = 'Evaluación no encontrada o inactiva';
                     echo json_encode($response);
-                    $conn->rollBack();
+                    if (isset($conn) && method_exists($conn, 'inTransaction') && $conn->inTransaction()) {
+                        try { $conn->rollBack(); } catch (Exception $ignored) {}
+                    }
                     exit;
                 }
                 
                 // Verificar si el estudiante ya completó esta evaluación con éxito
                 $stmt = $conn->prepare("
-                    SELECT puntaje_obtenido
+                    SELECT puntaje_evaluacion
                     FROM progreso_modulos
                     WHERE usuario_id = :usuario_id AND modulo_id = :modulo_id 
                     AND evaluacion_completada = 1
@@ -80,7 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($progreso_existente) {
                     $response['message'] = 'Ya has completado la evaluación de este módulo';
                     echo json_encode($response);
-                    $conn->rollBack();
+                    if (isset($conn) && method_exists($conn, 'inTransaction') && $conn->inTransaction()) {
+                        try { $conn->rollBack(); } catch (Exception $ignored) {}
+                    }
                     exit;
                 }
                 
@@ -89,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     SELECT puntaje_obtenido, estado
                     FROM intentos_evaluacion
                     WHERE usuario_id = :usuario_id AND evaluacion_id = :evaluacion_id
-                    ORDER BY fecha_intento DESC
+                    ORDER BY fecha_fin DESC, fecha_inicio DESC
                     LIMIT 1
                 ");
                 $stmt->execute([
@@ -101,7 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$ultimo_intento || $ultimo_intento['estado'] !== 'completado') {
                     $response['message'] = 'No se encontró un intento completado para esta evaluación';
                     echo json_encode($response);
-                    $conn->rollBack();
+                    if (isset($conn) && method_exists($conn, 'inTransaction') && $conn->inTransaction()) {
+                        try { $conn->rollBack(); } catch (Exception $ignored) {}
+                    }
                     exit;
                 }
                 
@@ -111,7 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$aprobado) {
                     $response['message'] = 'No has alcanzado el puntaje mínimo para aprobar esta evaluación';
                     echo json_encode($response);
-                    $conn->rollBack();
+                    if (isset($conn) && method_exists($conn, 'inTransaction') && $conn->inTransaction()) {
+                        try { $conn->rollBack(); } catch (Exception $ignored) {}
+                    }
                     exit;
                 }
                 
@@ -181,11 +189,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
         }
         
-        $conn->commit();
-        $response['success'] = true;
-        $response['message'] = 'Progreso actualizado correctamente';
+                $conn->commit();
+                $response['success'] = true;
+                $response['message'] = 'Progreso actualizado correctamente';
     } catch (PDOException $e) {
-        $conn->rollBack();
+        if (isset($conn) && method_exists($conn, 'inTransaction') && $conn->inTransaction()) {
+            try { $conn->rollBack(); } catch (Exception $ignored) {}
+        }
         $response['message'] = 'Error en la base de datos: ' . $e->getMessage();
     }
     

@@ -1,5 +1,21 @@
 /* CSS específico para Mis Cursos */
 
+/* Animaciones de entrada */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
 /* Estadísticas generales */
 .estadisticas-container {
     display: grid;
@@ -16,12 +32,20 @@
     text-align: center;
     border-left: 4px solid #3498db;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeInUp 0.6s ease-out both;
+    will-change: transform, opacity;
 }
 
 .estadistica-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
 }
+
+/* Escalonar la entrada de las tarjetas de estadísticas */
+.estadistica-card:nth-child(2) { animation-delay: 0.05s; }
+.estadistica-card:nth-child(3) { animation-delay: 0.1s; }
+.estadistica-card:nth-child(4) { animation-delay: 0.15s; }
+.estadistica-card:nth-child(5) { animation-delay: 0.2s; }
 
 .estadistica-card.completados {
     border-left-color: #27ae60;
@@ -61,12 +85,24 @@
     padding: 25px;
     transition: all 0.3s ease;
     border: 1px solid #f8f9fa;
+    animation: fadeInUp 0.6s ease-out both;
+    will-change: transform, opacity;
 }
 
 .curso-card.mis-cursos:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 30px rgba(0,0,0,0.15);
 }
+
+/* Escalonar la entrada en el grid de cursos */
+.cursos-grid .curso-card.mis-cursos:nth-child(2) { animation-delay: 0.05s; }
+.cursos-grid .curso-card.mis-cursos:nth-child(3) { animation-delay: 0.1s; }
+.cursos-grid .curso-card.mis-cursos:nth-child(4) { animation-delay: 0.15s; }
+.cursos-grid .curso-card.mis-cursos:nth-child(5) { animation-delay: 0.2s; }
+
+/* Animación suave para enlaces de navegación */
+.enlace-nav { animation: slideInRight 0.6s ease-out both; }
+.enlace-nav:nth-child(2) { animation-delay: 0.1s; }
 
 .curso-card .curso-header {
     display: flex;

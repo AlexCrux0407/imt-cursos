@@ -9,7 +9,11 @@ $mensaje = $_GET['mensaje'] ?? '';
 $tipo = $_GET['tipo'] ?? 'info';
 $usuario_id = (int)($_SESSION['user_id'] ?? 0);
 
+// Debug: Log para verificar parámetros recibidos
+error_log("resultado_evaluacion.php - intento_id: $intento_id, usuario_id: $usuario_id, mensaje: $mensaje, tipo: $tipo");
+
 if ($intento_id <= 0) {
+    error_log("resultado_evaluacion.php - intento_id inválido, redirigiendo a dashboard");
     header('Location: ' . BASE_URL . '/estudiante/dashboard.php');
     exit;
 }
@@ -304,32 +308,121 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                                         <strong>Tu respuesta:</strong>
                                         <div class="respuesta-<?= $respuesta['es_correcta'] === null ? 'pendiente' : ($respuesta['es_correcta'] ? 'correcta' : 'incorrecta') ?>">
                                             <?php
-                                            if ($respuesta['tipo'] === 'multiple_choice') {
-                                                $opciones = json_decode($respuesta['opciones'], true);
-                                                echo htmlspecialchars($opciones[$respuesta['respuesta']] ?? $respuesta['respuesta']);
+                                            $tipo = $respuesta['tipo'];
+                                            $resp = $respuesta['respuesta'];
+                                            $opciones = json_decode($respuesta['opciones'], true);
+                                            if ($tipo === 'multiple_choice') {
+                                                echo htmlspecialchars(($opciones[$resp] ?? $resp));
+                                            } elseif ($tipo === 'seleccion_multiple') {
+                                                $indices = json_decode($resp, true) ?: [];
+                                                $labels = [];
+                                                foreach ($indices as $i) { $labels[] = $opciones[$i] ?? $i; }
+                                                echo htmlspecialchars(implode(', ', $labels));
+                                            } elseif ($tipo === 'verdadero_falso') {
+                                                echo $resp == '1' ? 'Verdadero' : 'Falso';
+                                            } elseif ($tipo === 'emparejar_columnas') {
+                                                $pairs = $opciones['pairs'] ?? [];
+                                                $respMap = json_decode($resp, true) ?: [];
+                                                echo '<ul style="padding-left:18px;margin:0">';
+                                                foreach ($pairs as $idx => $pair) {
+                                                    $sel = $respMap[$idx] ?? '';
+                                                    echo '<li>' . htmlspecialchars($pair['left']) . ' → ' . htmlspecialchars($sel) . '</li>';
+                                                }
+                                                echo '</ul>';
+                                            } elseif ($tipo === 'completar_espacios') {
+                                                $blancos = json_decode($resp, true) ?: [];
+                                                echo htmlspecialchars(implode(' | ', $blancos));
                                             } else {
-                                                echo htmlspecialchars($respuesta['respuesta']);
+                                                echo htmlspecialchars($resp);
                                             }
                                             ?>
                                         </div>
                                     </div>
                                     
-                                    <?php if ($respuesta['es_correcta'] !== null && !$respuesta['es_correcta'] && $respuesta['tipo'] !== 'short_answer'): ?>
+                                    <?php if ($respuesta['es_correcta'] !== null && !$respuesta['es_correcta'] && !in_array($respuesta['tipo'], ['texto_corto','texto_largo'])): ?>
                                         <div class="col-md-6">
                                             <strong>Respuesta correcta:</strong>
                                             <div class="respuesta-correcta">
                                                 <?php
-                                                if ($respuesta['tipo'] === 'multiple_choice') {
-                                                    $opciones = json_decode($respuesta['opciones'], true);
-                                                    echo htmlspecialchars($opciones[$respuesta['respuesta_correcta']] ?? $respuesta['respuesta_correcta']);
+                                                $tipo = $respuesta['tipo'];
+                                                $opciones = json_decode($respuesta['opciones'], true);
+                                                $corr = $respuesta['respuesta_correcta'];
+                                                if ($tipo === 'multiple_choice') {
+                                                    echo htmlspecialchars($opciones[$corr] ?? $corr);
+                                                } elseif ($tipo === 'seleccion_multiple') {
+                                                    $indices = json_decode($corr, true) ?: [];
+                                                    $labels = [];
+                                                    foreach ($indices as $i) { $labels[] = $opciones[$i] ?? $i; }
+                                                    echo htmlspecialchars(implode(', ', $labels));
+                                                } elseif ($tipo === 'verdadero_falso') {
+                                                    echo $corr == '1' ? 'Verdadero' : 'Falso';
+                                                } elseif ($tipo === 'emparejar_columnas') {
+                                                    $pairs = $opciones['pairs'] ?? [];
+                                                    $derecha = json_decode($corr, true) ?: [];
+                                                    echo '<ul style="padding-left:18px;margin:0">';
+                                                    foreach ($pairs as $idx => $pair) {
+                                                        $sel = $derecha[$idx] ?? '';
+                                                        echo '<li>' . htmlspecialchars($pair['left']) . ' → ' . htmlspecialchars($sel) . '</li>';
+                                                    }
+                                                    echo '</ul>';
+                                                } elseif ($tipo === 'completar_espacios') {
+                                                    $vals = json_decode($corr, true) ?: [];
+                                                    echo htmlspecialchars(implode(' | ', $vals));
                                                 } else {
-                                                    echo htmlspecialchars($respuesta['respuesta_correcta']);
+                                                    echo htmlspecialchars($corr);
                                                 }
                                                 ?>
                                             </div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
+                                
+                                <!-- Sección de retroalimentación mejorada -->
+                                <?php if ($respuesta['es_correcta'] !== null): ?>
+                                    <div class="mt-3 p-3 rounded" style="background: <?= $respuesta['es_correcta'] ? '#e8f5e8' : '#ffeaea' ?>; border-left: 4px solid <?= $respuesta['es_correcta'] ? '#28a745' : '#dc3545' ?>;">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span style="font-size: 1.2em; margin-right: 8px;">
+                                                <?= $respuesta['es_correcta'] ? '✅' : '❌' ?>
+                                            </span>
+                                            <strong style="color: <?= $respuesta['es_correcta'] ? '#155724' : '#721c24' ?>;">
+                                                <?= $respuesta['es_correcta'] ? '¡Excelente!' : 'Revisa esta respuesta' ?>
+                                            </strong>
+                                        </div>
+                                        <div style="color: <?= $respuesta['es_correcta'] ? '#155724' : '#721c24' ?>; font-size: 0.9em;">
+                                            <?php if ($respuesta['es_correcta']): ?>
+                                                Has respondido correctamente. ¡Sigue así!
+                                            <?php else: ?>
+                                                <?php
+                                                // Generar retroalimentación específica por tipo de pregunta
+                                                $tipo = $respuesta['tipo'];
+                                                if ($tipo === 'multiple_choice') {
+                                                    echo "Recuerda revisar todas las opciones cuidadosamente antes de seleccionar tu respuesta.";
+                                                } elseif ($tipo === 'verdadero_falso') {
+                                                    echo "Analiza la afirmación palabra por palabra para determinar si es completamente verdadera o falsa.";
+                                                } elseif ($tipo === 'seleccion_multiple') {
+                                                    echo "En este tipo de pregunta, puede haber más de una respuesta correcta. Revisa todas las opciones.";
+                                                } elseif ($tipo === 'emparejar_columnas') {
+                                                    echo "Revisa las relaciones entre los elementos de ambas columnas.";
+                                                } elseif ($tipo === 'completar_espacios') {
+                                                    echo "Considera el contexto de la oración para completar los espacios en blanco.";
+                                                } else {
+                                                    echo "Revisa el material del curso relacionado con este tema.";
+                                                }
+                                                ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="mt-3 p-3 rounded" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span style="font-size: 1.2em; margin-right: 8px;">⏳</span>
+                                            <strong style="color: #856404;">Pendiente de revisión</strong>
+                                        </div>
+                                        <div style="color: #856404; font-size: 0.9em;">
+                                            Tu respuesta está siendo revisada por el instructor. Recibirás la calificación pronto.
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -338,6 +431,92 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
         </div>
         
         <div class="text-center mt-4 mb-5">
+            <!-- Sección de resumen final mejorada -->
+            <div class="card resultado-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <img src="<?= BASE_URL ?>/styles/iconos/showgreen.png" alt="Resumen" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                        Resumen de tu Desempeño
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Tu Puntaje</h6>
+                                <div class="display-4 fw-bold <?= ($intento['puntaje_obtenido'] ?? 0) >= $intento['puntaje_minimo_aprobacion'] ? 'text-success' : 'text-warning' ?>">
+                                    <?php if ($intento['puntaje_obtenido'] !== null): ?>
+                                        <?= number_format($intento['puntaje_obtenido'], 1) ?>%
+                                    <?php else: ?>
+                                        Pendiente
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h6 class="text-muted">Estado</h6>
+                                <div class="fs-3">
+                                    <?php if ($intento['puntaje_obtenido'] !== null): ?>
+                                        <?php if ($intento['puntaje_obtenido'] >= $intento['puntaje_minimo_aprobacion']): ?>
+                                            <span class="badge bg-success fs-6 p-3">✅ APROBADO</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning fs-6 p-3">⚠️ NO APROBADO</span>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span class="badge bg-info fs-6 p-3">⏳ EN REVISIÓN</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <?php if ($intento['puntaje_obtenido'] !== null): ?>
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="text-success fs-2 fw-bold"><?= $respuestas_correctas ?></div>
+                                <small class="text-muted">Correctas</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-danger fs-2 fw-bold"><?= $respuestas_incorrectas ?></div>
+                                <small class="text-muted">Incorrectas</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-warning fs-2 fw-bold"><?= $respuestas_pendientes ?></div>
+                                <small class="text-muted">Pendientes</small>
+                            </div>
+                        </div>
+                        
+                        <?php if ($intento['puntaje_obtenido'] >= $intento['puntaje_minimo_aprobacion']): ?>
+                            <div class="mt-3 p-3 rounded" style="background: #e8f5e8; border: 2px solid #28a745;">
+                                <div class="text-success">
+                                    <strong>🎉 ¡Felicitaciones!</strong><br>
+                                    Has aprobado esta evaluación. Puedes continuar con el siguiente módulo del curso.
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <div class="mt-3 p-3 rounded" style="background: #fff3cd; border: 2px solid #ffc107;">
+                                <div class="text-warning">
+                                    <strong>📚 Sigue practicando</strong><br>
+                                    Te recomendamos revisar el material del módulo y volver a intentar la evaluación.
+                                    <?php if ($evaluacion['intentos_permitidos'] > 0): ?>
+                                        <br><small>Intentos restantes: <?= max(0, $evaluacion['intentos_permitidos'] - ($intento['numero_intento'] ?? 1)) ?></small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="mt-3 p-3 rounded" style="background: #e7f3ff; border: 2px solid #007bff;">
+                            <div class="text-info">
+                                <strong>⏳ Evaluación en proceso</strong><br>
+                                Tu evaluación contiene preguntas que requieren revisión manual. Te notificaremos cuando esté lista la calificación final.
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
             <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $intento['curso_id'] ?>" class="btn btn-volver">
                 <img src="<?= BASE_URL ?>/styles/iconos/back.png" alt="Volver" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;">
                 Volver al Curso
