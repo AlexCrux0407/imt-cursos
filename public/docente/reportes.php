@@ -14,7 +14,7 @@ $stmt = $conn->prepare("
         COUNT(CASE WHEN i.estado = 'completado' THEN 1 END) as cursos_completados
     FROM cursos c
     LEFT JOIN inscripciones i ON c.id = i.curso_id WHERE (
-    WHERE c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+    WHERE c.creado_por = :docente_id OR c.asignado_a = :docente_id)
 ");
 $stmt->execute([':docente_id' => $_SESSION['user_id']]);
 $estadisticas = $stmt->fetch();

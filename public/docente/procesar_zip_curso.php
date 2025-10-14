@@ -31,15 +31,14 @@ try {
                CASE 
                    WHEN EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'cursos' AND COLUMN_NAME = 'asignado_a') 
                    THEN c.asignado_a = :docente_id1 
-                   ELSE c.creado_por = :docente_id2 
+                   ELSE c.creado_por = :docente_id 
                END as tiene_acceso
         FROM cursos c 
         WHERE c.id = :curso_id
     ");
     $stmt->execute([
         ':curso_id' => $curso_id, 
-        ':docente_id1' => $_SESSION['user_id'],
-        ':docente_id2' => $_SESSION['user_id']
+        ':docente_id1' => $_SESSION['user_id']
     ]);
     $curso = $stmt->fetch();
 

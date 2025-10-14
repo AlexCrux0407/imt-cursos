@@ -33,12 +33,12 @@ $stmt = $conn->prepare("
     LEFT JOIN respuestas_estudiante r ON i.id = r.intento_id
     WHERE i.estado = 'completado' 
     AND i.puntaje_obtenido IS NULL
-    AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+    AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
     GROUP BY i.id
     HAVING respuestas_pendientes > 0
     ORDER BY i.fecha_fin DESC
 ");
-$stmt->execute([':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
+$stmt->execute([':docente_id' => $_SESSION['user_id']]);
 $intentos_pendientes = $stmt->fetchAll();
 
 require __DIR__ . '/../partials/header.php';

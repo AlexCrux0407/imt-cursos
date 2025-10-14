@@ -520,14 +520,37 @@
 
 .contenido-texto {
     color: #5a5c69;
-    line-height: 1.8;
-    font-size: 1.1rem;
+    line-height: 1.6;
+    font-size: 1rem;
     padding: 25px;
     background: #f8fbff;
     border-radius: 12px;
     border-left: 4px solid #3498db;
     box-shadow: 0 2px 8px rgba(52, 152, 219, 0.08);
     position: relative;
+}
+
+.contenido-texto h1 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.contenido-texto h2 {
+    font-size: 1.4rem;
+    color: #34495e;
+    margin-bottom: 15px;
+    margin-top: 25px;
+    font-weight: 500;
+}
+
+.contenido-texto h3 {
+    font-size: 1.2rem;
+    color: #34495e;
+    margin-bottom: 12px;
+    margin-top: 20px;
+    font-weight: 500;
 }
 
 .contenido-texto::before {
@@ -543,10 +566,23 @@
 
 .contenido-texto p {
     margin-bottom: 15px;
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
 .contenido-texto p:last-child {
     margin-bottom: 0;
+}
+
+.contenido-texto ul {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.contenido-texto li {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
 .contenido-texto strong {

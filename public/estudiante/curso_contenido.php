@@ -54,37 +54,28 @@ $stmt = $conn->prepare("
 $stmt->execute([':curso_id' => $curso_id, ':estudiante_id' => $estudiante_id]);
 $modulos = $stmt->fetchAll();
 
-// Obtener evaluaciones del curso
-$stmt = $conn->prepare("
-    SELECT e.*, m.titulo as modulo_titulo,
-           COUNT(ie.id) as intentos_realizados,
-           MAX(ie.puntaje_obtenido) as mejor_calificacion
-    FROM evaluaciones_modulo e
-    LEFT JOIN modulos m ON e.modulo_id = m.id
-    LEFT JOIN intentos_evaluacion ie ON e.id = ie.evaluacion_id AND ie.usuario_id = :estudiante_id
-    WHERE m.curso_id = :curso_id AND e.activo = 1
-    GROUP BY e.id
-    ORDER BY e.orden
-");
-$stmt->execute([':curso_id' => $curso_id, ':estudiante_id' => $estudiante_id]);
-$evaluaciones = $stmt->fetchAll();
-
 // Estructura del curso para la sidebar
 $stmt = $conn->prepare("
     SELECT m.id AS modulo_id, m.titulo AS modulo_titulo, m.orden AS modulo_orden,
            t.id AS tema_id, t.titulo AS tema_titulo, t.orden AS tema_orden,
            s.id AS subtema_id, s.titulo AS subtema_titulo, s.orden AS subtema_orden,
            l.id AS leccion_id, l.titulo AS leccion_titulo, l.orden AS leccion_orden,
-           IF(pl.id IS NULL, 0, 1) AS leccion_completada
+           IF(pl.id IS NULL, 0, 1) AS leccion_completada,
+           IF(pm.evaluacion_completada = 1, 1, 0) AS evaluacion_completada
     FROM modulos m
     LEFT JOIN temas t ON m.id = t.modulo_id
     LEFT JOIN subtemas s ON t.id = s.tema_id
     LEFT JOIN lecciones l ON s.id = l.subtema_id
-    LEFT JOIN progreso_lecciones pl ON l.id = pl.leccion_id AND pl.usuario_id = :estudiante_id
+    LEFT JOIN progreso_lecciones pl ON l.id = pl.leccion_id AND pl.usuario_id = :estudiante_id1
+    LEFT JOIN progreso_modulos pm ON m.id = pm.modulo_id AND pm.usuario_id = :estudiante_id2
     WHERE m.curso_id = :curso_id
     ORDER BY m.orden, t.orden, s.orden, l.orden
 ");
-$stmt->execute([':curso_id' => $curso_id, ':estudiante_id' => $estudiante_id]);
+$stmt->execute([
+    ':curso_id' => $curso_id, 
+    ':estudiante_id1' => $estudiante_id,
+    ':estudiante_id2' => $estudiante_id
+]);
 $rows = $stmt->fetchAll();
 
 $curso_estructura = [];
@@ -97,7 +88,8 @@ foreach ($rows as $row) {
             'orden' => (int)$row['modulo_orden'],
             'temas' => [],
             'total_lecciones' => 0,
-            'lecciones_completadas' => 0
+            'lecciones_completadas' => 0,
+            'evaluacion_completada' => (bool)$row['evaluacion_completada']
         ];
     }
 
@@ -148,9 +140,8 @@ $__puedeAcceder = function($estructura, $moduloId) {
         if ($mod['id'] == $moduloId) {
             if ($i == 0) return true; // Primer módulo siempre accesible
             $anterior = $modulos[$i - 1];
-            $total = $anterior['total_lecciones'];
-            $completadas = $anterior['lecciones_completadas'];
-            return $total > 0 && $completadas >= $total;
+            // Un módulo es accesible si el anterior tiene su evaluación completada
+            return isset($anterior['evaluacion_completada']) && $anterior['evaluacion_completada'];
         }
     }
     return false;
@@ -290,48 +281,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
                 <?php endif; ?>
 
-                <!-- Evaluaciones -->
-                <?php if (!empty($evaluaciones)): ?>
-                <div class="collapsible-section sec-slate">
-                    <div class="collapsible-header" onclick="toggleSection('evaluaciones')">
-                        <h3>Evaluaciones</h3>
-                        <span class="toggle-icon" id="icon-evaluaciones">▶</span>
-                    </div>
-                    <div class="collapsible-content" id="content-evaluaciones">
-                        <?php foreach ($evaluaciones as $evaluacion): ?>
-                            <div class="evaluation-card">
-                                <div class="evaluation-header">
-                                    <h4><?= htmlspecialchars($evaluacion['titulo']) ?></h4>
-                                    <?php if (!empty($evaluacion['modulo_titulo'])): ?>
-                                        <span class="evaluation-module">Módulo: <?= htmlspecialchars($evaluacion['modulo_titulo']) ?></span>
-                                    <?php endif; ?>
-                                </div>
 
-                                <?php if (!empty($evaluacion['descripcion'])): ?>
-                                    <p class="evaluation-description"><?= htmlspecialchars($evaluacion['descripcion']) ?></p>
-                                <?php endif; ?>
-
-                                <div class="evaluation-info">
-                                    <div class="evaluation-stats">
-                                        <span>⏱️ Tiempo límite: <?= (int)$evaluacion['tiempo_limite'] ?> minutos</span>
-                                        <span>📊 Intentos realizados: <?= (int)$evaluacion['intentos_realizados'] ?></span>
-                                        <?php if ($evaluacion['mejor_calificacion'] !== null): ?>
-                                            <span>🏆 Mejor calificación: <?= number_format((float)$evaluacion['mejor_calificacion'], 1) ?>%</span>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <div class="evaluation-actions">
-                                        <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
-                                           class="btn btn-warning">
-                                           <?= ((int)$evaluacion['intentos_realizados'] > 0) ? 'Reintentar' : 'Tomar' ?> evaluación
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
@@ -339,7 +289,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <script>
 function toggleSection(sectionId) {
-    const allSections = ['descripcion','categoria','duracion','dirigido','objetivo-general','objetivos-especificos','evaluaciones'];
+    const allSections = ['descripcion','categoria','duracion','dirigido','objetivo-general','objetivos-especificos'];
     const targetContent = document.getElementById('content-' + sectionId);
     const targetIcon = document.getElementById('icon-' + sectionId);
     
@@ -362,7 +312,7 @@ function toggleSection(sectionId) {
 
 // Inicializar todas las secciones como colapsadas
 document.addEventListener('DOMContentLoaded', function() {
-    ['descripcion','categoria','duracion','dirigido','objetivo-general','objetivos-especificos','evaluaciones']
+    ['descripcion','categoria','duracion','dirigido','objetivo-general','objetivos-especificos']
         .forEach(function(id){
             const content = document.getElementById('content-' + id);
             const icon = document.getElementById('icon-' + id);

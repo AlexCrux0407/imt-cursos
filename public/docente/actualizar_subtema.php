@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         INNER JOIN temas t ON s.tema_id = t.id
         INNER JOIN modulos m ON t.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
-        WHERE s.id = :subtema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+        WHERE s.id = :subtema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
     ");
     $stmt->execute([':subtema_id' => $subtema_id, ':docente_id' => $_SESSION['user_id']]);
     
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':descripcion' => $descripcion,
             ':orden' => $orden,
             ':id' => $subtema_id
-        , ':docente_id2' => $_SESSION['user_id']]);
+        ]);
         
         header('Location:'  . BASE_URL . '/docente/subtemas_tema.php?id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=subtema_actualizado');
         exit;

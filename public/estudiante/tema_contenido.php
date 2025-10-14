@@ -161,7 +161,7 @@ require __DIR__ . '/../partials/nav.php';
             <div class="contenido-modulo-section">
                 <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Tema</h2>
                 <div class="contenido-texto">
-                    <?= nl2br(htmlspecialchars($tema['contenido'])) ?>
+                    <?= $tema['contenido'] ?>
                 </div>
             </div>
         <?php endif; ?>

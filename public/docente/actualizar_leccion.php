@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         SELECT l.id, l.recurso_url as archivo_actual, l.orden as orden_actual FROM lecciones l
         INNER JOIN modulos m ON l.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
-        WHERE l.id = :leccion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+        WHERE l.id = :leccion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
     ");
-    $stmt->execute([':leccion_id' => $leccion_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
+    $stmt->execute([':leccion_id' => $leccion_id, ':docente_id' => $_SESSION['user_id']]);
     $leccion_actual = $stmt->fetch();
     
     if (!$leccion_actual) {

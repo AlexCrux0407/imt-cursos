@@ -36,6 +36,13 @@ if (!$intento) {
     exit;
 }
 
+// Obtener información adicional de la evaluación
+$stmt = $conn->prepare("
+    SELECT * FROM evaluaciones_modulo WHERE id = :evaluacion_id
+");
+$stmt->execute([':evaluacion_id' => $intento['evaluacion_id']]);
+$evaluacion = $stmt->fetch();
+
 // Obtener respuestas del estudiante
 $stmt = $conn->prepare("
     SELECT re.*, pe.pregunta, pe.tipo, pe.opciones, pe.respuesta_correcta
@@ -210,7 +217,14 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                 <div class="col-md-4 text-end">
                     <div class="fs-4">
                         <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" alt="Fecha" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
-                        <?= date('d/m/Y H:i', strtotime($intento['fecha_completado'] ?? $intento['fecha_intento'])) ?>
+                        <?php 
+                        $fecha_mostrar = $intento['fecha_completado'] ?? $intento['fecha_intento'] ?? null;
+                        if ($fecha_mostrar) {
+                            echo date('d/m/Y H:i', strtotime($fecha_mostrar));
+                        } else {
+                            echo date('d/m/Y H:i'); // Fecha actual si no hay fecha disponible
+                        }
+                        ?>
                     </div>
                 </div>
             </div>
@@ -310,11 +324,11 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                                             <?php
                                             $tipo = $respuesta['tipo'];
                                             $resp = $respuesta['respuesta'];
-                                            $opciones = json_decode($respuesta['opciones'], true);
+                                            $opciones = json_decode($respuesta['opciones'] ?? '[]', true) ?: [];
                                             if ($tipo === 'multiple_choice') {
                                                 echo htmlspecialchars(($opciones[$resp] ?? $resp));
                                             } elseif ($tipo === 'seleccion_multiple') {
-                                                $indices = json_decode($resp, true) ?: [];
+                                                $indices = json_decode($resp ?? '[]', true) ?: [];
                                                 $labels = [];
                                                 foreach ($indices as $i) { $labels[] = $opciones[$i] ?? $i; }
                                                 echo htmlspecialchars(implode(', ', $labels));
@@ -322,7 +336,7 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                                                 echo $resp == '1' ? 'Verdadero' : 'Falso';
                                             } elseif ($tipo === 'emparejar_columnas') {
                                                 $pairs = $opciones['pairs'] ?? [];
-                                                $respMap = json_decode($resp, true) ?: [];
+                                                $respMap = json_decode($resp ?? '{}', true) ?: [];
                                                 echo '<ul style="padding-left:18px;margin:0">';
                                                 foreach ($pairs as $idx => $pair) {
                                                     $sel = $respMap[$idx] ?? '';
@@ -330,7 +344,7 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                                                 }
                                                 echo '</ul>';
                                             } elseif ($tipo === 'completar_espacios') {
-                                                $blancos = json_decode($resp, true) ?: [];
+                                                $blancos = json_decode($resp ?? '[]', true) ?: [];
                                                 echo htmlspecialchars(implode(' | ', $blancos));
                                             } else {
                                                 echo htmlspecialchars($resp);
@@ -345,12 +359,12 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                                             <div class="respuesta-correcta">
                                                 <?php
                                                 $tipo = $respuesta['tipo'];
-                                                $opciones = json_decode($respuesta['opciones'], true);
+                                                $opciones = json_decode($respuesta['opciones'] ?? '[]', true) ?: [];
                                                 $corr = $respuesta['respuesta_correcta'];
                                                 if ($tipo === 'multiple_choice') {
                                                     echo htmlspecialchars($opciones[$corr] ?? $corr);
                                                 } elseif ($tipo === 'seleccion_multiple') {
-                                                    $indices = json_decode($corr, true) ?: [];
+                                                    $indices = json_decode($corr ?? '[]', true) ?: [];
                                                     $labels = [];
                                                     foreach ($indices as $i) { $labels[] = $opciones[$i] ?? $i; }
                                                     echo htmlspecialchars(implode(', ', $labels));

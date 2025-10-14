@@ -15,7 +15,7 @@ $stmt = $conn->prepare("
     FROM lecciones l
     INNER JOIN modulos m ON l.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE l.id = :leccion_id AND l.modulo_id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+    WHERE l.id = :leccion_id AND l.modulo_id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
 ");
 $stmt->execute([
     ':leccion_id' => $leccion_id,

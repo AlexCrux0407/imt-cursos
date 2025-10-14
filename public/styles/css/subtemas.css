@@ -48,6 +48,13 @@
     box-shadow: 0 8px 32px rgba(52, 152, 219, 0.2);
 }
 
+.subtemas-header .div-fila-alt-start {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
 .subtemas-title {
     font-size: 2rem;
     font-weight: 600;
@@ -391,6 +398,45 @@
 
 .btn-crear:hover {
     background: var(--subtema-secondary);
+}
+
+/* Botón de volver */
+.btn-volver {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+    min-width: 100px;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.btn-volver:hover {
+    background: linear-gradient(135deg, #5a6268, #495057);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-volver:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+}
+
+.btn-volver:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.25);
 }
 
 /* Responsive */

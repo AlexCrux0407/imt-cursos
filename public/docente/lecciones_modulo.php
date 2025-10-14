@@ -13,9 +13,9 @@ $stmt = $conn->prepare("
     SELECT m.*, c.titulo as curso_titulo
     FROM modulos m
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+    WHERE m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
 ");
-$stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
+$stmt->execute([':modulo_id' => $modulo_id, ':docente_id' => $_SESSION['user_id']]);
 $modulo = $stmt->fetch();
 
 if (!$modulo) {

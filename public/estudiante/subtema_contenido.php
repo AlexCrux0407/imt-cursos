@@ -152,7 +152,7 @@ require __DIR__ . '/../partials/nav.php';
             $hrefTema      = BASE_URL . '/estudiante/tema_contenido.php?id=' . $temaIdLink;
             ?>
             <div class="breadcrumb">
-                <a href="<?= BASE_URL ?>/estudiante/cursos_disponibles.php">Mis Cursos</a> →
+                <a href="<?= BASE_URL ?>/estudiante/catalogo.php">Mis Cursos</a> →
                 <a href="<?= $hrefCurso ?>"><?= $cursoTituloBn ?></a> →
                 <a href="<?= $hrefModulo ?>"><?= $moduloTituloBn ?></a> →
                 <a href="<?= $hrefTema ?>"><?= $temaTituloBn ?></a> →
@@ -168,7 +168,7 @@ require __DIR__ . '/../partials/nav.php';
             <div class="contenido-modulo-section">
                 <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Subtema</h2>
                 <div class="contenido-texto">
-                    <?= nl2br(htmlspecialchars($subtema['contenido'])) ?>
+                    <?= $subtema['contenido'] ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -268,7 +268,7 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         <?php endif; ?>
 
-        <!-- Estado vacío - solo mostrar si realmente no hay contenido -->
+        <!-- Estado vacío - solo se muestra si  no hay contenido -->
         <?php if (empty($lecciones) && empty($subtema['contenido'] ?? '') && empty($subtema['recurso_url'])): ?>
             <div class="empty-content">
                 <i class="icon-info"></i>

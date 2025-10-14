@@ -88,7 +88,7 @@ require __DIR__ . '/../partials/nav.php';
         
         <div class="course-stat-card">
             <div class="course-stat-value orange">
-                <?= number_format($stats['progreso_promedio'], 1) ?>%
+                <?= number_format($stats['progreso_promedio'] ?? 0, 1) ?>%
             </div>
             <div class="course-stat-label">Progreso Promedio</div>
         </div>

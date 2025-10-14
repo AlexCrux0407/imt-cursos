@@ -21,9 +21,9 @@ $stmt = $conn->prepare("
            m.titulo as modulo_titulo, m.id as modulo_id,
            c.titulo as curso_titulo, c.id as curso_id
     FROM lecciones l
-    INNER JOIN subtemas st ON l.subtema_id = st.id
-    INNER JOIN temas t ON st.tema_id = t.id
-    INNER JOIN modulos m ON t.modulo_id = m.id
+    LEFT JOIN subtemas st ON l.subtema_id = st.id
+    LEFT JOIN temas t ON (l.tema_id = t.id OR st.tema_id = t.id)
+    LEFT JOIN modulos m ON (l.modulo_id = m.id OR t.modulo_id = m.id)
     INNER JOIN cursos c ON m.curso_id = c.id
     INNER JOIN inscripciones i ON c.id = i.curso_id
     WHERE l.id = :leccion_id AND i.usuario_id = :estudiante_id
@@ -32,19 +32,28 @@ $stmt = $conn->prepare("
 $stmt->execute([':leccion_id' => $leccion_id, ':estudiante_id' => $estudiante_id]);
 $leccion = $stmt->fetch();
 
+// DEBUG: Verificar contenido obtenido
+error_log("DEBUG LECCION - ID: " . $leccion_id);
+error_log("DEBUG LECCION - Contenido: " . ($leccion['contenido'] ?? 'NULL'));
+error_log("DEBUG LECCION - Titulo: " . ($leccion['titulo'] ?? 'NULL'));
+
 if (!$leccion) {
     header('Location: ' . BASE_URL . '/estudiante/dashboard.php?error=acceso_denegado');
     exit;
 }
 
-// Obtener lecciones del mismo subtema para navegación
+// Obtener lecciones del mismo nivel para navegación
 $stmt = $conn->prepare("
     SELECT id, titulo, orden 
     FROM lecciones 
-    WHERE subtema_id = :subtema_id 
+    WHERE (subtema_id = :subtema_id OR (subtema_id IS NULL AND tema_id = :tema_id) OR (subtema_id IS NULL AND tema_id IS NULL AND modulo_id = :modulo_id))
     ORDER BY orden ASC
 ");
-$stmt->execute([':subtema_id' => $leccion['subtema_id']]);
+$stmt->execute([
+    ':subtema_id' => $leccion['subtema_id'], 
+    ':tema_id' => $leccion['tema_id'],
+    ':modulo_id' => $leccion['modulo_id']
+]);
 $lecciones_subtema = $stmt->fetchAll();
 
 // Encontrar lección anterior y siguiente
@@ -65,29 +74,106 @@ foreach ($lecciones_subtema as $index => $l) {
     }
 }
 
+// Obtener estructura del curso para la sidebar
+$stmt = $conn->prepare("
+    SELECT m.id AS modulo_id, m.titulo AS modulo_titulo, m.orden AS modulo_orden,
+           t.id AS tema_id, t.titulo AS tema_titulo, t.orden AS tema_orden,
+           s.id AS subtema_id, s.titulo AS subtema_titulo, s.orden AS subtema_orden,
+           l.id AS leccion_id, l.titulo AS leccion_titulo, l.orden AS leccion_orden,
+           IF(pl.id IS NULL, 0, 1) AS leccion_completada
+    FROM modulos m
+    LEFT JOIN temas t ON m.id = t.modulo_id
+    LEFT JOIN subtemas s ON t.id = s.tema_id
+    LEFT JOIN lecciones l ON s.id = l.subtema_id
+    LEFT JOIN progreso_lecciones pl ON l.id = pl.leccion_id AND pl.usuario_id = :uid
+    WHERE m.curso_id = :curso_id
+    ORDER BY m.orden, t.orden, s.orden, l.orden
+");
+$stmt->execute([':curso_id' => $leccion['curso_id'], ':uid' => $estudiante_id]);
+$rows = $stmt->fetchAll();
+
+$curso_estructura = [];
+foreach ($rows as $r) {
+    $mid = (int)$r['modulo_id'];
+    if (!isset($curso_estructura[$mid])) {
+        $curso_estructura[$mid] = [
+            'id' => $mid,
+            'titulo' => $r['modulo_titulo'],
+            'orden' => (int)$r['modulo_orden'],
+            'temas' => [],
+            'total_lecciones' => 0,
+            'lecciones_completadas' => 0
+        ];
+    }
+    if (!empty($r['tema_id'])) {
+        $tid = (int)$r['tema_id'];
+        if (!isset($curso_estructura[$mid]['temas'][$tid])) {
+            $curso_estructura[$mid]['temas'][$tid] = [
+                'id' => $tid,
+                'titulo' => $r['tema_titulo'],
+                'orden' => (int)$r['tema_orden'],
+                'subtemas' => []
+            ];
+        }
+        if (!empty($r['subtema_id'])) {
+            $sid = (int)$r['subtema_id'];
+            if (!isset($curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid])) {
+                $curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid] = [
+                    'id' => $sid,
+                    'titulo' => $r['subtema_titulo'],
+                    'orden' => (int)$r['subtema_orden'],
+                    'lecciones' => []
+                ];
+            }
+            if (!empty($r['leccion_id'])) {
+                $curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid]['lecciones'][] = [
+                    'id' => (int)$r['leccion_id'],
+                    'titulo' => $r['leccion_titulo'],
+                    'orden' => (int)$r['leccion_orden'],
+                    'completada' => (bool)$r['leccion_completada']
+                ];
+                $curso_estructura[$mid]['total_lecciones']++;
+                if ($r['leccion_completada']) {
+                    $curso_estructura[$mid]['lecciones_completadas']++;
+                }
+            }
+        }
+    }
+}
+
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/integrated-resource-viewer.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/curso-sidebar.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/modulo-contenido.css">
 
-<div class="contenido">
-    <!-- Breadcrumb -->
-    <div class="breadcrumb">
-        <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $leccion['curso_id'] ?>">
-            <?= htmlspecialchars($leccion['curso_titulo']) ?>
-        </a>
-        <span>›</span>
-        <a href="<?= BASE_URL ?>/estudiante/modulo_contenido.php?id=<?= $leccion['modulo_id'] ?>">
-            <?= htmlspecialchars($leccion['modulo_titulo']) ?>
-        </a>
-        <span>›</span>
-        <a href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= $leccion['tema_id'] ?>">
-            <?= htmlspecialchars($leccion['tema_titulo']) ?>
-        </a>
-        <span>›</span>
-        <span><?= htmlspecialchars($leccion['titulo']) ?></span>
-    </div>
+<div class="contenido-con-sidebar" style="display:flex; gap:30px;">
+    <?php
+    $cursoTituloSidebar = $leccion['curso_titulo'];
+    $moduloActualId     = (int)$leccion['modulo_id'];
+    include __DIR__ . '/partials/curso_sidebar.php';
+    ?>
+
+    <div class="contenido-principal" style="flex:1;">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $leccion['curso_id'] ?>">
+                <?= htmlspecialchars($leccion['curso_titulo']) ?>
+            </a>
+            <span>›</span>
+            <a href="<?= BASE_URL ?>/estudiante/modulo_contenido.php?id=<?= $leccion['modulo_id'] ?>">
+                <?= htmlspecialchars($leccion['modulo_titulo']) ?>
+            </a>
+            <span>›</span>
+            <a href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= $leccion['tema_id'] ?>">
+                <?= htmlspecialchars($leccion['tema_titulo']) ?>
+            </a>
+            <span>›</span>
+            <span><?= htmlspecialchars($leccion['titulo']) ?></span>
+        </div>
 
     <!-- Header de la lección -->
     <div class="leccion-header">
@@ -103,7 +189,21 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Contenido de la lección -->
     <div class="leccion-contenido">
         <div class="contenido-texto">
-            <?= nl2br(htmlspecialchars($leccion['contenido'])) ?>
+            <?php 
+            // Limpiar el contenido HTML para extraer solo el contenido del body
+            $contenido = $leccion['contenido'] ?? '';
+            
+            // Si el contenido incluye etiquetas HTML completas, extraer solo el contenido del body
+            if (strpos($contenido, '<html') !== false && strpos($contenido, '<body') !== false) {
+                // Extraer contenido entre <body> y </body>
+                preg_match('/<body[^>]*>(.*?)<\/body>/is', $contenido, $matches);
+                if (!empty($matches[1])) {
+                    $contenido = $matches[1];
+                }
+            }
+            
+            echo $contenido;
+            ?>
         </div>
 
         <!-- Recurso adjunto -->
@@ -192,7 +292,8 @@ require __DIR__ . '/../partials/nav.php';
             ← Volver al subtema
         </a>
     </div>
-</div>
+    </div> <!-- /.contenido-principal -->
+</div> <!-- /.contenido-con-sidebar -->
 
 <style>
 .breadcrumb {
@@ -227,6 +328,7 @@ require __DIR__ . '/../partials/nav.php';
     font-size: 2rem;
     margin-bottom: 15px;
     font-weight: 600;
+    color: white;
 }
 
 .leccion-meta {
@@ -255,13 +357,15 @@ require __DIR__ . '/../partials/nav.php';
 .leccion-navegacion {
     display: flex;
     gap: 20px;
-    margin-bottom: 30px;
+    margin: 30px 0;
     flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 .btn-navegacion {
     flex: 1;
-    min-width: 200px;
+    min-width: 250px;
+    max-width: 45%;
     padding: 15px 20px;
     background: white;
     border: 2px solid #e8ecef;
@@ -269,13 +373,15 @@ require __DIR__ . '/../partials/nav.php';
     text-decoration: none;
     color: #2c3e50;
     transition: all 0.3s ease;
-    text-align: center;
+    display: block;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .btn-navegacion:hover {
     border-color: var(--estudiante-primary);
     background: var(--estudiante-light);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
 }
 
 .btn-navegacion.anterior {
@@ -284,6 +390,16 @@ require __DIR__ . '/../partials/nav.php';
 
 .btn-navegacion.siguiente {
     text-align: right;
+    margin-left: auto;
+}
+
+/* Si solo hay un botón, centrarlo */
+.leccion-navegacion:has(.btn-navegacion:only-child) {
+    justify-content: center;
+}
+
+.leccion-navegacion .btn-navegacion:only-child {
+    max-width: 400px;
 }
 
 .leccion-acciones {

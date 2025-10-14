@@ -17,9 +17,9 @@ $stmt = $conn->prepare("
     SELECT t.id, t.recurso_url FROM temas t
     INNER JOIN modulos m ON t.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE t.id = :tema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+    WHERE t.id = :tema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
 ");
-$stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
+$stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id']]);
 $tema = $stmt->fetch();
 
 if (!$tema) {

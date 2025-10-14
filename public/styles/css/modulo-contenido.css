@@ -272,3 +272,36 @@
 .contenido-principal > .modulo-header .page-title {
   color: #fff !important;
 }
+
+/* ===== Responsividad mejorada ===== */
+/* Grid adaptable para temas y lecciones */
+@media (min-width: 768px){
+  .contenido-principal .temas-lista{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1200px){
+  .contenido-principal .temas-lista{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Ajustes generales para tablets */
+@media (max-width: 768px){
+  .page-header{ padding: 12px 16px; }
+  .contenido-principal .contenido-modulo{ padding: 16px; }
+  .contenido-principal .progreso-modulo{ padding: 14px; }
+  .contenido-principal .navegacion-modulo{ padding: 18px; }
+  .modulo-card{ padding: 12px; }
+  .btn-siguiente-modulo{ padding: 8px 14px; font-size: .9rem; }
+  .progress-circle{ width: 60px; height: 60px; }
+  .progress-value{ font-size: 1rem; }
+}
+
+/* Ajustes para móviles pequeños */
+@media (max-width: 576px){
+  .breadcrumb{ font-size: .85rem; }
+  .page-title{ font-size: 1.1rem; }
+  .contenido-principal .tema-header{ flex-wrap: wrap; gap: 8px; }
+  .tema-titulo-link{ overflow-wrap: anywhere; }
+  .contenido-principal .temas-lista,
+  .contenido-principal .lecciones-lista{ grid-template-columns: 1fr; }
+  .contenido-principal .navegacion-modulo{ padding: 16px; border-radius: 12px; }
+  .modulo-card{ margin-top: 10px; }
+}

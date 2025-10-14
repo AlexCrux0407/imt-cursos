@@ -41,7 +41,8 @@
 
 .sidebar-leccion.activo .leccion-titulo {
     font-weight: 600;
-    color: #2980b9;
+    color: #2980b9 !important;
+    font-size: 0.65rem !important;
 }
 
 /* Hover effects para elementos activos */
@@ -57,6 +58,9 @@
     display: flex;
     gap: 25px;
     align-items: flex-start;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 .sidebar-navegacion {
@@ -364,31 +368,41 @@
 
 .sidebar-leccion {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 6px;
-    padding: 2px 0;
-    font-size: 0.7rem;
+    padding: 3px 0;
+    font-size: 0.65rem;
+    min-height: 16px;
 }
 
-.leccion-estado {
+.sidebar-leccion .leccion-estado {
     color: #bdc3c7;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     width: 12px;
     text-align: center;
+    line-height: 0.65rem;
 }
 
 .sidebar-leccion.completada .leccion-estado {
     color: #27ae60;
 }
 
-.leccion-titulo {
+.sidebar-leccion .leccion-titulo {
     flex: 1;
-    color: #7f8c8d;
-    line-height: 1.2;
+    color: #7f8c8d !important;
+    line-height: 0.65rem;
+    font-size: 0.65rem !important;
 }
 
 .sidebar-leccion.completada .leccion-titulo {
-    color: #2c3e50;
+    color: #2c3e50 !important;
+    font-size: 0.65rem !important;
+}
+
+.sidebar-leccion.activo .leccion-titulo {
+    font-weight: 600;
+    color: #2980b9 !important;
+    font-size: 0.65rem !important;
 }
 
 .leccion-link {
@@ -420,6 +434,7 @@
     .contenido-con-sidebar {
         flex-direction: column;
         gap: 15px;
+        padding: 0 15px;
     }
     
     .sidebar-navegacion {
@@ -452,4 +467,27 @@
 
 .sidebar-navegacion::-webkit-scrollbar-thumb:hover {
     background: #3498db;
+}
+
+/* ===== Responsividad mejorada del sidebar ===== */
+/* Header sticky para mantener visible el progreso */
+.sidebar-header{ position: sticky; top: 0; z-index: 2; }
+
+/* Mejor scroll táctil en móviles */
+.sidebar-navegacion{ -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+
+/* Ajuste de altura en tablets/móviles */
+@media (max-width: 992px){
+  .sidebar-navegacion{ max-height: 60vh; }
+}
+
+/* Ajustes finos para móviles pequeños */
+@media (max-width: 576px){
+  .sidebar-navegacion{ max-height: 55vh; }
+  .sidebar-header{ padding: 16px; }
+  .sidebar-titulo{ font-size: 1rem; }
+  .progreso-info{ font-size: 0.85rem; }
+  .modulo-header{ padding: 10px; gap: 8px; }
+  .modulo-titulo{ font-size: 0.8rem; }
+  .modulo-link{ font-size: 0.75rem; padding: 6px 8px; }
 }
