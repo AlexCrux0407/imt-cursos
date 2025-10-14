@@ -79,6 +79,17 @@ $stmt = $conn->prepare("
 $stmt->execute([':curso_id' => $tema['curso_id'], ':uid' => $estudiante_id]);
 $rows = $stmt->fetchAll();
 
+/** Obtener información de progreso de módulos para el sidebar */
+$stmt = $conn->prepare("
+    SELECT m.id, 
+           IF(pm.evaluacion_completada = 1, 1, 0) AS evaluacion_completada
+    FROM modulos m
+    LEFT JOIN progreso_modulos pm ON m.id = pm.modulo_id AND pm.usuario_id = :uid
+    WHERE m.curso_id = :curso_id
+");
+$stmt->execute([':curso_id' => $tema['curso_id'], ':uid' => $estudiante_id]);
+$progreso_modulos_info = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
 $curso_estructura = [];
 foreach ($rows as $r) {
     $mid = (int)$r['modulo_id'];
@@ -89,7 +100,8 @@ foreach ($rows as $r) {
             'orden' => (int)$r['modulo_orden'],
             'temas' => [],
             'total_lecciones' => 0,
-            'lecciones_completadas' => 0
+            'lecciones_completadas' => 0,
+            'evaluacion_completada' => isset($progreso_modulos_info[$mid]) ? (bool)$progreso_modulos_info[$mid] : false
         ];
     }
     if (!empty($r['tema_id'])) {

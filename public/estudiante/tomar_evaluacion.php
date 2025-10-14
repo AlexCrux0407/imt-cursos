@@ -383,6 +383,11 @@ require __DIR__ . '/../partials/nav.php';
                         <div class="question-number"><?= $index + 1 ?></div>
                         <div style="flex: 1; margin-left: 15px;">
                             <div class="question-text"><?= nl2br(htmlspecialchars($pregunta['pregunta'])) ?></div>
+                            <?php if (!empty($pregunta['explicacion'])): ?>
+                                <div class="question-explanation" style="font-size: 0.85em; color: #6c757d; margin-top: 8px; font-style: italic;">
+                                    <?= nl2br(htmlspecialchars($pregunta['explicacion'])) ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
