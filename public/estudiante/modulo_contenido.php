@@ -32,7 +32,8 @@ if ($estudiante_id === 0) {
 /** Verificar acceso: módulo válido y estudiante inscrito en ese curso */
 $stmt = $conn->prepare("
     SELECT m.id, m.titulo, m.descripcion, m.contenido, m.orden, m.curso_id,
-           c.titulo AS curso_titulo, c.descripcion AS curso_descripcion
+           c.titulo AS curso_titulo, c.descripcion AS curso_descripcion,
+           i.estado AS curso_estado, i.progreso AS curso_progreso
     FROM modulos m
     INNER JOIN cursos c ON m.curso_id = c.id
     INNER JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = :uid
@@ -144,12 +145,12 @@ $stmt = $conn->prepare("
            COUNT(ie.id) as intentos_realizados,
            MAX(ie.puntaje_obtenido) as mejor_calificacion,
            CASE 
-               WHEN MAX(ie.puntaje_obtenido) >= e.puntaje_minimo_aprobacion THEN 1 
+               WHEN MAX(ie.puntaje_obtenido) >= 100.0 THEN 1 
                ELSE 0 
            END as aprobada,
            CASE 
                WHEN e.intentos_permitidos > 0 AND COUNT(ie.id) >= e.intentos_permitidos 
-                    AND (MAX(ie.puntaje_obtenido) < e.puntaje_minimo_aprobacion OR MAX(ie.puntaje_obtenido) IS NULL) THEN 1
+                    AND (MAX(ie.puntaje_obtenido) < 100.0 OR MAX(ie.puntaje_obtenido) IS NULL) THEN 1
                ELSE 0 
            END as sin_intentos
     FROM evaluaciones_modulo e
@@ -430,34 +431,43 @@ require __DIR__ . '/../partials/nav.php';
         flex-shrink: 0;
     }
 
-    .estado-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    .evaluacion-estado .estado-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        padding: 8px 12px !important;
+        border-radius: 20px !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        text-align: center !important;
+        transition: none !important;
+        transform: none !important;
     }
 
-    .estado-badge.aprobada {
-        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-        color: #166534;
-        border: 1px solid #86efac;
+    .evaluacion-estado .estado-badge.aprobada {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important;
+        color: #166534 !important;
+        border: 1px solid #86efac !important;
     }
 
-    .estado-badge.sin-intentos {
-        background: linear-gradient(135deg, #fef2f2, #fecaca);
-        color: #991b1b;
-        border: 1px solid #fca5a5;
+    .evaluacion-estado .estado-badge.sin-intentos {
+        background: linear-gradient(135deg, #fef2f2, #fecaca) !important;
+        color: #991b1b !important;
+        border: 1px solid #fca5a5 !important;
     }
 
-    .estado-badge.disponible {
-        background: linear-gradient(135deg, #fef3c7, #fde68a);
-        color: #92400e;
-        border: 1px solid #fcd34d;
+    .evaluacion-estado .estado-badge.disponible {
+        background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+        color: #92400e !important;
+        border: 1px solid #fcd34d !important;
+    }
+
+    /* Asegurar que no se apliquen estilos hover de otros badges */
+    .evaluacion-estado .estado-badge:hover {
+        transform: none !important;
+        background: inherit !important;
     }
 
     .evaluacion-stats-moderna {
@@ -534,6 +544,7 @@ require __DIR__ . '/../partials/nav.php';
         width: 100%;
         justify-content: center;
         text-align: center;
+        margin-bottom: 8px;
     }
 
     .btn-evaluacion.aprobada {
@@ -548,6 +559,13 @@ require __DIR__ . '/../partials/nav.php';
         cursor: default;
     }
 
+    .btn-evaluacion.curso-completado {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+        cursor: default;
+        opacity: 0.8;
+    }
+
     .btn-evaluacion.disponible {
         background: linear-gradient(135deg, #f59e0b, #d97706);
         color: white;
@@ -557,6 +575,30 @@ require __DIR__ . '/../partials/nav.php';
         background: linear-gradient(135deg, #d97706, #b45309);
         transform: translateY(-1px);
         box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-evaluacion.rehacer {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+    }
+
+    .btn-evaluacion.rehacer:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-evaluacion.secundario {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        color: white;
+        font-size: 0.85rem;
+        padding: 10px 18px;
+    }
+
+    .btn-evaluacion.secundario:hover {
+        background: linear-gradient(135deg, #4b5563, #374151);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
     }
 
     .btn-evaluacion i {
@@ -745,17 +787,12 @@ require __DIR__ . '/../partials/nav.php';
                                     <?php if ((int)$evaluacion['aprobada'] === 1): ?>
                                         <div class="estado-badge aprobada">
                                             <i class="icon-check-circle"></i>
-                                            <span>Aprobada</span>
+                                            <span>Completada (100%)</span>
                                         </div>
                                     <?php elseif ((int)$evaluacion['sin_intentos'] === 1): ?>
                                         <div class="estado-badge sin-intentos">
                                             <i class="icon-x-circle"></i>
                                             <span>Sin Intentos</span>
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="estado-badge disponible">
-                                            <i class="icon-clock"></i>
-                                            <span>Disponible</span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -786,19 +823,40 @@ require __DIR__ . '/../partials/nav.php';
                                 <?php if ((int)$evaluacion['aprobada'] === 1): ?>
                                     <button class="btn-evaluacion aprobada" disabled>
                                         <i class="icon-check"></i>
-                                        <span>Evaluación Completada</span>
+                                        <span>Evaluación Completada (100%)</span>
                                     </button>
                                 <?php elseif ((int)$evaluacion['sin_intentos'] === 1): ?>
                                     <button class="btn-evaluacion sin-intentos" disabled>
                                         <i class="icon-x"></i>
                                         <span>Sin Intentos Restantes</span>
                                     </button>
+                                <?php elseif ($modulo['curso_estado'] === 'completado'): ?>
+                                    <button class="btn-evaluacion curso-completado" disabled>
+                                        <i class="icon-check"></i>
+                                        <span>Curso Completado</span>
+                                    </button>
                                 <?php else: ?>
-                                    <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
-                                       class="btn-evaluacion disponible">
-                                        <i class="icon-play"></i>
-                                        <span><?= ((int)$evaluacion['intentos_realizados'] > 0) ? 'Reintentar Evaluación' : 'Iniciar Evaluación' ?></span>
-                                    </a>
+                                    <?php if ((int)$evaluacion['intentos_realizados'] > 0 && $evaluacion['mejor_calificacion'] !== null && $evaluacion['mejor_calificacion'] < 100.0): ?>
+                                        <!-- Botón principal para rehacer -->
+                                        <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
+                                           class="btn-evaluacion rehacer">
+                                            <i class="icon-refresh"></i>
+                                            <span>Rehacer Evaluación</span>
+                                        </a>
+                                        <!-- Botón secundario para ver resultado -->
+                                        <a href="<?= BASE_URL ?>/estudiante/resultado_evaluacion.php?evaluacion_id=<?= (int)$evaluacion['id'] ?>"
+                                           class="btn-evaluacion secundario">
+                                            <i class="icon-eye"></i>
+                                            <span>Ver Resultado (<?= number_format((float)$evaluacion['mejor_calificacion'], 1) ?>%)</span>
+                                        </a>
+                                    <?php else: ?>
+                                        <!-- Botón para iniciar por primera vez -->
+                                        <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
+                                           class="btn-evaluacion disponible">
+                                            <i class="icon-play"></i>
+                                            <span>Iniciar Evaluación</span>
+                                        </a>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </div>

@@ -2,9 +2,8 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!defined('BASE_URL')) {
-    define('BASE_URL', ''); 
-}
+// Cargar configuración centralizada de rutas
+require_once __DIR__ . '/../../config/paths.php';
 require_once __DIR__ . '/../../app/auth.php';
 ?>
 <!DOCTYPE html>

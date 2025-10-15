@@ -23,9 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             INNER JOIN evaluaciones_modulo e ON p.evaluacion_id = e.id
             INNER JOIN modulos m ON e.modulo_id = m.id
             INNER JOIN cursos c ON m.curso_id = c.id
-            WHERE p.id = :pregunta_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
+            WHERE p.id = :pregunta_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
         ");
-        $stmt->execute([':pregunta_id' => $pregunta_id, ':docente_id' => $_SESSION['user_id']]);
+        $stmt->execute([
+            ':pregunta_id' => $pregunta_id, 
+            ':docente_id' => $_SESSION['user_id'],
+            ':docente_id2' => $_SESSION['user_id']
+        ]);
         $pregunta = $stmt->fetch();
         
         if (!$pregunta) {

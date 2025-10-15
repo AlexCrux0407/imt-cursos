@@ -278,11 +278,11 @@
 
 .badge {
     text-align: center;
-    padding: 15px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 8px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #0177ec, #0077ed);
     transition: all 0.3s ease;
-    font-size: 2rem;
+    font-size: 1rem;
 }
 
 .badge.earned {

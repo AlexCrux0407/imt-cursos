@@ -41,14 +41,15 @@ if (!$stmt->fetch()) {
     exit;
 }
 
-// Verificar si ya completó la evaluación
+// Verificar si ya completó la evaluación con 100%
 $stmt = $conn->prepare("
-    SELECT puntaje_evaluacion
-    FROM progreso_modulos
-    WHERE usuario_id = :usuario_id AND modulo_id = :modulo_id AND evaluacion_completada = 1
+    SELECT MAX(puntaje_obtenido) as mejor_puntaje
+    FROM intentos_evaluacion
+    WHERE usuario_id = :usuario_id AND evaluacion_id = :evaluacion_id
 ");
-$stmt->execute([':usuario_id' => $usuario_id, ':modulo_id' => $evaluacion['modulo_id']]);
-$ya_completada = $stmt->fetch();
+$stmt->execute([':usuario_id' => $usuario_id, ':evaluacion_id' => $evaluacion_id]);
+$resultado_puntaje = $stmt->fetch();
+$ya_completada_100 = $resultado_puntaje && $resultado_puntaje['mejor_puntaje'] >= 100.0;
 
 // Contar intentos previos
 $stmt = $conn->prepare("
@@ -60,7 +61,7 @@ $stmt->execute([':usuario_id' => $usuario_id, ':evaluacion_id' => $evaluacion_id
 $intentos_realizados = $stmt->fetchColumn();
 
 // Verificar si puede tomar la evaluación
-$puede_tomar = !$ya_completada && ($evaluacion['intentos_permitidos'] == 0 || $intentos_realizados < $evaluacion['intentos_permitidos']);
+$puede_tomar = !$ya_completada_100 && ($evaluacion['intentos_permitidos'] == 0 || $intentos_realizados < $evaluacion['intentos_permitidos']);
 
 // Obtener preguntas de la evaluación
 $stmt = $conn->prepare("
@@ -310,10 +311,10 @@ require __DIR__ . '/../partials/nav.php';
         <p><?= htmlspecialchars($evaluacion['modulo_titulo']) ?> - <?= htmlspecialchars($evaluacion['curso_titulo']) ?></p>
     </div>
 
-    <?php if ($ya_completada): ?>
+    <?php if ($ya_completada_100): ?>
         <div class="alert alert-success">
-            <h4>✅ Evaluación ya completada</h4>
-            <p>Ya has completado esta evaluación con un puntaje de <strong><?= number_format($ya_completada['puntaje_evaluacion'], 1) ?>%</strong>.</p>
+            <h4>✅ Evaluación completada con 100%</h4>
+            <p>Ya has completado esta evaluación con un puntaje perfecto de <strong>100%</strong>.</p>
             <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $evaluacion['curso_id'] ?>" class="btn-submit">Volver al curso</a>
         </div>
     <?php elseif (!$puede_tomar): ?>

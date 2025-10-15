@@ -62,14 +62,6 @@ function nav_active_class(string $href, string $current_path): string {
                     <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="" class="nav-icon">
                     Administración de cursos
                 </a>
-                <a href="<?= BASE_URL ?>/docente/visualizar_curso.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/visualizar_curso.php', $current_path) ?>">
-                    <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" class="nav-icon">
-                    Visualización de curso
-                </a>
-                <a href="<?= BASE_URL ?>/docente/revisar_evaluaciones.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/revisar_evaluaciones.php', $current_path) ?>">
-                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" class="nav-icon">
-                    Revisar Evaluaciones
-                </a>
             <?php elseif ($role === 'ejecutivo'): ?>
                 <a href="<?= BASE_URL ?>/ejecutivo/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">

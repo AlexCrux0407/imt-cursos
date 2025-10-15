@@ -63,14 +63,16 @@ try {
         throw new Exception('No tienes acceso a esta evaluación');
     }
     
-    // Verificar si ya completó la evaluación
+    // Verificar si ya completó la evaluación con 100%
     $stmt = $conn->prepare("
-        SELECT id FROM progreso_modulos
-        WHERE usuario_id = :usuario_id AND modulo_id = :modulo_id AND evaluacion_completada = 1
+        SELECT MAX(puntaje_obtenido) as mejor_puntaje
+        FROM intentos_evaluacion
+        WHERE usuario_id = :usuario_id AND evaluacion_id = :evaluacion_id
     ");
-    $stmt->execute([':usuario_id' => $usuario_id, ':modulo_id' => $evaluacion['modulo_id']]);
-    if ($stmt->fetch()) {
-        throw new Exception('Ya has completado esta evaluación');
+    $stmt->execute([':usuario_id' => $usuario_id, ':evaluacion_id' => $evaluacion_id]);
+    $resultado_puntaje = $stmt->fetch();
+    if ($resultado_puntaje && $resultado_puntaje['mejor_puntaje'] >= 100.0) {
+        throw new Exception('Ya has completado esta evaluación con un puntaje perfecto de 100%');
     }
     
     // Contar intentos previos

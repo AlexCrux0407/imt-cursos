@@ -2,11 +2,8 @@
 session_start();
 
 require_once __DIR__ . '/../config/database.php';
-
-// Definir BASE_URL si no está definido
-if (!defined('BASE_URL')) {
-    define('BASE_URL', '/imt-cursos/public');
-}
+// Cargar configuración centralizada de rutas
+require_once __DIR__ . '/../config/paths.php';
 
 $error = '';
 

@@ -3,10 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Definir BASE_URL si no está definido
-if (!defined('BASE_URL')) {
-    define('BASE_URL', '/imt-cursos/public');
-}
+// Cargar configuración centralizada de rutas
+require_once __DIR__ . '/../config/paths.php';
 
 function is_logged_in(): bool
 {

@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Modificadores de color (borde izquierdo) */
 .sec-blue   { border-left-color:#3498db; background-color: rgba(52, 152, 219, 0.05); }
-.sec-purple { border-left-color:#9b59b6; background-color: rgba(155, 89, 182, 0.05); }
+.sec-purple { border-left-color:#3498db; background-color: rgba(155, 89, 182, 0.05); }
 .sec-orange { border-left-color:#e67e22; background-color: rgba(230, 126, 34, 0.05); }
 .sec-teal   { border-left-color:#1abc9c; background-color: rgba(26, 188, 156, 0.05); }
 .sec-yellow { border-left-color:#f39c12; background-color: rgba(243, 156, 18, 0.05); }

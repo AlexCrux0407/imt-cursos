@@ -1,20 +1,48 @@
 <?php
 
+declare(strict_types=1);
+
+/* Asegurar sesión y BASE_URL antes de usarla en redirects/rutas */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (!defined('BASE_URL')) {
+    // Ajusta este valor a tu entorno. Para Laragon típico:
+    define('BASE_URL', '/imt-cursos/public');
+}
+
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
 
+$page_title = 'Estudiante – Resultado de Evaluación';
+
 $intento_id = (int)($_GET['intento_id'] ?? 0);
+$evaluacion_id = (int)($_GET['evaluacion_id'] ?? 0);
 $mensaje = $_GET['mensaje'] ?? '';
 $tipo = $_GET['tipo'] ?? 'info';
 $usuario_id = (int)($_SESSION['user_id'] ?? 0);
 
 // Debug: Log para verificar parámetros recibidos
-error_log("resultado_evaluacion.php - intento_id: $intento_id, usuario_id: $usuario_id, mensaje: $mensaje, tipo: $tipo");
+error_log("resultado_evaluacion.php - intento_id: $intento_id, evaluacion_id: $evaluacion_id, usuario_id: $usuario_id, mensaje: $mensaje, tipo: $tipo");
+
+// Si no se proporciona intento_id pero sí evaluacion_id, buscar el último intento
+if ($intento_id <= 0 && $evaluacion_id > 0) {
+    $stmt = $conn->prepare("
+        SELECT id FROM intentos_evaluacion 
+        WHERE evaluacion_id = :evaluacion_id AND usuario_id = :usuario_id 
+        ORDER BY fecha_inicio DESC LIMIT 1
+    ");
+    $stmt->execute([':evaluacion_id' => $evaluacion_id, ':usuario_id' => $usuario_id]);
+    $ultimo_intento = $stmt->fetch();
+    
+    if ($ultimo_intento) {
+        $intento_id = $ultimo_intento['id'];
+    }
+}
 
 if ($intento_id <= 0) {
-    error_log("resultado_evaluacion.php - intento_id inválido, redirigiendo a dashboard");
-    header('Location: ' . BASE_URL . '/estudiante/dashboard.php');
+    header('Location: ' . BASE_URL . '/estudiante/dashboard.php?error=intento_no_valido');
     exit;
 }
 
@@ -71,190 +99,199 @@ foreach ($respuestas as $respuesta) {
 }
 
 $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_preguntas) * 100 : 0;
+
+require __DIR__ . '/../partials/header.php';
+require __DIR__ . '/../partials/nav.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultado de Evaluación - <?= htmlspecialchars($intento['evaluacion_titulo']) ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .resultado-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-        }
-        
-        .resultado-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .resultado-card .card-header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.5rem;
-        }
-        
-        .estadistica-item {
-            text-align: center;
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-        }
-        
-        .estadistica-correcta {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        
-        .estadistica-incorrecta {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-        }
-        
-        .estadistica-pendiente {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            color: #333;
-        }
-        
-        .pregunta-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            background: white;
-        }
-        
-        .pregunta-correcta {
-            border-left: 5px solid #28a745;
-            background: #f8fff9;
-        }
-        
-        .pregunta-incorrecta {
-            border-left: 5px solid #dc3545;
-            background: #fff8f8;
-        }
-        
-        .pregunta-pendiente {
-            border-left: 5px solid #ffc107;
-            background: #fffdf5;
-        }
-        
-        .respuesta-correcta {
-            color: #28a745;
-            font-weight: bold;
-        }
-        
-        .respuesta-incorrecta {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        
-        .respuesta-pendiente {
-            color: #ffc107;
-            font-weight: bold;
-        }
-        
-        .btn-volver {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 25px;
-            padding: 0.75rem 2rem;
-            color: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-volver:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
-        
-        .alert-custom {
-            border: none;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .alert-success-custom {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        
-        .alert-warning-custom {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-        }
-        
-        .alert-info-custom {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            color: #333;
-        }
-    </style>
-</head>
-<body class="bg-light">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
+
+<style>
+    .resultado-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .resultado-header {
+        background: #fff;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #3498db;
+    }
+    
+    .resultado-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .card-header-custom {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .estadistica-item {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .estadistica-correcta {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+    }
+    
+    .estadistica-incorrecta {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+    
+    .estadistica-pendiente {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+    }
+    
+    .pregunta-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: white;
+    }
+    
+    .pregunta-correcta {
+        border-left: 4px solid #27ae60;
+        background: #f8fff9;
+    }
+    
+    .pregunta-incorrecta {
+        border-left: 4px solid #e74c3c;
+        background: #fff8f8;
+    }
+    
+    .pregunta-pendiente {
+        border-left: 4px solid #f39c12;
+        background: #fffdf5;
+    }
+    
+    .respuesta-correcta {
+        color: #27ae60;
+        font-weight: bold;
+    }
+    
+    .respuesta-incorrecta {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+    
+    .respuesta-pendiente {
+        color: #f39c12;
+        font-weight: bold;
+    }
+    
+    .btn-volver {
+        background: #3498db;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-volver:hover {
+        background: #2980b9;
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    .alert-custom {
+        border: none;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .alert-success-custom {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #27ae60;
+    }
+    
+    .alert-warning-custom {
+        background: #fff3cd;
+        color: #856404;
+        border-left: 4px solid #f39c12;
+    }
+    
+    .alert-info-custom {
+        background: #d1ecf1;
+        color: #0c5460;
+        border-left: 4px solid #3498db;
+    }
+</style>
+
+<div class="resultado-container">
     <div class="resultado-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="mb-2">
-                        <img src="<?= BASE_URL ?>/styles/iconos/tablefull.png" alt="Evaluación" style="width: 24px; height: 24px; margin-right: 12px; vertical-align: middle;">
-                        Resultado de Evaluación
-                    </h1>
-                    <p class="mb-0 opacity-75">
-                        <?= htmlspecialchars($intento['curso_titulo']) ?> > <?= htmlspecialchars($intento['modulo_titulo']) ?>
-                    </p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <div class="fs-4">
-                        <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" alt="Fecha" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
-                        <?php 
-                        $fecha_mostrar = $intento['fecha_completado'] ?? $intento['fecha_intento'] ?? null;
-                        if ($fecha_mostrar) {
-                            echo date('d/m/Y H:i', strtotime($fecha_mostrar));
-                        } else {
-                            echo date('d/m/Y H:i'); // Fecha actual si no hay fecha disponible
-                        }
-                        ?>
-                    </div>
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="mb-2 d-flex align-items-center" style="color: #2c3e50;">
+                    <img src="../styles/iconos/tablefullb.png" alt="Evaluación" style="width: 24px; height: 24px; margin-right: 12px;">
+                    Resultado de Evaluación
+                </h1>
+                <p class="mb-0" style="color: #7f8c8d;">
+                    <?= htmlspecialchars($intento['curso_titulo']) ?> > <?= htmlspecialchars($intento['modulo_titulo']) ?>
+                </p>
+            </div>
+            <div class="text-end">
+                <div class="fs-5 d-flex align-items-center justify-content-end" style="color: #7f8c8d;">
+                    <img src="../styles/iconos/entrada.png" alt="Fecha" style="width: 20px; height: 20px; margin-right: 8px;">
+                    <span><?php 
+                    $fecha_mostrar = $intento['fecha_completado'] ?? $intento['fecha_intento'] ?? null;
+                    if ($fecha_mostrar) {
+                        echo date('d/m/Y H:i', strtotime($fecha_mostrar));
+                    } else {
+                        echo date('d/m/Y H:i'); // Fecha actual si no hay fecha disponible
+                    }
+                    ?></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="container">
-        <?php if ($mensaje): ?>
-            <div class="alert alert-<?= $tipo === 'success' ? 'success' : ($tipo === 'warning' ? 'warning' : 'info') ?>-custom alert-custom">
-                <div class="d-flex align-items-center">
-                    <?php 
-                    $icon_src = $tipo === 'success' ? 'showgreen.png' : ($tipo === 'warning' ? 'hidenred.png' : 'show.png');
-                    $icon_alt = $tipo === 'success' ? 'Éxito' : ($tipo === 'warning' ? 'Advertencia' : 'Información');
-                    ?>
-                    <img src="<?= BASE_URL ?>/styles/iconos/<?= $icon_src ?>" alt="<?= $icon_alt ?>" style="width: 24px; height: 24px; margin-right: 12px; vertical-align: middle;">
-                    <div><?= htmlspecialchars($mensaje) ?></div>
-                </div>
+    <?php if ($mensaje): ?>
+        <div class="alert alert-<?= $tipo === 'success' ? 'success' : ($tipo === 'warning' ? 'warning' : 'info') ?>-custom alert-custom">
+            <div class="d-flex align-items-center">
+                <?php 
+                $icon_src = $tipo === 'success' ? 'showgreen.png' : ($tipo === 'warning' ? 'hidenred.png' : 'show.png');
+                $icon_alt = $tipo === 'success' ? 'Éxito' : ($tipo === 'warning' ? 'Advertencia' : 'Información');
+                ?>
+                <img src="../styles/iconos/<?= $icon_src ?>" alt="<?= $icon_alt ?>" style="width: 24px; height: 24px; margin-right: 12px; vertical-align: middle;">
+                <div><?= htmlspecialchars($mensaje) ?></div>
             </div>
-        <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
         <div class="row">
             <div class="col-md-4">
-                <div class="resultado-card card">
-                    <div class="card-header">
+                <div class="resultado-card">
+                    <div class="card-header-custom">
                         <h5 class="mb-0">
-                            <img src="<?= BASE_URL ?>/styles/iconos/tablefull.png" alt="Resumen" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                            <img src="../styles/iconos/tablefullb.png" alt="Resumen" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
                             Resumen de Resultados
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="p-3">
                         <div class="estadistica-item estadistica-correcta">
                             <div class="fs-2 fw-bold"><?= $respuestas_correctas ?></div>
                             <div>Respuestas Correctas</div>
@@ -275,9 +312,9 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                         <hr>
                         
                         <div class="text-center">
-                            <div class="fs-4 fw-bold mb-2">
+                            <div class="fs-4 fw-bold mb-2" style="color: #2c3e50;">
                                 <?php if ($intento['puntaje_obtenido'] !== null): ?>
-                                    <?= number_format($intento['puntaje_obtenido'], 1) ?>%
+                                    <?= number_format((float)$intento['puntaje_obtenido'], 1) ?>%
                                 <?php else: ?>
                                     Pendiente
                                 <?php endif; ?>
@@ -298,19 +335,26 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
             </div>
             
             <div class="col-md-8">
-                <div class="resultado-card card">
-                    <div class="card-header">
+                <div class="resultado-card">
+                    <div class="card-header-custom">
                         <h5 class="mb-0">
-                            <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="Detalle" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                            <img src="../styles/iconos/detalles_bl.png" alt="Detalle" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
                             Detalle de Respuestas
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="p-3">
                         <?php foreach ($respuestas as $index => $respuesta): ?>
                             <div class="pregunta-item <?= $respuesta['es_correcta'] === null ? 'pregunta-pendiente' : ($respuesta['es_correcta'] ? 'pregunta-correcta' : 'pregunta-incorrecta') ?>">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <h6 class="mb-0">Pregunta <?= $index + 1 ?></h6>
-                                    <span class="badge <?= $respuesta['es_correcta'] === null ? 'bg-warning' : ($respuesta['es_correcta'] ? 'bg-success' : 'bg-danger') ?>">
+                                    <span class="badge <?= $respuesta['es_correcta'] === null ? 'text-dark' : '' ?>" 
+                                          <?php if ($respuesta['es_correcta'] === null): ?>
+                                              style="background: #ffc107 !important; color: #212529 !important;"
+                                          <?php elseif ($respuesta['es_correcta']): ?>
+                                              style="background: #28a745 !important; color: white !important;"
+                                          <?php else: ?>
+                                              style="background: #dc3545 !important; color: white !important;"
+                                          <?php endif; ?>>
                                         <?= $respuesta['es_correcta'] === null ? 'Pendiente' : ($respuesta['es_correcta'] ? 'Correcta' : 'Incorrecta') ?>
                                     </span>
                                 </div>
@@ -444,23 +488,23 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
             </div>
         </div>
         
-        <div class="text-center mt-4 mb-5">
+        <div class="text-center mt-3 mb-3">
             <!-- Sección de resumen final mejorada -->
-            <div class="card resultado-card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <img src="<?= BASE_URL ?>/styles/iconos/showgreen.png" alt="Resumen" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+            <div class="card resultado-card mb-3">
+                <div class="card-header py-2">
+                    <h6 class="mb-0">
+                        <img src="../styles/iconos/showgreen.png" alt="Resumen" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
                         Resumen de tu Desempeño
-                    </h5>
+                    </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body py-3">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <h6 class="text-muted">Tu Puntaje</h6>
-                                <div class="display-4 fw-bold <?= ($intento['puntaje_obtenido'] ?? 0) >= $intento['puntaje_minimo_aprobacion'] ? 'text-success' : 'text-warning' ?>">
+                                <div class="fs-1 fw-bold <?= ($intento['puntaje_obtenido'] ?? 0) >= $intento['puntaje_minimo_aprobacion'] ? 'text-success' : 'text-warning' ?>">
                                     <?php if ($intento['puntaje_obtenido'] !== null): ?>
-                                        <?= number_format($intento['puntaje_obtenido'], 1) ?>%
+                                        <?= number_format((float)$intento['puntaje_obtenido'], 1) ?>%
                                     <?php else: ?>
                                         Pendiente
                                     <?php endif; ?>
@@ -468,17 +512,17 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <h6 class="text-muted">Estado</h6>
-                                <div class="fs-3">
+                                <div class="fs-4">
                                     <?php if ($intento['puntaje_obtenido'] !== null): ?>
                                         <?php if ($intento['puntaje_obtenido'] >= $intento['puntaje_minimo_aprobacion']): ?>
-                                            <span class="badge bg-success fs-6 p-3">✅ APROBADO</span>
+                                            <span class="badge bg-success fs-6 py-2 px-3">✅ APROBADO</span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning fs-6 p-3">⚠️ NO APROBADO</span>
+                                            <span class="badge fs-6 py-2 px-3 text-white" style="background: #dc3545 !important; color: white !important;">⚠️ NO APROBADO</span>
                                         <?php endif; ?>
                                     <?php else: ?>
-                                        <span class="badge bg-info fs-6 p-3">⏳ EN REVISIÓN</span>
+                                        <span class="badge fs-6 py-2 px-3 text-white" style="background: #17a2b8 !important; color: white !important;">⏳ EN REVISIÓN</span>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -486,18 +530,18 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                     </div>
                     
                     <?php if ($intento['puntaje_obtenido'] !== null): ?>
-                        <hr>
+                        <hr class="my-2">
                         <div class="row text-center">
                             <div class="col-4">
-                                <div class="text-success fs-2 fw-bold"><?= $respuestas_correctas ?></div>
+                                <div class="text-success fs-4 fw-bold"><?= $respuestas_correctas ?></div>
                                 <small class="text-muted">Correctas</small>
                             </div>
                             <div class="col-4">
-                                <div class="text-danger fs-2 fw-bold"><?= $respuestas_incorrectas ?></div>
+                                <div class="text-danger fs-4 fw-bold"><?= $respuestas_incorrectas ?></div>
                                 <small class="text-muted">Incorrectas</small>
                             </div>
                             <div class="col-4">
-                                <div class="text-warning fs-2 fw-bold"><?= $respuestas_pendientes ?></div>
+                                <div class="text-warning fs-4 fw-bold"><?= $respuestas_pendientes ?></div>
                                 <small class="text-muted">Pendientes</small>
                             </div>
                         </div>
@@ -531,13 +575,13 @@ $porcentaje_correcto = $total_preguntas > 0 ? ($respuestas_correctas / $total_pr
                 </div>
             </div>
             
-            <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $intento['curso_id'] ?>" class="btn btn-volver">
-                <img src="<?= BASE_URL ?>/styles/iconos/back.png" alt="Volver" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;">
-                Volver al Curso
-            </a>
+            <div class="mt-4 text-center">
+                <a href="curso_contenido.php?id=<?= $intento['curso_id'] ?>" class="btn-volver">
+                    <img src="../styles/iconos/back.png" alt="Volver" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;">
+                    Volver al Curso
+                </a>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php require __DIR__ . '/../partials/footer.php'; ?>

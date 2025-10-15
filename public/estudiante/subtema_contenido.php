@@ -281,7 +281,7 @@ require __DIR__ . '/../partials/nav.php';
         <?php endif; ?>
 
         <!-- Estado vacío - solo se muestra si  no hay contenido -->
-        <?php if (empty($lecciones) && empty($subtema['contenido'] ?? '') && empty($subtema['recurso_url'])): ?>
+        <?php if (empty($lecciones) && empty($subtema['contenido'] ?? '') && empty($subtema['recurso_url']) && empty($subtema['descripcion'])): ?>
             <div class="empty-content">
                 <i class="icon-info"></i>
                 <h3>Contenido en preparación</h3>
