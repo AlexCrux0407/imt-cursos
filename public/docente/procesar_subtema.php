@@ -23,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         SELECT t.id FROM temas t
         INNER JOIN modulos m ON t.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
-        WHERE t.id = :tema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
+        WHERE t.id = :tema_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
-    $stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id']]);
+    $stmt->execute([':tema_id' => $tema_id, ':docente_id' => $_SESSION['user_id'], ':docente_id2' => $_SESSION['user_id']]);
     
     if (!$stmt->fetch()) {
         header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');

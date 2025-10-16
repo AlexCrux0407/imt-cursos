@@ -34,11 +34,12 @@ try {
         WHERE i.id = :intento_id 
         AND i.estado = 'completado' 
         AND i.puntaje_obtenido IS NULL
-        AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
+        AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
     $stmt->execute([
         ':intento_id' => $intento_id, 
-        ':docente_id' => $_SESSION['user_id']
+        ':docente_id' => $_SESSION['user_id'],
+        ':docente_id2' => $_SESSION['user_id']
     ]);
     $intento = $stmt->fetch();
     

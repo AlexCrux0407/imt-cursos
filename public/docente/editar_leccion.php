@@ -15,12 +15,13 @@ $stmt = $conn->prepare("
     FROM lecciones l
     INNER JOIN modulos m ON l.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE l.id = :leccion_id AND l.modulo_id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
+    WHERE l.id = :leccion_id AND l.modulo_id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
 $stmt->execute([
     ':leccion_id' => $leccion_id,
     ':modulo_id' => $modulo_id,
-    ':docente_id' => $_SESSION['user_id']
+    ':docente_id' => $_SESSION['user_id'],
+    ':docente_id2' => $_SESSION['user_id']
 ]);
 $leccion = $stmt->fetch();
 

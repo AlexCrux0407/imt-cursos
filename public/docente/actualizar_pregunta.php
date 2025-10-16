@@ -56,6 +56,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $opciones = json_encode(array_values($opciones_array));
             break;
             
+        case 'seleccion_multiple':
+            $opciones_array = $_POST['opciones'] ?? [];
+            $respuestas_correctas = $_POST['respuesta_correcta'] ?? [];
+            
+            if (count($opciones_array) < 2) {
+                header('Location: ' . BASE_URL . '/docente/editar_pregunta.php?id=' . $pregunta_id . '&evaluacion_id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=opciones_insuficientes');
+                exit;
+            }
+            
+            $opciones = json_encode(array_values($opciones_array));
+            $respuesta_correcta = json_encode(array_values($respuestas_correctas));
+            break;
+            
+        case 'emparejar_columnas':
+            $columna1 = $_POST['columna1'] ?? [];
+            $columna2 = $_POST['columna2'] ?? [];
+            
+            if (count($columna1) < 2 || count($columna2) < 2) {
+                header('Location: ' . BASE_URL . '/docente/editar_pregunta.php?id=' . $pregunta_id . '&evaluacion_id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=parejas_insuficientes');
+                exit;
+            }
+            
+            $opciones = json_encode(['pairs' => array_map(null, $columna1, $columna2)]);
+            $respuesta_correcta = json_encode(array_combine(range(0, count($columna1) - 1), range(0, count($columna1) - 1)));
+            break;
+            
+        case 'completar_espacios':
+            $texto = trim($_POST['texto_completar'] ?? '');
+            $respuestas = $_POST['blancos_respuestas'] ?? [];
+            
+            // Validar que hay texto y respuestas
+            if (empty($texto) || empty($respuestas)) {
+                header('Location: ' . BASE_URL . '/docente/editar_pregunta.php?id=' . $pregunta_id . '&evaluacion_id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_incompletos');
+                exit;
+            }
+            
+            // Procesar distractores de forma segura
+            $distractores = [];
+            if (isset($_POST['distractores']) && is_array($_POST['distractores'])) {
+                $distractores = array_filter(array_map('trim', $_POST['distractores']), function($d) { 
+                    return !empty($d); 
+                });
+            }
+            
+            $opciones = json_encode([
+                'texto' => $texto, 
+                'blancos' => count($respuestas),
+                'distractores' => $distractores
+            ], JSON_UNESCAPED_UNICODE);
+            
+            $respuesta_correcta = json_encode(array_values($respuestas), JSON_UNESCAPED_UNICODE);
+            break;
+            
         case 'verdadero_falso':
             $respuesta_correcta = $_POST['respuesta_vf'] ?? null;
             break;
@@ -78,8 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 respuesta_correcta = :respuesta_correcta, 
                 puntaje = :puntaje, 
                 orden = :orden, 
-                explicacion = :explicacion,
-                fecha_modificacion = NOW()
+                explicacion = :explicacion
             WHERE id = :pregunta_id
         ");
         
@@ -102,6 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Exception $e) {
         $conn->rollBack();
         error_log("Error al actualizar pregunta: " . $e->getMessage());
+        error_log("POST data: " . print_r($_POST, true));
+        error_log("Pregunta ID: " . $pregunta_id . ", Tipo: " . $tipo);
         header('Location: ' . BASE_URL . '/docente/editar_pregunta.php?id=' . $pregunta_id . '&evaluacion_id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_servidor');
         exit;
     }

@@ -269,6 +269,55 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="form-container-body">
+        <?php if (isset($_GET['success']) || isset($_GET['error'])): ?>
+            <div style="margin-bottom: 20px;">
+                <?php if (isset($_GET['success'])): ?>
+                    <div style="background: #d4edda; color: #155724; padding: 12px 16px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 20px;">
+                        <strong>✓ Éxito:</strong> 
+                        <?php
+                        switch($_GET['success']) {
+                            case 'pregunta_creada':
+                                echo 'La pregunta ha sido creada exitosamente.';
+                                break;
+                            case 'pregunta_actualizada':
+                                echo 'La pregunta ha sido actualizada exitosamente.';
+                                break;
+                            case 'pregunta_eliminada':
+                                echo 'La pregunta ha sido eliminada exitosamente.';
+                                break;
+                            default:
+                                echo 'Operación completada exitosamente.';
+                        }
+                        ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($_GET['error'])): ?>
+                    <div style="background: #f8d7da; color: #721c24; padding: 12px 16px; border-radius: 8px; border: 1px solid #f5c6cb; margin-bottom: 20px;">
+                        <strong>✗ Error:</strong> 
+                        <?php
+                        switch($_GET['error']) {
+                            case 'error_procesar':
+                                echo 'Ocurrió un error al procesar la pregunta. Por favor, verifica los datos e inténtalo nuevamente.';
+                                break;
+                            case 'datos_invalidos':
+                                echo 'Los datos proporcionados no son válidos.';
+                                break;
+                            case 'pregunta_no_encontrada':
+                                echo 'La pregunta solicitada no fue encontrada.';
+                                break;
+                            case 'sin_permisos':
+                                echo 'No tienes permisos para realizar esta acción.';
+                                break;
+                            default:
+                                echo 'Ocurrió un error inesperado. Por favor, inténtalo nuevamente.';
+                        }
+                        ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        
         <?php if (empty($preguntas)): ?>
             <div class="empty-state">
                 <img src="<?= BASE_URL ?>/styles/iconos/pregunta.png" alt="Sin preguntas">
@@ -436,6 +485,15 @@ require __DIR__ . '/../partials/nav.php';
                 <label>Texto con espacios</label>
                 <textarea name="texto_completar" id="texto_completar" class="form-control" rows="3" placeholder="Usa {{blank}} para marcar espacios a completar" oninput="detectarBlancos()"></textarea>
                 <div id="blancosList" style="margin-top:10px;"></div>
+                
+                <!-- Opciones distractoras -->
+                <div id="distractoresContainer" style="margin-top:15px; display:none;">
+                    <label>Opciones adicionales</label>
+                    <p style="margin-bottom:10px;color:#6c757d;font-size:0.9em;">Agrega opciones extra para enriquecer el banco de palabras.</p>
+                    <div id="distractoresList"></div>
+                    <button type="button" class="btn-add-opcion" onclick="agregarDistractor()" style="margin-top:8px;">+ Agregar Opción</button>
+                </div>
+                
                 <p style="margin-top:8px;color:#6c757d;">Detectamos espacios y generamos campos de respuesta.</p>
             </div>
             
@@ -609,19 +667,32 @@ function agregarPareja() {
 // Completar Espacios
 function inicializarBlancos() {
     document.getElementById('blancosList').innerHTML = '';
+    document.getElementById('distractoresList').innerHTML = '';
+    document.getElementById('distractoresContainer').style.display = 'none';
 }
 
 function detectarBlancos() {
     const texto = document.getElementById('texto_completar').value;
     const cont = document.getElementById('blancosList');
+    const distractoresContainer = document.getElementById('distractoresContainer');
+    
     cont.innerHTML = '';
     const regex = /\{\{blank\}\}/g;
     const matches = texto.match(regex) || [];
-    if (matches.length === 0) return;
+    
+    if (matches.length === 0) {
+        distractoresContainer.style.display = 'none';
+        return;
+    }
+    
+    // Mostrar contenedor de distractores cuando hay espacios
+    distractoresContainer.style.display = 'block';
+    
     const info = document.createElement('div');
     info.style.marginBottom = '8px';
     info.textContent = `Espacios detectados: ${matches.length}`;
     cont.appendChild(info);
+    
     for (let i = 0; i < matches.length; i++) {
         const div = document.createElement('div');
         div.className = 'opcion-input';
@@ -631,6 +702,21 @@ function detectarBlancos() {
         `;
         cont.appendChild(div);
     }
+}
+
+// Nueva función para agregar distractores
+function agregarDistractor() {
+    const lista = document.getElementById('distractoresList');
+    const div = document.createElement('div');
+    div.className = 'opcion-input';
+    div.style.display = 'flex';
+    div.style.gap = '10px';
+    div.style.alignItems = 'center';
+    div.innerHTML = `
+        <input type="text" name="distractores[]" placeholder="Opción adicional" style="flex: 1;">
+        <button type="button" class="btn-remove-opcion" onclick="this.parentElement.remove()">×</button>
+    `;
+    lista.appendChild(div);
 }
 
 function actualizarLetrasOpciones() {

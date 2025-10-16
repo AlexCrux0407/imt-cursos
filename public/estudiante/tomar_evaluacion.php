@@ -181,6 +181,129 @@ require __DIR__ . '/../partials/nav.php';
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
+    background: white;
+}
+
+.answer-option:hover {
+    border-color: #3498db;
+    background: #f8f9fa;
+}
+
+.answer-option.selected {
+    border-color: #3498db;
+    background: #e3f2fd;
+}
+
+.answer-option input[type="radio"],
+.answer-option input[type="checkbox"] {
+    margin-right: 12px;
+    transform: scale(1.2);
+}
+
+.answer-option label {
+    flex: 1;
+    cursor: pointer;
+    margin: 0;
+}
+
+/* Estilos para drag and drop */
+.draggable-word {
+    background: #3498db;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: grab;
+    user-select: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.draggable-word:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.draggable-word:active {
+    cursor: grabbing;
+}
+
+.draggable-word.used {
+    background: #95a5a6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.drop-zone {
+    display: inline-block;
+    min-width: 120px;
+    min-height: 35px;
+    border: 2px dashed #dee2e6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    margin: 0 4px;
+    position: relative;
+    background: white;
+    transition: all 0.3s ease;
+    vertical-align: middle;
+}
+
+.drop-zone.drag-over {
+    border-color: #3498db;
+    background: #e3f2fd;
+    border-style: solid;
+}
+
+.drop-zone.filled {
+    border-color: #27ae60;
+    background: #d5f4e6;
+    border-style: solid;
+}
+
+.drop-placeholder {
+    color: #adb5bd;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.drop-content {
+    background: #27ae60;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.remove-word {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.remove-word:hover {
+    background: #c0392b;
+}
+
+.word-bank {
+    transition: all 0.3s ease;
+}
+
+.word-bank.drag-active {
+    border-color: #3498db;
+    background: #f8f9fa;
 }
 
 .answer-option:hover {
@@ -451,16 +574,47 @@ require __DIR__ . '/../partials/nav.php';
                                 </div>
                             </div>
                         <?php elseif ($pregunta['tipo'] === 'completar_espacios'): ?>
-                            <?php $data = json_decode($pregunta['opciones'], true); $texto = $data['texto'] ?? ''; $blancos = $data['blancos'] ?? 0; ?>
-                            <div style="background:#f8f9fa;padding:12px;border-radius:8px;margin-bottom:8px;">
-                                <?= nl2br(htmlspecialchars($texto)) ?>
+                            <?php 
+                            $data = json_decode($pregunta['opciones'], true); 
+                            $texto = $data['texto'] ?? ''; 
+                            $blancos = $data['blancos'] ?? 0;
+                            $respuestas_correctas = json_decode($pregunta['respuesta_correcta'], true) ?? [];
+                            $distractores = $data['distractores'] ?? [];
+                            
+                            // Crear opciones mezcladas para arrastrar (correctas + distractores)
+                            $opciones_arrastrar = array_merge($respuestas_correctas, $distractores);
+                            shuffle($opciones_arrastrar);
+                            ?>
+                            
+                            <!-- Texto con espacios en blanco -->
+                            <div class="completar-texto" style="background:#f8f9fa;padding:20px;border-radius:8px;margin-bottom:20px;font-size:1.1rem;line-height:1.8;">
+                                <?php
+                                // Reemplazar {{blank}} con zonas de drop
+                                $texto_con_drops = $texto;
+                                for ($i = 0; $i < (int)$blancos; $i++) {
+                                    $drop_zone = '<span class="drop-zone" data-blank-index="' . $i . '" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                                        <input type="hidden" name="respuesta_' . $pregunta['id'] . '[' . $i . ']" class="drop-input">
+                                        <span class="drop-placeholder">Arrastra aquí</span>
+                                        <span class="drop-content" style="display:none;"></span>
+                                        <button type="button" class="remove-word" onclick="removeWord(this)" style="display:none;">×</button>
+                                    </span>';
+                                    $texto_con_drops = preg_replace('/\{\{blank\}\}/', $drop_zone, $texto_con_drops, 1);
+                                }
+                                echo $texto_con_drops;
+                                ?>
                             </div>
-                            <?php for ($i = 0; $i < (int)$blancos; $i++): ?>
-                                <div class="answer-option">
-                                    <label>Espacio <?= $i + 1 ?></label>
-                                    <input type="text" name="respuesta_<?= $pregunta['id'] ?>[<?= $i ?>]" onchange="updateProgress()" oninput="updateProgress()" placeholder="Completa la palabra faltante">
+                            
+                            <!-- Banco de palabras para arrastrar -->
+                            <div class="word-bank" style="background:white;border:2px dashed #dee2e6;border-radius:8px;padding:15px;min-height:80px;">
+                                <h5 style="margin:0 0 15px 0;color:#6c757d;font-size:0.9rem;">Banco de palabras (arrastra las palabras a los espacios correspondientes):</h5>
+                                <div class="draggable-words" style="display:flex;flex-wrap:wrap;gap:10px;">
+                                    <?php foreach ($opciones_arrastrar as $index => $opcion): ?>
+                                        <div class="draggable-word" draggable="true" ondragstart="drag(event)" data-word="<?= htmlspecialchars($opcion) ?>">
+                                            <?= htmlspecialchars($opcion) ?>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
-                            <?php endfor; ?>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -554,6 +708,129 @@ function startTimer() {
             document.getElementById('evaluation-form').submit();
         }
     }, 1000);
+}
+
+// Funciones para drag and drop
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.getAttribute('data-word'));
+    ev.target.style.opacity = '0.5';
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+    ev.target.closest('.drop-zone').classList.add('drag-over');
+}
+
+function dragLeave(ev) {
+    ev.target.closest('.drop-zone').classList.remove('drag-over');
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    const dropZone = ev.target.closest('.drop-zone');
+    const word = ev.dataTransfer.getData("text");
+    
+    // Remover clase de drag-over
+    dropZone.classList.remove('drag-over');
+    
+    // Si ya hay una palabra, devolverla al banco
+    const currentInput = dropZone.querySelector('.drop-input');
+    if (currentInput.value) {
+        returnWordToBank(currentInput.value);
+    }
+    
+    // Colocar la nueva palabra
+    const placeholder = dropZone.querySelector('.drop-placeholder');
+    const content = dropZone.querySelector('.drop-content');
+    const removeBtn = dropZone.querySelector('.remove-word');
+    
+    placeholder.style.display = 'none';
+    content.style.display = 'inline-block';
+    content.textContent = word;
+    removeBtn.style.display = 'inline-flex';
+    currentInput.value = word;
+    
+    dropZone.classList.add('filled');
+    
+    // Marcar la palabra como usada en el banco
+    markWordAsUsed(word);
+    
+    // Actualizar progreso
+    updateProgress();
+}
+
+function removeWord(btn) {
+    const dropZone = btn.closest('.drop-zone');
+    const input = dropZone.querySelector('.drop-input');
+    const word = input.value;
+    
+    // Limpiar la zona de drop
+    const placeholder = dropZone.querySelector('.drop-placeholder');
+    const content = dropZone.querySelector('.drop-content');
+    
+    placeholder.style.display = 'inline';
+    content.style.display = 'none';
+    btn.style.display = 'none';
+    input.value = '';
+    
+    dropZone.classList.remove('filled');
+    
+    // Devolver la palabra al banco
+    returnWordToBank(word);
+    
+    // Actualizar progreso
+    updateProgress();
+}
+
+function markWordAsUsed(word) {
+    const wordElements = document.querySelectorAll('.draggable-word');
+    wordElements.forEach(el => {
+        if (el.getAttribute('data-word') === word) {
+            el.classList.add('used');
+            el.draggable = false;
+        }
+    });
+}
+
+function returnWordToBank(word) {
+    const wordElements = document.querySelectorAll('.draggable-word');
+    wordElements.forEach(el => {
+        if (el.getAttribute('data-word') === word) {
+            el.classList.remove('used');
+            el.draggable = true;
+            el.style.opacity = '1';
+        }
+    });
+}
+
+// Actualizar la función updateProgress para incluir completar_espacios
+function updateProgress() {
+    const totalQuestions = document.querySelectorAll('.question-container').length;
+    let answeredQuestions = 0;
+    
+    document.querySelectorAll('.question-container').forEach(container => {
+        const tipo = container.getAttribute('data-tipo');
+        const id = container.getAttribute('data-pregunta-id');
+        let answered = false;
+        
+        if (tipo === 'multiple_choice' || tipo === 'verdadero_falso') {
+            const checkedInputs = container.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked');
+            answered = checkedInputs.length > 0;
+        } else if (tipo === 'texto_corto' || tipo === 'texto_largo') {
+            const textInputs = container.querySelectorAll('input[type="text"], textarea');
+            answered = Array.from(textInputs).some(inp => inp.value && inp.value.trim() !== '');
+        } else if (tipo === 'emparejar_columnas') {
+            const selects = container.querySelectorAll('select');
+            answered = selects.length > 0 && Array.from(selects).every(s => s.value && s.value.trim() !== '');
+        } else if (tipo === 'completar_espacios') {
+            const inputs = container.querySelectorAll('.drop-input');
+            answered = inputs.length > 0 && Array.from(inputs).every(inp => inp.value && inp.value.trim() !== '');
+        }
+        if (answered) answeredQuestions++;
+    });
+    const progress = (answeredQuestions / totalQuestions) * 100;
+    document.getElementById('progress-fill').style.width = progress + '%';
+    document.getElementById('submit-btn').disabled = answeredQuestions !== totalQuestions;
 }
 
 // Confirmar antes de salir de la página

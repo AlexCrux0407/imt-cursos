@@ -10,9 +10,13 @@ $curso_id = $_GET['id'] ?? 0;
 // Verificar que el curso pertenece al docente
 $stmt = $conn->prepare("
     SELECT * FROM cursos 
-    WHERE id = :id AND (creado_por = :docente_id OR asignado_a = :docente_id)
+    WHERE id = :id AND (creado_por = :docente_id OR asignado_a = :docente_id2)
 ");
-$stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
+$stmt->execute([
+    ':id' => $curso_id, 
+    ':docente_id' => $_SESSION['user_id'],
+    ':docente_id2' => $_SESSION['user_id']
+]);
 $curso = $stmt->fetch();
 
 if (!$curso) {

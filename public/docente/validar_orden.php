@@ -16,14 +16,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         INNER JOIN modulos m ON l.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
         WHERE l.modulo_id = :modulo_id AND l.orden = :orden 
-        AND l.id != :leccion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
+        AND l.id != :leccion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
     ");
     
     $stmt->execute([
         ':modulo_id' => $modulo_id,
         ':orden' => $orden,
         ':leccion_id' => $leccion_id,
-        ':docente_id' => $_SESSION['user_id']
+        ':docente_id' => $_SESSION['user_id'],
+        ':docente_id2' => $_SESSION['user_id']
     ]);
     
     $existe = $stmt->fetch();

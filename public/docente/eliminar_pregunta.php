@@ -19,9 +19,13 @@ $stmt = $conn->prepare("
     INNER JOIN evaluaciones_modulo e ON p.evaluacion_id = e.id
     INNER JOIN modulos m ON e.modulo_id = m.id
     INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE p.id = :pregunta_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)
+    WHERE p.id = :pregunta_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
 ");
-$stmt->execute([':pregunta_id' => $pregunta_id, ':docente_id' => $_SESSION['user_id']]);
+$stmt->execute([
+    ':pregunta_id' => $pregunta_id, 
+    ':docente_id' => $_SESSION['user_id'],
+    ':docente_id2' => $_SESSION['user_id']
+]);
 $pregunta = $stmt->fetch();
 
 if (!$pregunta) {
@@ -56,11 +60,11 @@ try {
         UPDATE evaluaciones_modulo 
         SET puntaje_maximo = (
             SELECT COALESCE(SUM(puntaje), 0) FROM preguntas_evaluacion 
-            WHERE evaluacion_id = :evaluacion_id
+            WHERE evaluacion_id = :evaluacion_id2
         )
         WHERE id = :evaluacion_id
     ");
-    $stmt->execute([':evaluacion_id' => $evaluacion_id]);
+    $stmt->execute([':evaluacion_id' => $evaluacion_id, ':evaluacion_id2' => $evaluacion_id]);
     
     $conn->commit();
     
@@ -69,8 +73,25 @@ try {
     
 } catch (Exception $e) {
     $conn->rollback();
-    error_log("Error eliminando pregunta: " . $e->getMessage());
-    header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_eliminar');
+    
+    // Log detallado del error
+    $error_details = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'user_id' => $_SESSION['user_id'] ?? 'unknown',
+        'pregunta_id' => $pregunta_id,
+        'evaluacion_id' => $evaluacion_id,
+        'error_message' => $e->getMessage(),
+        'error_file' => $e->getFile(),
+        'error_line' => $e->getLine(),
+        'stack_trace' => $e->getTraceAsString()
+    ];
+    
+    error_log("Error eliminando pregunta: " . json_encode($error_details));
+    file_put_contents(__DIR__ . '/../../debug_eliminar_pregunta.log', 
+        date('Y-m-d H:i:s') . " - Error eliminando pregunta: " . json_encode($error_details) . "\n", 
+        FILE_APPEND | LOCK_EX);
+    
+    header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_eliminar&details=' . urlencode($e->getMessage()));
     exit;
 }
 ?>

@@ -2,6 +2,12 @@
 require_once __DIR__ . '/../../app/auth.php';
 require_role('docente');
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../config/paths.php';
+
+// Debug inicial
+error_log("=== INICIO PROCESAR PREGUNTA ===");
+error_log("REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD']);
+error_log("POST data: " . print_r($_POST, true));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $evaluacion_id = (int)($_POST['evaluacion_id'] ?? 0);
@@ -14,12 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orden = (int)($_POST['orden'] ?? 1);
     $explicacion = trim($_POST['explicacion'] ?? '');
     
+    error_log("Variables procesadas - evaluacion_id: $evaluacion_id, tipo: $tipo, pregunta_id: $pregunta_id");
+    
     if (empty($pregunta) || $evaluacion_id === 0) {
+        error_log("ERROR: Datos inválidos - pregunta vacía o evaluacion_id = 0");
         header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_invalidos');
         exit;
     }
     
     // Verificar que la evaluación pertenece a un módulo del docente
+    error_log("Verificando permisos de evaluación...");
     $stmt = $conn->prepare("
         SELECT e.id FROM evaluaciones_modulo e
         INNER JOIN modulos m ON e.modulo_id = m.id
@@ -33,9 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
     
     if (!$stmt->fetch()) {
+        error_log("ERROR: Acceso denegado para evaluación $evaluacion_id");
         header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
         exit;
     }
+    
+    error_log("Permisos verificados correctamente");
     
     // Procesar respuesta correcta según el tipo
     $opciones = null;
@@ -101,14 +114,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'completar_espacios':
             $texto = trim($_POST['texto_completar'] ?? '');
             $respuestas = $_POST['blancos_respuestas'] ?? [];
-            $opciones = json_encode(['texto' => $texto, 'blancos' => count($respuestas)]);
-            $respuesta_correcta = json_encode(array_values($respuestas));
+            
+            // Validar que hay texto y respuestas
+            if (empty($texto) || empty($respuestas)) {
+                header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_incompletos');
+                exit;
+            }
+            
+            // Procesar distractores de forma segura
+            $distractores = [];
+            if (isset($_POST['distractores']) && is_array($_POST['distractores'])) {
+                $distractores = array_filter(array_map('trim', $_POST['distractores']), function($d) { 
+                    return !empty($d); 
+                });
+            }
+            
+            $opciones = json_encode([
+                'texto' => $texto, 
+                'blancos' => count($respuestas),
+                'distractores' => $distractores
+            ], JSON_UNESCAPED_UNICODE);
+            
+            $respuesta_correcta = json_encode(array_values($respuestas), JSON_UNESCAPED_UNICODE);
             break;
     }
     
     try {
+        // Debug temporal
+        error_log("DEBUG: Iniciando procesamiento de pregunta");
+        error_log("DEBUG: tipo = $tipo");
+        error_log("DEBUG: opciones = $opciones");
+        error_log("DEBUG: respuesta_correcta = $respuesta_correcta");
+        
         if ($pregunta_id > 0) {
             // Actualizar pregunta existente
+            error_log("DEBUG: Actualizando pregunta existente ID: $pregunta_id");
+            
             $stmt = $conn->prepare("
                 UPDATE preguntas_evaluacion 
                 SET pregunta = :pregunta, tipo = :tipo, opciones = :opciones, 
@@ -117,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 WHERE id = :pregunta_id AND evaluacion_id = :evaluacion_id
             ");
             
-            $stmt->execute([
+            $params = [
                 ':pregunta' => $pregunta,
                 ':tipo' => $tipo,
                 ':opciones' => $opciones,
@@ -127,22 +168,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':explicacion' => $explicacion,
                 ':pregunta_id' => $pregunta_id,
                 ':evaluacion_id' => $evaluacion_id
-            ]);
+            ];
             
+            error_log("DEBUG: Parámetros de actualización: " . print_r($params, true));
+            
+            $stmt->execute($params);
+            
+            error_log("DEBUG: Pregunta actualizada exitosamente");
             $mensaje = 'pregunta_actualizada';
         } else {
-            // Crear nueva pregunta
+            // Insertar nueva pregunta
+            error_log("DEBUG: Insertando nueva pregunta");
+            
             $stmt = $conn->prepare("
-                INSERT INTO preguntas_evaluacion (
-                    evaluacion_id, pregunta, tipo, opciones, respuesta_correcta, 
-                    puntaje, orden, explicacion
-                ) VALUES (
-                    :evaluacion_id, :pregunta, :tipo, :opciones, :respuesta_correcta,
-                    :puntaje, :orden, :explicacion
-                )
+                INSERT INTO preguntas_evaluacion 
+                (evaluacion_id, pregunta, tipo, opciones, respuesta_correcta, puntaje, orden, explicacion) 
+                VALUES (:evaluacion_id, :pregunta, :tipo, :opciones, :respuesta_correcta, :puntaje, :orden, :explicacion)
             ");
             
-            $stmt->execute([
+            $params = [
                 ':evaluacion_id' => $evaluacion_id,
                 ':pregunta' => $pregunta,
                 ':tipo' => $tipo,
@@ -151,8 +195,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':puntaje' => $puntaje,
                 ':orden' => $orden,
                 ':explicacion' => $explicacion
-            ]);
+            ];
             
+            error_log("DEBUG: Parámetros de inserción: " . print_r($params, true));
+            
+            $stmt->execute($params);
+            
+            error_log("DEBUG: Pregunta insertada exitosamente");
             $mensaje = 'pregunta_creada';
         }
         
@@ -163,16 +212,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 SELECT SUM(puntaje) FROM preguntas_evaluacion 
                 WHERE evaluacion_id = :evaluacion_id
             )
-            WHERE id = :evaluacion_id
+            WHERE id = :evaluacion_id2
         ");
-        $stmt->execute([':evaluacion_id' => $evaluacion_id]);
+        $stmt->execute([':evaluacion_id' => $evaluacion_id, ':evaluacion_id2' => $evaluacion_id]);
         
         header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=' . $mensaje);
         exit;
         
     } catch (Exception $e) {
         error_log("Error procesando pregunta: " . $e->getMessage());
-        header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_procesar');
+        error_log("POST data: " . print_r($_POST, true));
+        
+        // Redirigir con error específico según el tipo de pregunta
+        $error_param = 'error_procesar';
+        if (isset($_POST['tipo']) && $_POST['tipo'] === 'completar_espacios') {
+            $error_param = 'error_espacios';
+        }
+        
+        if ($pregunta_id > 0) {
+            header('Location: ' . BASE_URL . '/docente/editar_pregunta.php?id=' . $pregunta_id . '&evaluacion_id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=' . $error_param);
+        } else {
+            header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=' . $error_param);
+        }
         exit;
     }
 } else {

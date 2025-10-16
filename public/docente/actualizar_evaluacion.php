@@ -30,8 +30,17 @@ if ($evaluacion_id === 0 || empty($titulo) || $modulo_id === 0) {
 }
 
 // Verificar acceso del docente a la evaluación
-$stmt = $conn->prepare("\n    SELECT e.id FROM evaluaciones_modulo e\n    INNER JOIN modulos m ON e.modulo_id = m.id\n    INNER JOIN cursos c ON m.curso_id = c.id\n    WHERE e.id = :evaluacion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id)\n");
-$stmt->execute([':evaluacion_id' => $evaluacion_id, ':docente_id' => $_SESSION['user_id']]);
+$stmt = $conn->prepare("
+    SELECT e.id FROM evaluaciones_modulo e
+    INNER JOIN modulos m ON e.modulo_id = m.id
+    INNER JOIN cursos c ON m.curso_id = c.id
+    WHERE e.id = :evaluacion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
+");
+$stmt->execute([
+    ':evaluacion_id' => $evaluacion_id, 
+    ':docente_id' => $_SESSION['user_id'],
+    ':docente_id2' => $_SESSION['user_id']
+]);
 if (!$stmt->fetch()) {
     header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=acceso_denegado');
     exit;
