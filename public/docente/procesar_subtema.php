@@ -72,15 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        header('Location: <?= BASE_URL ?>/docente/subtemas_tema.php?id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=subtema_creado');
+        header('Location: ' . BASE_URL . '/docente/subtemas_tema.php?id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=subtema_creado');
         exit;
         
     } catch (Exception $e) {
-        header('Location: <?= BASE_URL ?>/docente/subtemas_tema.php?id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_crear');
+        header('Location: ' . BASE_URL . '/docente/subtemas_tema.php?id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_crear');
         exit;
     }
 } else {
-    header('Location: <?= BASE_URL ?>/docente/admin_cursos.php');
+    header('Location: ' . BASE_URL . '/docente/admin_cursos.php');
     exit;
 }
 ?>

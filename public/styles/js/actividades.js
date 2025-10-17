@@ -669,7 +669,6 @@ window.actividades = {
             const mensaje = actividades.utilidades.crearElemento('div', 'mensaje-examen', 'El examen ha sido iniciado. Serás redirigido a la página del examen.');
             contenedor.appendChild(mensaje);
             
-            // Simular redirección o iniciar examen
             setTimeout(() => {
                 if (configuracion.urlExamen) {
                     window.location.href = configuracion.urlExamen;
@@ -680,7 +679,6 @@ window.actividades = {
         },
         
         evaluar: function(configuracion, respuestas) {
-            // Esta función sería implementada según el sistema de evaluación específico
             return {
                 iniciado: true,
                 completado: respuestas ? true : false,

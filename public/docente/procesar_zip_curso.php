@@ -38,7 +38,8 @@ try {
     ");
     $stmt->execute([
         ':curso_id' => $curso_id, 
-        ':docente_id1' => $_SESSION['user_id']
+        ':docente_id1' => $_SESSION['user_id'],
+        ':docente_id' => $_SESSION['user_id']
     ]);
     $curso = $stmt->fetch();
 
