@@ -91,7 +91,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
             }
             $opciones = json_encode(['pairs' => $pairs]);
-            $respuesta_correcta = json_encode(array_combine(range(0, count($columna1) - 1), range(0, count($columna1) - 1)));
+            // Guardar como respuesta correcta el mapeo de índices a las definiciones reales
+            $respuesta_correcta_map = [];
+            for ($i = 0; $i < count($columna1); $i++) {
+                $respuesta_correcta_map[$i] = $columna2[$i]; // índice concepto -> definición correcta
+            }
+            $respuesta_correcta = json_encode($respuesta_correcta_map);
             break;
             
         case 'completar_espacios':

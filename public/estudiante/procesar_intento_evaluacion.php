@@ -3,6 +3,24 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
 
+// Función para normalizar texto y hacer comparación flexible
+function normalizeAndCompare($text1, $text2) {
+    if ($text1 === null || $text2 === null) return false;
+    
+    // Normalizar ambos textos
+    $text1 = mb_convert_encoding(trim($text1), 'UTF-8', 'UTF-8');
+    $text2 = mb_convert_encoding(trim($text2), 'UTF-8', 'UTF-8');
+    
+    // Comparación exacta primero
+    if ($text1 === $text2) return true;
+    
+    // Comparación de similitud para manejar diferencias menores de codificación
+    $similarity = 0;
+    similar_text($text1, $text2, $similarity);
+    
+    return $similarity > 95; // 95% de similitud
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ' . BASE_URL . '/estudiante/dashboard.php');
     exit;
@@ -228,14 +246,32 @@ try {
                      // Insertar una respuesta por cada par
                      foreach ($correctas as $indice => $valor_correcto) {
                          $respuesta_estudiante_par = $resp[$indice] ?? null;
-                         $par_correcto = isset($resp[$indice]) && $resp[$indice] == $valor_correcto;
+                         
+                         // Obtener la definición seleccionada por el estudiante
+                         $definicion_estudiante = null;
+                         if ($respuesta_estudiante_par !== null) {
+                             // El estudiante seleccionó el índice original de una definición
+                             // Necesitamos obtener el texto de esa definición desde las opciones
+                             $opciones_data = json_decode($pregunta['opciones'], true);
+                             $pairs = $opciones_data['pairs'] ?? [];
+                             if (isset($pairs[$respuesta_estudiante_par])) {
+                                 $definicion_estudiante = $pairs[$respuesta_estudiante_par]['right'];
+                             }
+                         }
+                         
+                         // LÓGICA CORREGIDA: Comparar directamente la definición seleccionada 
+                         // con la respuesta correcta para este par específico
+                         $par_correcto = false;
+                         if ($definicion_estudiante !== null) {
+                             // Comparar la definición seleccionada con la respuesta correcta para este par
+                             $par_correcto = normalizeAndCompare($definicion_estudiante, $valor_correcto);
+                         }
                          
                          error_log("DEBUG - Par $indice:");
-                         error_log("  - Respuesta estudiante: " . json_encode($respuesta_estudiante_par));
-                         error_log("  - Respuesta correcta: " . json_encode($valor_correcto));
-                         error_log("  - Comparación (==): " . ($resp[$indice] == $valor_correcto ? 'true' : 'false'));
-                         error_log("  - Comparación (===): " . ($resp[$indice] === $valor_correcto ? 'true' : 'false'));
-                         error_log("  - Par correcto: " . ($par_correcto ? 'true' : 'false'));
+                         error_log("  - Índice seleccionado por estudiante: " . json_encode($respuesta_estudiante_par));
+                         error_log("  - Definición seleccionada: " . json_encode($definicion_estudiante));
+                         error_log("  - Definición correcta: " . json_encode($valor_correcto));
+                         error_log("  - Comparación: " . ($par_correcto ? 'CORRECTO' : 'INCORRECTO'));
                          
                          if ($par_correcto) {
                              $pares_correctos++;
@@ -244,7 +280,8 @@ try {
                          // Crear respuesta individual para cada par
                          $respuesta_par = json_encode([
                              'par_indice' => $indice,
-                             'respuesta_estudiante' => $respuesta_estudiante_par,
+                             'respuesta_estudiante_indice' => $respuesta_estudiante_par,
+                             'respuesta_estudiante_texto' => $definicion_estudiante,
                              'respuesta_correcta' => $valor_correcto
                          ]);
                          
@@ -257,7 +294,8 @@ try {
                          // Crear respuesta JSON con información del par
                          $respuesta_par_json = json_encode([
                              'par_indice' => $indice,
-                             'respuesta_estudiante' => $respuesta_estudiante_par,
+                             'respuesta_estudiante_indice' => $respuesta_estudiante_par,
+                             'respuesta_estudiante_texto' => $definicion_estudiante,
                              'respuesta_correcta' => $valor_correcto,
                              'par_correcto' => $par_correcto
                          ]);
@@ -270,7 +308,9 @@ try {
                              ':requiere_revision' => 0
                          ]);
                          
-                         error_log("DEBUG - Insertado par $indice con es_correcta: " . ($par_correcto ? 1 : 0));
+                         // DEBUG: Verificar si la inserción fue exitosa
+                         $inserted_id = $conn->lastInsertId();
+                         error_log("DEBUG - Insertado par $indice con ID: $inserted_id, es_correcta: " . ($par_correcto ? 1 : 0));
                          
                          if ($par_correcto) {
                              $respuestas_correctas++;
@@ -285,9 +325,6 @@ try {
                      
                      // No insertar respuesta general ya que cada par se maneja individualmente
                      continue 2; // Saltar al siguiente pregunta en el bucle principal
-                     
-                     $respuesta_estudiante = json_encode($resp);
-                     break;
 
                  case 'completar_espacios':
                      $resp = $_POST['respuesta_' . $pregunta['id']] ?? [];

@@ -723,8 +723,8 @@ require __DIR__ . '/../partials/nav.php';
                                     actualizarCampoOculto();
                                     
                                     // Llamar a updateProgress después de actualizar el campo
-                                    if (typeof window.updateProgress === 'function') {
-                                        window.updateProgress();
+                                    if (typeof updateProgress === 'function') {
+                                        updateProgress();
                                     }
                                 }
                                 
@@ -775,16 +775,16 @@ require __DIR__ . '/../partials/nav.php';
                                         actualizarCampoOculto();
                                         
                                         // Llamar a updateProgress después de actualizar el campo
-                                        if (typeof window.updateProgress === 'function') {
-                                            window.updateProgress();
+                                        if (typeof updateProgress === 'function') {
+                                            updateProgress();
                                         }
                                     });
                                 }
                                 
                                 function actualizarCampoOculto() {
                                     if (hiddenInput) {
-                                        // Crear array de respuestas usando índices numéricos
-                                        const respuestas = [];
+                                        // Crear objeto de respuestas usando índices numéricos
+                                        const respuestas = {};
                                         
                                         // Obtener los pares originales y las definiciones con índices desde los script tags
                                         const preguntaId = container.getAttribute('data-pregunta-id');
@@ -817,8 +817,13 @@ require __DIR__ . '/../partials/nav.php';
                                         console.log('Campo actualizado con índices originales:', respuestas);
                                         
                                         // Llamar a updateProgress
-                                        if (typeof window.updateProgress === 'function') {
-                                            window.updateProgress();
+                                        console.log('[DEBUG] Verificando si updateProgress existe:', typeof updateProgress);
+                                        if (typeof updateProgress === 'function') {
+                                            console.log('[DEBUG] Llamando a updateProgress()...');
+                                            updateProgress();
+                                            console.log('[DEBUG] updateProgress() ejecutado');
+                                        } else {
+                                            console.log('[DEBUG] ERROR: updateProgress no es una función');
                                         }
                                     }
                                 }
@@ -912,6 +917,9 @@ function updateProgress() {
     const containers = document.querySelectorAll('.question-container');
     const totalQuestions = containers.length;
     let answeredQuestions = 0;
+    
+    console.log(`[DEBUG] === INICIO updateProgress ===`);
+    console.log(`[DEBUG] Total de contenedores encontrados: ${totalQuestions}`);
     containers.forEach(container => {
         const id = container.dataset.preguntaId;
         const tipo = container.dataset.tipo;
@@ -930,40 +938,76 @@ function updateProgress() {
             const inputs = container.querySelectorAll(`input[name^="respuesta_${id}["]`);
             answered = inputs.length > 0 && Array.from(inputs).every(inp => inp.value && inp.value.trim() !== '');
         } else if (tipo === 'relacionar_pares') {
-            // Verificar si la actividad de relacionar columnas tiene respuestas en campo oculto
-            const campoRespuesta = document.querySelector(`input[name="respuesta_${id}"]`);
-            console.log(`Verificando pregunta ${id}, campo:`, campoRespuesta);
-            console.log(`Valor del campo:`, campoRespuesta ? campoRespuesta.value : 'null');
-            
-            if (campoRespuesta && campoRespuesta.value) {
-                try {
-                    const respuestas = JSON.parse(campoRespuesta.value);
-                    console.log(`Respuestas parseadas:`, respuestas);
-                    
-                    // Obtener el número total de pares esperados desde los datos JSON
-                    const scriptPairs = document.getElementById(`pairs-data-${id}`);
-                    if (scriptPairs) {
-                        const pairs = JSON.parse(scriptPairs.textContent);
-                        console.log(`Pairs esperados:`, pairs.length, `Respuestas dadas:`, Object.keys(respuestas).length);
-                        answered = Object.keys(respuestas).length === pairs.length;
-                    } else {
-                        console.log(`No se encontró script pairs para pregunta ${id}`);
-                        answered = Object.keys(respuestas).length > 0;
-                    }
-                } catch (e) {
-                    console.log(`Error parseando respuestas:`, e);
-                    answered = false;
-                }
-            } else {
-                answered = false;
-            }
-            console.log(`Pregunta ${id} respondida:`, answered);
+                            // Verificar si la actividad de relacionar columnas tiene respuestas en campo oculto
+                            const campoRespuesta = document.querySelector(`input[name="respuesta_${id}"]`);
+                            console.log(`[DEBUG] Verificando pregunta ${id}, campo:`, campoRespuesta);
+                            console.log(`[DEBUG] Valor del campo:`, campoRespuesta ? campoRespuesta.value : 'null');
+                            
+                            if (campoRespuesta && campoRespuesta.value && campoRespuesta.value.trim() !== '') {
+                                try {
+                                    const respuestas = JSON.parse(campoRespuesta.value);
+                                    console.log(`[DEBUG] Respuestas parseadas:`, respuestas);
+                                    
+                                    // Verificar que no sea un objeto vacío
+                                    const numRespuestas = Object.keys(respuestas).length;
+                                    console.log(`[DEBUG] Número de respuestas:`, numRespuestas);
+                                    
+                                    if (numRespuestas > 0) {
+                                        // Obtener el número total de pares esperados desde los datos JSON
+                                        const scriptPairs = document.getElementById(`pairs-data-${id}`);
+                                        console.log(`[DEBUG] Script pairs encontrado:`, scriptPairs);
+                                        if (scriptPairs) {
+                                            const pairs = JSON.parse(scriptPairs.textContent);
+                                            console.log(`[DEBUG] Pairs esperados:`, pairs.length, `Respuestas dadas:`, numRespuestas);
+                                            answered = numRespuestas >= pairs.length;
+                                            console.log(`[DEBUG] Pregunta ${id} considerada respondida:`, answered);
+                                        } else {
+                                            console.log(`[DEBUG] No se encontró script pairs para pregunta ${id}, asumiendo respondida si hay respuestas`);
+                                            answered = numRespuestas >= 8; // Asumimos 8 pares como mínimo
+                                            console.log(`[DEBUG] Pregunta ${id} considerada respondida (fallback):`, answered);
+                                        }
+                                    } else {
+                                        answered = false;
+                                        console.log(`[DEBUG] Pregunta ${id} NO respondida - objeto vacío`);
+                                    }
+                                } catch (e) {
+                                    console.log(`[DEBUG] Error parseando respuestas:`, e);
+                                    answered = false;
+                                }
+                            } else {
+                                console.log(`[DEBUG] Campo vacío o no encontrado para pregunta ${id}`);
+                                answered = false;
+                            }
+                            console.log(`[DEBUG] Pregunta ${id} resultado final:`, answered);
         }
         if (answered) answeredQuestions++;
     });
+    
+    console.log(`[DEBUG] === RESUMEN FINAL ===`);
+    console.log(`[DEBUG] Preguntas respondidas: ${answeredQuestions}`);
+    console.log(`[DEBUG] Total de preguntas: ${totalQuestions}`);
+    console.log(`[DEBUG] ¿Todas respondidas? ${answeredQuestions === totalQuestions}`);
+    
     const progress = (answeredQuestions / totalQuestions) * 100;
-    document.getElementById('progress-fill').style.width = progress + '%';
-    document.getElementById('submit-btn').disabled = answeredQuestions !== totalQuestions;
+    console.log(`[DEBUG] Progreso calculado: ${answeredQuestions}/${totalQuestions} = ${progress}%`);
+    
+    const progressFill = document.getElementById('progress-fill');
+    if (progressFill) {
+        progressFill.style.width = progress + '%';
+        console.log(`[DEBUG] Barra de progreso actualizada a ${progress}%`);
+    }
+    
+    const submitBtn = document.getElementById('submit-btn');
+    console.log(`[DEBUG] Botón submit encontrado:`, submitBtn);
+    console.log(`[DEBUG] Estado actual del botón:`, submitBtn ? (submitBtn.disabled ? 'DESHABILITADO' : 'HABILITADO') : 'NO ENCONTRADO');
+    
+    const shouldEnable = answeredQuestions === totalQuestions;
+    console.log(`[DEBUG] ¿Debería habilitarse? ${shouldEnable} (${answeredQuestions} === ${totalQuestions})`);
+    
+    if (submitBtn) {
+        submitBtn.disabled = !shouldEnable;
+        console.log(`[DEBUG] Botón actualizado a:`, submitBtn.disabled ? 'DESHABILITADO' : 'HABILITADO');
+    }
 }
 
 function startTimer() {
@@ -1084,63 +1128,7 @@ function returnWordToBank(word) {
     });
 }
 
-// Actualizar la función updateProgress para incluir completar_espacios
-function updateProgress() {
-    const totalQuestions = document.querySelectorAll('.question-container').length;
-    let answeredQuestions = 0;
-    
-    document.querySelectorAll('.question-container').forEach(container => {
-        const tipo = container.getAttribute('data-tipo');
-        const id = container.getAttribute('data-pregunta-id');
-        let answered = false;
-        
-        if (tipo === 'multiple_choice' || tipo === 'verdadero_falso') {
-            const checkedInputs = container.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked');
-            answered = checkedInputs.length > 0;
-        } else if (tipo === 'texto_corto' || tipo === 'texto_largo') {
-            const textInputs = container.querySelectorAll('input[type="text"], textarea');
-            answered = Array.from(textInputs).some(inp => inp.value && inp.value.trim() !== '');
-        } else if (tipo === 'emparejar_columnas') {
-            const selects = container.querySelectorAll('select');
-            answered = selects.length > 0 && Array.from(selects).every(s => s.value && s.value.trim() !== '');
-        } else if (tipo === 'completar_espacios') {
-            const inputs = container.querySelectorAll('.drop-input');
-            answered = inputs.length > 0 && Array.from(inputs).every(inp => inp.value && inp.value.trim() !== '');
-        } else if (tipo === 'relacionar_pares' || container.querySelector('.actividad-relacionar-pares')) {
-            // Verificar si la actividad de relacionar columnas tiene conexiones
-            const actividadContainer = container.querySelector('.actividad-relacionar-pares');
-            const campoRespuesta = document.querySelector(`input[name="respuesta_${id}"]`);
-            console.log('Verificando relacionar_pares para ID:', id, 'Campo:', campoRespuesta);
-            if (campoRespuesta && campoRespuesta.value) {
-                console.log('Valor del campo:', campoRespuesta.value);
-                try {
-                    const respuestas = JSON.parse(campoRespuesta.value);
-                    console.log('Respuestas parseadas:', respuestas);
-                    // Obtener el número total de pares esperados desde los datos
-                    const paresData = actividadContainer ? actividadContainer.getAttribute('data-pairs') : null;
-                    if (paresData) {
-                        const pairs = JSON.parse(paresData);
-                        answered = Object.keys(respuestas).length === pairs.length;
-                        console.log('Pares esperados:', pairs.length, 'Respuestas:', Object.keys(respuestas).length, 'Completado:', answered);
-                    } else {
-                        answered = Object.keys(respuestas).length > 0;
-                        console.log('Sin data-pairs, respuestas:', Object.keys(respuestas).length, 'Completado:', answered);
-                    }
-                } catch (e) {
-                    console.log('Error parseando respuestas:', e);
-                    answered = false;
-                }
-            } else {
-                console.log('No hay campo de respuesta o está vacío');
-                answered = false;
-            }
-        }
-        if (answered) answeredQuestions++;
-    });
-    const progress = (answeredQuestions / totalQuestions) * 100;
-    document.getElementById('progress-fill').style.width = progress + '%';
-    document.getElementById('submit-btn').disabled = answeredQuestions !== totalQuestions;
-}
+// FUNCIÓN DUPLICADA ELIMINADA - updateProgress ya está definida arriba con logging completo
 
 // Confirmar antes de salir de la página
 window.addEventListener('beforeunload', function(e) {
@@ -1193,17 +1181,43 @@ document.addEventListener('DOMContentLoaded', function() {
             const campoRespuesta = actividad.querySelector(`input[name="respuesta_${preguntaId}"]`);
             
             if (campoRespuesta) {
+                // Obtener los pares originales y las definiciones con índices desde los script tags
+                const pairsScript = document.getElementById(`pairs-data-${preguntaId}`);
+                const definicionesScript = document.getElementById(`definiciones-data-${preguntaId}`);
+                
+                const pairs = pairsScript ? JSON.parse(pairsScript.textContent) : [];
+                const definiciones = definicionesScript ? JSON.parse(definicionesScript.textContent) : [];
+                
+                console.log('Pairs originales:', pairs);
+                console.log('Definiciones con índices:', definiciones);
+                console.log('Conexiones Map:', Array.from(conexiones.entries()));
+                
+                // Crear objeto de respuestas usando índices originales
                 const respuestas = {};
-                conexiones.forEach((definicionId, conceptoId) => {
-                    respuestas[conceptoId] = definicionId;
+                
+                // Para cada concepto (índice de la izquierda), encontrar qué definición está conectada
+                pairs.forEach((pair, conceptoIdx) => {
+                    const conceptoId = conceptoIdx.toString();
+                    if (conexiones.has(conceptoId)) {
+                        const definicionIdMezclado = conexiones.get(conceptoId);
+                        // Obtener el índice original de la definición seleccionada
+                        const indiceOriginal = definiciones[parseInt(definicionIdMezclado)].indice_original;
+                        respuestas[conceptoIdx] = indiceOriginal;
+                        console.log(`Concepto ${conceptoIdx} (${pair.left}) → Definición mezclada ${definicionIdMezclado} → Índice original ${indiceOriginal}`);
+                    }
                 });
                 
                 campoRespuesta.value = JSON.stringify(respuestas);
-                console.log('Campo actualizado:', respuestas);
+                console.log('Campo actualizado con índices originales:', respuestas);
                 
                 // Llamar a updateProgress
-                if (typeof window.updateProgress === 'function') {
-                    window.updateProgress();
+                console.log('[DEBUG] Verificando si updateProgress existe:', typeof updateProgress);
+                if (typeof updateProgress === 'function') {
+                    console.log('[DEBUG] Llamando a updateProgress()...');
+                    updateProgress();
+                    console.log('[DEBUG] updateProgress() ejecutado');
+                } else {
+                    console.log('[DEBUG] ERROR: updateProgress no es una función');
                 }
             }
         }
