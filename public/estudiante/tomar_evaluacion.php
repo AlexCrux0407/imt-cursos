@@ -924,33 +924,82 @@ function updateProgress() {
         const id = container.dataset.preguntaId;
         const tipo = container.dataset.tipo;
         let answered = false;
+        
+        console.log(`[DEBUG] === PROCESANDO PREGUNTA ${id} ===`);
+        console.log(`[DEBUG] Tipo detectado: "${tipo}"`);
+        console.log(`[DEBUG] Tipo es relacionar_pares: ${tipo === 'relacionar_pares'}`);
+        
         if (tipo === 'multiple_choice' || tipo === 'verdadero_falso') {
-            answered = !!container.querySelector(`input["radio"][name="respuesta_${id}"]:checked`);
+            answered = !!container.querySelector(`input[type="radio"][name="respuesta_${id}"]:checked`);
         } else if (tipo === 'seleccion_multiple') {
-            answered = container.querySelectorAll(`input["checkbox"][name="respuesta_${id}[]"]:checked`).length > 0;
+            answered = container.querySelectorAll(`input[type="checkbox"][name="respuesta_${id}[]"]:checked`).length > 0;
         } else if (tipo === 'texto_corto' || tipo === 'texto_largo') {
             const ta = container.querySelector(`textarea[name="respuesta_${id}"]`);
             answered = !!(ta && ta.value.trim() !== '');
         } else if (tipo === 'emparejar_columnas') {
-            const selects = container.querySelectorAll(`select[name^="respuesta_${id}["]`);
-            answered = selects.length > 0 && Array.from(selects).every(s => s.value && s.value.trim() !== '');
+            // Verificar si la actividad de emparejar columnas tiene respuestas en campo oculto
+            const campoRespuesta = document.querySelector(`input[name="respuesta_${id}"]`);
+            console.log(`[DEBUG] === VALIDANDO EMPAREJAR_COLUMNAS PREGUNTA ${id} ===`);
+            console.log(`[DEBUG] Campo encontrado:`, campoRespuesta);
+            console.log(`[DEBUG] Valor del campo:`, campoRespuesta ? campoRespuesta.value : 'null');
+            
+            if (campoRespuesta && campoRespuesta.value && campoRespuesta.value.trim() !== '') {
+                try {
+                    const respuestas = JSON.parse(campoRespuesta.value);
+                    console.log(`[DEBUG] Respuestas parseadas exitosamente:`, respuestas);
+                    
+                    // Verificar que no sea un objeto vacío
+                    const numRespuestas = Object.keys(respuestas).length;
+                    console.log(`[DEBUG] Número de respuestas (Object.keys):`, numRespuestas);
+                    
+                    if (numRespuestas > 0) {
+                        // Obtener el número total de pares esperados desde los datos JSON
+                        const scriptPairs = document.getElementById(`pairs-data-${id}`);
+                        console.log(`[DEBUG] Script pairs encontrado:`, scriptPairs);
+                        if (scriptPairs) {
+                            const pairs = JSON.parse(scriptPairs.textContent);
+                            console.log(`[DEBUG] Pairs esperados:`, pairs.length, `Respuestas dadas:`, numRespuestas);
+                            answered = numRespuestas >= pairs.length;
+                            console.log(`[DEBUG] Comparación: ${numRespuestas} >= ${pairs.length} = ${answered}`);
+                        } else {
+                            console.log(`[DEBUG] No se encontró script pairs para pregunta ${id}, usando fallback`);
+                            answered = numRespuestas >= 3; // Fallback para emparejar columnas
+                            console.log(`[DEBUG] Fallback: ${numRespuestas} >= 3 = ${answered}`);
+                        }
+                    } else {
+                        answered = false;
+                        console.log(`[DEBUG] Pregunta ${id} NO respondida - objeto vacío`);
+                    }
+                } catch (e) {
+                    console.log(`[DEBUG] Error parseando respuestas:`, e);
+                    answered = false;
+                }
+            } else {
+                console.log(`[DEBUG] Campo vacío, no encontrado, o valor vacío para pregunta ${id}`);
+                answered = false;
+            }
+            console.log(`[DEBUG] === RESULTADO FINAL EMPAREJAR_COLUMNAS PREGUNTA ${id}: ${answered} ===`);
         } else if (tipo === 'completar_espacios') {
             const inputs = container.querySelectorAll(`input[name^="respuesta_${id}["]`);
             answered = inputs.length > 0 && Array.from(inputs).every(inp => inp.value && inp.value.trim() !== '');
         } else if (tipo === 'relacionar_pares') {
                             // Verificar si la actividad de relacionar columnas tiene respuestas en campo oculto
                             const campoRespuesta = document.querySelector(`input[name="respuesta_${id}"]`);
-                            console.log(`[DEBUG] Verificando pregunta ${id}, campo:`, campoRespuesta);
+                            console.log(`[DEBUG] === VALIDANDO RELACIONAR_PARES PREGUNTA ${id} ===`);
+                            console.log(`[DEBUG] Campo encontrado:`, campoRespuesta);
                             console.log(`[DEBUG] Valor del campo:`, campoRespuesta ? campoRespuesta.value : 'null');
+                            console.log(`[DEBUG] Tipo del campo:`, campoRespuesta ? typeof campoRespuesta.value : 'null');
                             
                             if (campoRespuesta && campoRespuesta.value && campoRespuesta.value.trim() !== '') {
                                 try {
                                     const respuestas = JSON.parse(campoRespuesta.value);
-                                    console.log(`[DEBUG] Respuestas parseadas:`, respuestas);
+                                    console.log(`[DEBUG] Respuestas parseadas exitosamente:`, respuestas);
+                                    console.log(`[DEBUG] Tipo de respuestas:`, typeof respuestas);
                                     
                                     // Verificar que no sea un objeto vacío
                                     const numRespuestas = Object.keys(respuestas).length;
-                                    console.log(`[DEBUG] Número de respuestas:`, numRespuestas);
+                                    console.log(`[DEBUG] Número de respuestas (Object.keys):`, numRespuestas);
+                                    console.log(`[DEBUG] Keys de respuestas:`, Object.keys(respuestas));
                                     
                                     if (numRespuestas > 0) {
                                         // Obtener el número total de pares esperados desde los datos JSON
@@ -960,11 +1009,11 @@ function updateProgress() {
                                             const pairs = JSON.parse(scriptPairs.textContent);
                                             console.log(`[DEBUG] Pairs esperados:`, pairs.length, `Respuestas dadas:`, numRespuestas);
                                             answered = numRespuestas >= pairs.length;
-                                            console.log(`[DEBUG] Pregunta ${id} considerada respondida:`, answered);
+                                            console.log(`[DEBUG] Comparación: ${numRespuestas} >= ${pairs.length} = ${answered}`);
                                         } else {
-                                            console.log(`[DEBUG] No se encontró script pairs para pregunta ${id}, asumiendo respondida si hay respuestas`);
-                                            answered = numRespuestas >= 8; // Asumimos 8 pares como mínimo
-                                            console.log(`[DEBUG] Pregunta ${id} considerada respondida (fallback):`, answered);
+                                            console.log(`[DEBUG] No se encontró script pairs para pregunta ${id}, usando fallback`);
+                                            answered = numRespuestas >= 5; // Reducir el fallback para testing
+                                            console.log(`[DEBUG] Fallback: ${numRespuestas} >= 5 = ${answered}`);
                                         }
                                     } else {
                                         answered = false;
@@ -972,14 +1021,20 @@ function updateProgress() {
                                     }
                                 } catch (e) {
                                     console.log(`[DEBUG] Error parseando respuestas:`, e);
+                                    console.log(`[DEBUG] Valor que causó error:`, campoRespuesta.value);
                                     answered = false;
                                 }
                             } else {
-                                console.log(`[DEBUG] Campo vacío o no encontrado para pregunta ${id}`);
+                                console.log(`[DEBUG] Campo vacío, no encontrado, o valor vacío para pregunta ${id}`);
+                                console.log(`[DEBUG] Campo existe:`, !!campoRespuesta);
+                                console.log(`[DEBUG] Campo tiene valor:`, campoRespuesta ? !!campoRespuesta.value : false);
+                                console.log(`[DEBUG] Valor no está vacío:`, campoRespuesta && campoRespuesta.value ? campoRespuesta.value.trim() !== '' : false);
                                 answered = false;
                             }
-                            console.log(`[DEBUG] Pregunta ${id} resultado final:`, answered);
+                            console.log(`[DEBUG] === RESULTADO FINAL PREGUNTA ${id}: ${answered} ===`);
         }
+        
+        console.log(`[DEBUG] Pregunta ${id} respondida: ${answered}`);
         if (answered) answeredQuestions++;
     });
     
