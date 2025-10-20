@@ -75,9 +75,12 @@ $evaluacion = $stmt->fetch();
 $stmt = $conn->prepare("
     SELECT re.*, pe.pregunta, pe.tipo, pe.opciones, pe.respuesta_correcta
     FROM respuestas_estudiante re
-    INNER JOIN preguntas_evaluacion pe ON re.pregunta_id = pe.id
+    LEFT JOIN preguntas_evaluacion pe ON (
+        re.pregunta_id = pe.id OR 
+        (pe.tipo = 'relacionar_pares' AND re.pregunta_id LIKE CONCAT(pe.id, '_par_%'))
+    )
     WHERE re.intento_id = :intento_id
-    ORDER BY pe.orden ASC
+    ORDER BY pe.orden ASC, re.pregunta_id ASC
 ");
 $stmt->execute([':intento_id' => $intento_id]);
 $respuestas = $stmt->fetchAll();
@@ -343,7 +346,72 @@ require __DIR__ . '/../partials/nav.php';
                         </h5>
                     </div>
                     <div class="p-3">
-                        <?php foreach ($respuestas as $index => $respuesta): ?>
+                        <?php 
+                        // Agrupar respuestas de relacionar_pares por pregunta base
+                        $respuestas_agrupadas = [];
+                        foreach ($respuestas as $respuesta) {
+                            if ($respuesta['tipo'] === 'relacionar_pares' && strpos($respuesta['pregunta_id'], '_par_') !== false) {
+                                // Es un par individual
+                                $pregunta_base_id = explode('_par_', $respuesta['pregunta_id'])[0];
+                                if (!isset($respuestas_agrupadas[$pregunta_base_id])) {
+                                    $respuestas_agrupadas[$pregunta_base_id] = [
+                                        'pregunta' => $respuesta['pregunta'],
+                                        'tipo' => $respuesta['tipo'],
+                                        'opciones' => $respuesta['opciones'],
+                                        'respuesta_correcta' => $respuesta['respuesta_correcta'],
+                                        'pares' => []
+                                    ];
+                                }
+                                $respuestas_agrupadas[$pregunta_base_id]['pares'][] = $respuesta;
+                            } else {
+                                // Respuesta normal
+                                $respuestas_agrupadas[$respuesta['pregunta_id']] = $respuesta;
+                            }
+                        }
+                        
+                        $index = 0;
+                        foreach ($respuestas_agrupadas as $pregunta_id => $respuesta_data): 
+                            if (isset($respuesta_data['pares'])): 
+                                // Es una pregunta de relacionar_pares con pares individuales
+                                foreach ($respuesta_data['pares'] as $par_index => $par_respuesta):
+                                    $par_data = json_decode($par_respuesta['respuesta'], true);
+                        ?>
+                            <div class="pregunta-item <?= $par_respuesta['es_correcta'] === null ? 'pregunta-pendiente' : ($par_respuesta['es_correcta'] ? 'pregunta-correcta' : 'pregunta-incorrecta') ?>">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h6 class="mb-0">Par <?= $par_index + 1 ?> - <?= htmlspecialchars($respuesta_data['pregunta']) ?></h6>
+                                    <span class="badge <?= $par_respuesta['es_correcta'] === null ? 'text-dark' : '' ?>" 
+                                          <?php if ($par_respuesta['es_correcta'] === null): ?>
+                                              style="background: #ffc107 !important; color: #212529 !important;"
+                                          <?php elseif ($par_respuesta['es_correcta']): ?>
+                                              style="background: #28a745 !important; color: white !important;"
+                                          <?php else: ?>
+                                              style="background: #dc3545 !important; color: white !important;"
+                                          <?php endif; ?>>
+                                        <?= $par_respuesta['es_correcta'] === null ? 'Pendiente' : ($par_respuesta['es_correcta'] ? 'Correcta' : 'Incorrecta') ?>
+                                    </span>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Tu respuesta:</strong>
+                                        <div class="respuesta-<?= $par_respuesta['es_correcta'] === null ? 'pendiente' : ($par_respuesta['es_correcta'] ? 'correcta' : 'incorrecta') ?>">
+                                            <?= htmlspecialchars($par_data['respuesta_estudiante'] ?? 'Sin respuesta') ?>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Respuesta correcta:</strong>
+                                        <div class="respuesta-correcta">
+                                            <?= htmlspecialchars($par_data['respuesta_correcta'] ?? '') ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php 
+                                endforeach;
+                            else: 
+                                // Respuesta normal
+                                $respuesta = $respuesta_data;
+                        ?>
                             <div class="pregunta-item <?= $respuesta['es_correcta'] === null ? 'pregunta-pendiente' : ($respuesta['es_correcta'] ? 'pregunta-correcta' : 'pregunta-incorrecta') ?>">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <h6 class="mb-0">Pregunta <?= $index + 1 ?></h6>
@@ -388,11 +456,26 @@ require __DIR__ . '/../partials/nav.php';
                                                 }
                                                 echo '</ul>';
                                             } elseif ($tipo === 'completar_espacios') {
-                                                $blancos = json_decode($resp ?? '[]', true) ?: [];
-                                                echo htmlspecialchars(implode(' | ', $blancos));
-                                            } else {
-                                                echo htmlspecialchars($resp);
-                                            }
+                                $blancos = json_decode($resp ?? '[]', true) ?: [];
+                                echo htmlspecialchars(implode(' | ', $blancos));
+                            } elseif ($tipo === 'relacionar_pares') {
+                                $pairs = $opciones['pairs'] ?? [];
+                                $definiciones = $opciones['definiciones'] ?? [];
+                                $respIndices = json_decode($resp ?? '[]', true) ?: [];
+                                echo '<ul style="padding-left:18px;margin:0">';
+                                foreach ($pairs as $idx => $pair) {
+                                    $definicionIdx = $respIndices[$idx] ?? null;
+                                    if ($definicionIdx !== null && isset($definiciones[$definicionIdx])) {
+                                        $definicionSeleccionada = $definiciones[$definicionIdx];
+                                    } else {
+                                        $definicionSeleccionada = 'Sin respuesta';
+                                    }
+                                    echo '<li>' . htmlspecialchars($pair['left']) . ' → ' . htmlspecialchars($definicionSeleccionada) . '</li>';
+                                }
+                                echo '</ul>';
+                            } else {
+                                echo htmlspecialchars($resp);
+                            }
                                             ?>
                                         </div>
                                     </div>
@@ -420,14 +503,25 @@ require __DIR__ . '/../partials/nav.php';
                                                     echo '<ul style="padding-left:18px;margin:0">';
                                                     foreach ($pairs as $idx => $pair) {
                                                         $sel = $derecha[$idx] ?? '';
-                                                        echo '<li>' . htmlspecialchars($pair['left']) . ' → ' . htmlspecialchars($sel) . '</li>';
+                                                        echo '<li>' . htmlspecialchars((string)$pair['left']) . ' → ' . htmlspecialchars((string)$sel) . '</li>';
                                                     }
                                                     echo '</ul>';
                                                 } elseif ($tipo === 'completar_espacios') {
                                                     $vals = json_decode($corr, true) ?: [];
                                                     echo htmlspecialchars(implode(' | ', $vals));
+                                                } elseif ($tipo === 'relacionar_pares') {
+                                    $pairs = $opciones['pairs'] ?? [];
+                                    $definiciones = $opciones['definiciones'] ?? [];
+                                    $correctas = json_decode($corr, true) ?: [];
+                                    echo '<ul style="padding-left:18px;margin:0">';
+                                    foreach ($pairs as $idx => $pair) {
+                                        $correctaIdx = $correctas[$idx] ?? $idx;
+                                        $definicionCorrecta = $definiciones[$correctaIdx] ?? '';
+                                        echo '<li>' . htmlspecialchars((string)$pair['left']) . ' → ' . htmlspecialchars((string)$definicionCorrecta) . '</li>';
+                                    }
+                                    echo '</ul>';
                                                 } else {
-                                                    echo htmlspecialchars($corr);
+                                                    echo htmlspecialchars((string)$corr);
                                                 }
                                                 ?>
                                             </div>
@@ -482,7 +576,10 @@ require __DIR__ . '/../partials/nav.php';
                                     </div>
                                 <?php endif; ?>
                             </div>
-                        <?php endforeach; ?>
+                        <?php 
+                            endif;
+                            $index++;
+                        endforeach; ?>
                     </div>
                 </div>
             </div>

@@ -1,4 +1,9 @@
 <?php
+// Definir BASE_URL si no está definido
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/imt-cursos/public');
+}
+
 $host = '127.0.0.1';
 $db   = 'imt_cursos';
 $user = 'root';

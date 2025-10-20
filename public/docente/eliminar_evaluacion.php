@@ -13,12 +13,7 @@ if ($evaluacion_id === 0 || $modulo_id === 0 || $curso_id === 0) {
 }
 
 // Verificar que la evaluación pertenece a un módulo del docente
-$stmt = $conn->prepare("
-    SELECT e.id, e.titulo FROM evaluaciones_modulo e
-    INNER JOIN modulos m ON e.modulo_id = m.id
-    INNER JOIN cursos c ON m.curso_id = c.id
-    WHERE e.id = :evaluacion_id AND m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
-");
+$stmt = $conn->prepare("\n    SELECT e.id, e.titulo FROM evaluaciones_modulo e\n    INNER JOIN modulos m ON e.modulo_id = m.id\n    INNER JOIN cursos c ON m.curso_id = c.id\n    WHERE e.id = :evaluacion_id AND m.id = :modulo_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)\n");
 $stmt->execute([
     ':evaluacion_id' => $evaluacion_id,
     ':modulo_id' => $modulo_id,
@@ -36,11 +31,7 @@ try {
     $conn->beginTransaction();
     
     // Eliminar respuestas de estudiantes asociadas a las preguntas de esta evaluación
-    $stmt = $conn->prepare("
-        DELETE r FROM respuestas r
-        INNER JOIN preguntas_evaluacion p ON r.pregunta_id = p.id
-        WHERE p.evaluacion_id = :evaluacion_id
-    ");
+    $stmt = $conn->prepare("\n        DELETE r FROM respuestas r\n        INNER JOIN preguntas_evaluacion p ON r.pregunta_id = p.id\n        WHERE p.evaluacion_id = :evaluacion_id\n    ");
     $stmt->execute([':evaluacion_id' => $evaluacion_id]);
     
     // Eliminar intentos de evaluación
@@ -57,13 +48,13 @@ try {
 
     // Recalcular progreso del módulo para todos los estudiantes del módulo afectado
     // Basado en intentos aprobados de cualquier evaluación restante del módulo
-    $stmt = $conn->prepare("\n        UPDATE progreso_modulos pm\n        LEFT JOIN (\n            SELECT ie.usuario_id, e.modulo_id,\n                   MAX(CASE WHEN ie.aprobado = 1 AND ie.estado = 'completado' THEN 1 ELSE 0 END) AS aprobado_flag,\n                   MAX(CASE WHEN ie.aprobado = 1 AND ie.estado = 'completado' THEN ie.fecha_fin END) AS fecha_completado,\n                   MAX(CASE WHEN ie.aprobado = 1 AND ie.estado = 'completado' THEN ie.puntaje_obtenido END) AS puntaje_obtenido\n            FROM intentos_evaluacion ie\n            JOIN evaluaciones_modulo e ON e.id = ie.evaluacion_id\n            WHERE e.modulo_id = :modulo_id\n            GROUP BY ie.usuario_id, e.modulo_id\n        ) t ON t.usuario_id = pm.usuario_id AND t.modulo_id = pm.modulo_id\n        SET pm.evaluacion_completada = CASE WHEN IFNULL(t.aprobado_flag, 0) = 1 THEN 1 ELSE 0 END,\n            pm.fecha_evaluacion_completada = CASE WHEN IFNULL(t.aprobado_flag, 0) = 1 THEN t.fecha_completado ELSE NULL END,\n            pm.puntaje_evaluacion = CASE WHEN IFNULL(t.aprobado_flag, 0) = 1 THEN t.puntaje_obtenido ELSE NULL END\n        WHERE pm.modulo_id = :modulo_id\n    ");
-    $stmt->execute([':modulo_id' => $modulo_id]);
+    $stmt = $conn->prepare("\n        UPDATE progreso_modulos pm\n        LEFT JOIN (\n            SELECT ie.usuario_id, e.modulo_id,\n                   MAX(CASE WHEN ie.aprobado = 1 AND ie.estado = 'completado' THEN 1 ELSE 0 END) AS aprobado_flag,\n                   MAX(CASE WHEN ie.aprobado = 1 AND ie.estado = 'completado' THEN ie.fecha_fin END) AS fecha_completado,\n                   MAX(CASE WHEN ie.aprobado = 1 AND ie.estado = 'completado' THEN ie.puntaje_obtenido END) AS puntaje_obtenido\n            FROM intentos_evaluacion ie\n            JOIN evaluaciones_modulo e ON e.id = ie.evaluacion_id\n            WHERE e.modulo_id = :modulo_id\n            GROUP BY ie.usuario_id, e.modulo_id\n        ) t ON t.usuario_id = pm.usuario_id AND t.modulo_id = pm.modulo_id\n        SET pm.evaluacion_completada = CASE WHEN IFNULL(t.aprobado_flag, 0) = 1 THEN 1 ELSE 0 END,\n            pm.fecha_evaluacion_completada = CASE WHEN IFNULL(t.aprobado_flag, 0) = 1 THEN t.fecha_completado ELSE NULL END,\n            pm.puntaje_evaluacion = CASE WHEN IFNULL(t.aprobado_flag, 0) = 1 THEN t.puntaje_obtenido ELSE NULL END\n        WHERE pm.modulo_id = :modulo_id2\n    ");
+    $stmt->execute([':modulo_id' => $modulo_id, ':modulo_id2' => $modulo_id]);
 
     // Recalcular progreso del curso en inscripciones para todos los estudiantes del curso
     // Basado en evaluaciones completadas por módulo
-    $stmt = $conn->prepare("\n        UPDATE inscripciones i\n        JOIN (\n            SELECT i.usuario_id AS uid, i.curso_id AS cid,\n                   COUNT(m.id) AS total_modulos,\n                   SUM(CASE WHEN pm.evaluacion_completada = 1 THEN 1 ELSE 0 END) AS modulos_completados\n            FROM inscripciones i\n            JOIN cursos c ON i.curso_id = c.id\n            JOIN modulos m ON m.curso_id = c.id\n            LEFT JOIN progreso_modulos pm ON pm.modulo_id = m.id AND pm.usuario_id = i.usuario_id\n            WHERE i.curso_id = :curso_id\n            GROUP BY i.usuario_id, i.curso_id\n        ) x ON x.uid = i.usuario_id AND x.cid = i.curso_id\n        SET i.progreso = CASE WHEN x.total_modulos > 0 THEN ROUND((x.modulos_completados / x.total_modulos) * 100, 2) ELSE 0 END,\n            i.estado = CASE WHEN x.total_modulos > 0 AND x.modulos_completados = x.total_modulos THEN 'completado' ELSE 'en_progreso' END,\n            i.fecha_completado = CASE WHEN x.total_modulos > 0 AND x.modulos_completados = x.total_modulos THEN i.fecha_completado ELSE NULL END\n        WHERE i.curso_id = :curso_id\n    ");
-    $stmt->execute([':curso_id' => $curso_id]);
+    $stmt = $conn->prepare("\n        UPDATE inscripciones i\n        JOIN (\n            SELECT i.usuario_id AS uid, i.curso_id AS cid,\n                   COUNT(m.id) AS total_modulos,\n                   SUM(CASE WHEN pm.evaluacion_completada = 1 THEN 1 ELSE 0 END) AS modulos_completados\n            FROM inscripciones i\n            JOIN cursos c ON i.curso_id = c.id\n            JOIN modulos m ON m.curso_id = c.id\n            LEFT JOIN progreso_modulos pm ON pm.modulo_id = m.id AND pm.usuario_id = i.usuario_id\n            WHERE i.curso_id = :curso_id\n            GROUP BY i.usuario_id, i.curso_id\n        ) x ON x.uid = i.usuario_id AND x.cid = i.curso_id\n        SET i.progreso = CASE WHEN x.total_modulos > 0 THEN ROUND((x.modulos_completados / x.total_modulos) * 100, 2) ELSE 0 END,\n            i.estado = CASE WHEN x.total_modulos > 0 AND x.modulos_completados = x.total_modulos THEN 'completado' ELSE 'activo' END,\n            i.fecha_completado = CASE WHEN x.total_modulos > 0 AND x.modulos_completados = x.total_modulos THEN NOW() ELSE NULL END\n        WHERE i.curso_id = :curso_id2\n    ");
+    $stmt->execute([':curso_id' => $curso_id, ':curso_id2' => $curso_id]);
 
     $conn->commit();
     

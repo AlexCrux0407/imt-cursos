@@ -225,61 +225,67 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="form-container-body">
-        <?php if (isset($_GET['success']) || isset($_GET['error'])): ?>
-            <div style="margin-bottom: 20px;">
-                <?php if (isset($_GET['success'])): ?>
-                    <div style="background: #d4edda; color: #155724; padding: 12px 16px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 20px;">
-                        <strong>✓ Éxito:</strong> 
-                        <?php
-                        switch($_GET['success']) {
-                            case 'pregunta_actualizada':
-                                echo 'La pregunta ha sido actualizada exitosamente.';
-                                break;
-                            default:
-                                echo 'Operación completada exitosamente.';
-                        }
-                        ?>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if (isset($_GET['error'])): ?>
-                    <div style="background: #f8d7da; color: #721c24; padding: 12px 16px; border-radius: 8px; border: 1px solid #f5c6cb; margin-bottom: 20px;">
-                        <strong>✗ Error:</strong> 
-                        <?php
-                        switch($_GET['error']) {
-                            case 'error_procesar':
-                                echo 'Ocurrió un error al procesar la pregunta. Por favor, verifica los datos e inténtalo nuevamente.';
-                                break;
-                            case 'error_espacios':
-                                echo 'Error al procesar la pregunta de completar espacios. Verifica que el texto contenga espacios marcados con {{blank}} y que hayas completado las respuestas correctas.';
-                                break;
-                            case 'datos_incompletos':
-                                echo 'Faltan datos requeridos. Para preguntas de completar espacios, asegúrate de incluir el texto y las respuestas correctas.';
-                                break;
-                            case 'datos_invalidos':
-                                echo 'Los datos proporcionados no son válidos.';
-                                break;
-                            case 'pregunta_no_encontrada':
-                                echo 'La pregunta solicitada no fue encontrada.';
-                                break;
-                            case 'sin_permisos':
-                                echo 'No tienes permisos para realizar esta acción.';
-                                break;
-                            case 'error_servidor':
-                                echo 'Error interno del servidor. Por favor, inténtalo nuevamente en unos momentos.';
-                                break;
-                            default:
-                                echo 'Ocurrió un error inesperado. Por favor, inténtalo nuevamente.';
-                        }
-                        ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
         <!-- Modal Editar Pregunta -->
         <div id="modalPregunta" class="modal">
             <div class="modal-content">
+                <?php if (isset($_GET['success']) || isset($_GET['error'])): ?>
+                    <div style="margin-bottom: 20px;">
+                        <?php if (isset($_GET['success'])): ?>
+                            <div style="background: #d4edda; color: #155724; padding: 12px 16px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 20px;">
+                                <strong>✓ Éxito:</strong> 
+                                <?php
+                                switch($_GET['success']) {
+                                    case 'pregunta_actualizada':
+                                        echo 'La pregunta ha sido actualizada exitosamente.';
+                                        break;
+                                    default:
+                                        echo 'Operación completada exitosamente.';
+                                }
+                                ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (isset($_GET['error'])): ?>
+                            <div style="background: #f8d7da; color: #721c24; padding: 12px 16px; border-radius: 8px; border: 1px solid #f5c6cb; margin-bottom: 20px;">
+                                <strong>✗ Error:</strong> 
+                                <?php
+                                switch($_GET['error']) {
+                                    case 'error_procesar':
+                                        echo 'Ocurrió un error al procesar la pregunta. Por favor, verifica los datos e inténtalo nuevamente.';
+                                        break;
+                                    case 'error_espacios':
+                                        echo 'Error al procesar la pregunta de completar espacios. Verifica que el texto contenga espacios marcados con {{blank}} y que hayas completado las respuestas correctas.';
+                                        break;
+                                    case 'datos_incompletos':
+                                        echo 'Faltan datos requeridos. Para preguntas de completar espacios, asegúrate de incluir el texto y las respuestas correctas.';
+                                        break;
+                                    case 'datos_invalidos':
+                                        echo 'Los datos proporcionados no son válidos.';
+                                        break;
+                                    case 'pregunta_no_encontrada':
+                                        echo 'La pregunta solicitada no fue encontrada.';
+                                        break;
+                                    case 'sin_permisos':
+                                        echo 'No tienes permisos para realizar esta acción.';
+                                        break;
+                                    case 'error_servidor':
+                                        echo 'Error interno del servidor. Por favor, inténtalo nuevamente en unos momentos.';
+                                        break;
+                                    case 'parejas_insuficientes':
+                                        echo 'Para preguntas de emparejar columnas, debes agregar al menos 2 parejas de elementos. Cada pareja debe tener un elemento en la columna izquierda y otro en la columna derecha.';
+                                        break;
+                                    case 'opciones_insuficientes':
+                                        echo 'Para preguntas de opción múltiple o selección múltiple, debes agregar al menos 2 opciones.';
+                                        break;
+                                    default:
+                                        echo 'Ocurrió un error inesperado. Por favor, inténtalo nuevamente.';
+                                }
+                                ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+                
                 <h2 id="modalTitulo">Editar Pregunta</h2>
                 
                 <form id="formPregunta" action="<?= BASE_URL ?>/docente/actualizar_pregunta.php" method="POST" novalidate>

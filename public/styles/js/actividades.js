@@ -616,6 +616,550 @@ window.actividades = {
         }
     },
 
+    // Relacionar columnas con líneas (nueva funcionalidad con nodos)
+    relacionarColumnasLineas: {
+        construir: function(pares) {
+            const contenedor = actividades.utilidades.crearElemento('div', 'actividad-relacionar-pares');
+            
+            // Crear instrucciones
+            const instrucciones = actividades.utilidades.crearElemento('div', 'instrucciones-relacionar');
+            instrucciones.innerHTML = '<p><span class="icono">🔗</span> Arrastra desde el nodo de un concepto hasta el nodo de su definición correspondiente para conectarlos.</p>';
+            
+            // Crear contenedor de columnas
+            const contenedorColumnas = actividades.utilidades.crearElemento('div', 'contenedor-columnas');
+            
+            // Crear columnas
+            const columnaConceptos = actividades.utilidades.crearElemento('div', 'columna-conceptos');
+            const columnaDefiniciones = actividades.utilidades.crearElemento('div', 'columna-definiciones');
+            
+            // Agregar títulos
+            const tituloConceptos = actividades.utilidades.crearElemento('h4', '', 'Conceptos');
+            const tituloDefiniciones = actividades.utilidades.crearElemento('h4', '', 'Definiciones');
+            
+            columnaConceptos.appendChild(tituloConceptos);
+            columnaDefiniciones.appendChild(tituloDefiniciones);
+            
+            // Mezclar las definiciones para que no estén en orden
+            const definicionesMezcladas = actividades.utilidades.mezclar([...pares]);
+            
+            // Crear elementos de conceptos
+            pares.forEach((par, index) => {
+                const elementoConcepto = actividades.utilidades.crearElemento('div', 'elemento-concepto');
+                elementoConcepto.setAttribute('data-concepto-id', par.conceptoId || `concepto_${index}`);
+                elementoConcepto.setAttribute('data-index', index);
+                elementoConcepto.textContent = par.concepto;
+                
+                // Agregar nodo de conexión
+                const nodoConcepto = actividades.utilidades.crearElemento('div', 'nodo-conexion');
+                nodoConcepto.setAttribute('data-tipo', 'concepto');
+                nodoConcepto.setAttribute('data-id', par.conceptoId || `concepto_${index}`);
+                elementoConcepto.appendChild(nodoConcepto);
+                
+                columnaConceptos.appendChild(elementoConcepto);
+            });
+            
+            // Crear elementos de definiciones
+            definicionesMezcladas.forEach((par, index) => {
+                const elementoDefinicion = actividades.utilidades.crearElemento('div', 'elemento-definicion');
+                elementoDefinicion.setAttribute('data-definicion-id', par.definicionId || `definicion_${pares.indexOf(par)}`);
+                elementoDefinicion.setAttribute('data-concepto-original', par.conceptoId || `concepto_${pares.indexOf(par)}`);
+                elementoDefinicion.textContent = par.definicion;
+                
+                // Agregar nodo de conexión
+                const nodoDefinicion = actividades.utilidades.crearElemento('div', 'nodo-conexion');
+                nodoDefinicion.setAttribute('data-tipo', 'definicion');
+                nodoDefinicion.setAttribute('data-id', par.definicionId || `definicion_${pares.indexOf(par)}`);
+                nodoDefinicion.setAttribute('data-concepto-original', par.conceptoId || `concepto_${pares.indexOf(par)}`);
+                elementoDefinicion.appendChild(nodoDefinicion);
+                
+                columnaDefiniciones.appendChild(elementoDefinicion);
+            });
+            
+            // Crear SVG para las líneas
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'lineas-conexion');
+            svg.style.position = 'absolute';
+            svg.style.top = '0';
+            svg.style.left = '0';
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            svg.style.pointerEvents = 'none';
+            svg.style.zIndex = '10';
+            
+            contenedorColumnas.appendChild(columnaConceptos);
+            contenedorColumnas.appendChild(columnaDefiniciones);
+            contenedorColumnas.appendChild(svg);
+            
+            contenedor.appendChild(instrucciones);
+            contenedor.appendChild(contenedorColumnas);
+            
+            return contenedor;
+        },
+        
+        renderizar: function(raiz, modelo) {
+            raiz.innerHTML = '';
+            const actividad = this.construir(modelo.pares);
+            raiz.appendChild(actividad);
+            
+            this._configurarNodosArrastrar(raiz);
+        },
+        
+        _configurarNodosArrastrar: function(contenedor) {
+            const conexiones = new Map();
+            const svg = contenedor.querySelector('.lineas-conexion');
+            let nodoArrastrandose = null;
+            let lineaTemporal = null;
+            
+            const nodos = contenedor.querySelectorAll('.nodo-conexion');
+            
+            // Función auxiliar para finalizar el arrastre
+            const finalizarArrastre = () => {
+                if (nodoArrastrandose) {
+                    nodoArrastrandose.classList.remove('arrastrando');
+                    nodoArrastrandose = null;
+                }
+                
+                if (lineaTemporal) {
+                    lineaTemporal.remove();
+                    lineaTemporal = null;
+                }
+                
+                // Limpiar estilos de destino
+                const nodos = contenedor.querySelectorAll('.nodo-conexion');
+                nodos.forEach(nodo => {
+                    nodo.classList.remove('destino-valido', 'destino-invalido');
+                });
+            };
+            
+            nodos.forEach(nodo => {
+                // Configurar eventos de drag and drop
+                nodo.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    nodoArrastrandose = nodo;
+                    nodo.classList.add('arrastrando');
+                    
+                    // Crear línea temporal
+                    lineaTemporal = this._crearLineaTemporal(nodo, svg);
+                    
+                    // Resaltar nodos válidos como destino
+                    this._resaltarNodosDestino(nodo, contenedor);
+                });
+                
+                nodo.addEventListener('mouseenter', (e) => {
+                    if (nodoArrastrandose && nodoArrastrandose !== nodo) {
+                        e.preventDefault();
+                        const esDestinoValido = this._esDestinoValido(nodoArrastrandose, nodo);
+                        if (esDestinoValido) {
+                            nodo.classList.add('destino-valido');
+                        }
+                    }
+                });
+                
+                nodo.addEventListener('mouseleave', (e) => {
+                    e.preventDefault();
+                    nodo.classList.remove('destino-valido');
+                });
+                
+                nodo.addEventListener('mouseup', (e) => {
+                    e.preventDefault();
+                    if (nodoArrastrandose && nodoArrastrandose !== nodo) {
+                        const esDestinoValido = this._esDestinoValido(nodoArrastrandose, nodo);
+                        if (esDestinoValido) {
+                            this._crearConexion(nodoArrastrandose, nodo, conexiones, svg);
+                        }
+                    }
+                    finalizarArrastre();
+                });
+            });
+            
+            // Eventos globales para el arrastre
+            document.addEventListener('mousemove', (e) => {
+                if (nodoArrastrandose && lineaTemporal) {
+                    e.preventDefault();
+                    this._actualizarLineaTemporal(e, lineaTemporal);
+                }
+            });
+            
+            document.addEventListener('mouseup', (e) => {
+                if (nodoArrastrandose) {
+                    e.preventDefault();
+                    finalizarArrastre();
+                }
+            });
+            
+            // Guardar referencia a las conexiones para evaluación
+            contenedor._obtenerConexiones = () => {
+                const resultado = [];
+                conexiones.forEach((definicionId, conceptoId) => {
+                    resultado.push({ conceptoId, definicionId });
+                });
+                return resultado;
+            };
+            
+            // Función para limpiar todas las conexiones
+            contenedor._limpiarConexiones = () => {
+                conexiones.clear();
+                svg.innerHTML = '';
+                const elementos = contenedor.querySelectorAll('.elemento-concepto, .elemento-definicion');
+                elementos.forEach(el => {
+                    el.classList.remove('relacionado', 'correcto', 'incorrecto');
+                });
+                const nodosConexion = contenedor.querySelectorAll('.nodo-conexion');
+                nodosConexion.forEach(nodo => {
+                    nodo.classList.remove('conectado');
+                });
+                // Notificar actualización de progreso si existe función global
+                if (typeof window !== 'undefined' && typeof window.updateProgress === 'function') {
+                    window.updateProgress();
+                }
+            };
+        },
+        
+        _esDestinoValido: function(nodoOrigen, nodoDestino) {
+            const elementoOrigen = nodoOrigen.closest('.elemento-concepto, .elemento-definicion');
+            const elementoDestino = nodoDestino.closest('.elemento-concepto, .elemento-definicion');
+            
+            // Solo se puede conectar concepto con definición
+            const origenEsConcepto = elementoOrigen.classList.contains('elemento-concepto');
+            const destinoEsDefinicion = elementoDestino.classList.contains('elemento-definicion');
+            const origenEsDefinicion = elementoOrigen.classList.contains('elemento-definicion');
+            const destinoEsConcepto = elementoDestino.classList.contains('elemento-concepto');
+            
+            return (origenEsConcepto && destinoEsDefinicion) || (origenEsDefinicion && destinoEsConcepto);
+        },
+        
+        _resaltarNodosDestino: function(nodoOrigen, contenedor) {
+            const nodos = contenedor.querySelectorAll('.nodo-conexion');
+            nodos.forEach(nodo => {
+                if (nodo !== nodoOrigen) {
+                    const esValido = this._esDestinoValido(nodoOrigen, nodo);
+                    if (esValido) {
+                        nodo.classList.add('destino-valido');
+                    } else {
+                        nodo.classList.add('destino-invalido');
+                    }
+                }
+            });
+        },
+        
+        _crearLineaTemporal: function(nodoOrigen, svg) {
+            const rect = nodoOrigen.getBoundingClientRect();
+            const svgRect = svg.getBoundingClientRect();
+            
+            const x1 = rect.left + rect.width / 2 - svgRect.left;
+            const y1 = rect.top + rect.height / 2 - svgRect.top;
+            
+            const linea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            linea.setAttribute('x1', x1);
+            linea.setAttribute('y1', y1);
+            linea.setAttribute('x2', x1);
+            linea.setAttribute('y2', y1);
+            linea.classList.add('linea-temporal');
+            
+            svg.appendChild(linea);
+            return linea;
+        },
+        
+        _actualizarLineaTemporal: function(evento, lineaTemporal) {
+            const svg = lineaTemporal.closest('svg');
+            const svgRect = svg.getBoundingClientRect();
+            
+            const x2 = evento.clientX - svgRect.left;
+            const y2 = evento.clientY - svgRect.top;
+            
+            lineaTemporal.setAttribute('x2', x2);
+            lineaTemporal.setAttribute('y2', y2);
+        },
+        
+        _crearConexion: function(nodoOrigen, nodoDestino, conexiones, svg) {
+            const elementoOrigen = nodoOrigen.closest('.elemento-concepto, .elemento-definicion');
+            const elementoDestino = nodoDestino.closest('.elemento-concepto, .elemento-definicion');
+            
+            let conceptoId, definicionId;
+            
+            if (elementoOrigen.classList.contains('elemento-concepto')) {
+                conceptoId = elementoOrigen.getAttribute('data-concepto-id');
+                definicionId = elementoDestino.getAttribute('data-definicion-id');
+            } else {
+                conceptoId = elementoDestino.getAttribute('data-concepto-id');
+                definicionId = elementoOrigen.getAttribute('data-definicion-id');
+            }
+            
+            // Eliminar conexión anterior si existe
+            this._eliminarConexionExistente(conexiones, conceptoId, definicionId, svg);
+            
+            // Crear nueva conexión
+            conexiones.set(conceptoId, definicionId);
+            this._dibujarLineaNodos(nodoOrigen, nodoDestino, svg, conceptoId);
+            
+            // Actualizar estilos
+            elementoOrigen.classList.add('relacionado');
+            elementoDestino.classList.add('relacionado');
+            nodoOrigen.classList.add('conectado');
+            nodoDestino.classList.add('conectado');
+            
+            // Actualizar campos ocultos del formulario
+            this._actualizarCamposFormulario(svg.closest('.actividad-relacionar-pares'));
+            
+            // Notificar actualización de progreso si existe función global
+            if (typeof window !== 'undefined' && typeof window.updateProgress === 'function') {
+                window.updateProgress();
+            }
+        },
+        
+        _dibujarLineaNodos: function(nodoOrigen, nodoDestino, svg, conceptoId) {
+            const rectOrigen = nodoOrigen.getBoundingClientRect();
+            const rectDestino = nodoDestino.getBoundingClientRect();
+            const svgRect = svg.getBoundingClientRect();
+            
+            const x1 = rectOrigen.left + rectOrigen.width / 2 - svgRect.left;
+            const y1 = rectOrigen.top + rectOrigen.height / 2 - svgRect.top;
+            const x2 = rectDestino.left + rectDestino.width / 2 - svgRect.left;
+            const y2 = rectDestino.top + rectDestino.height / 2 - svgRect.top;
+            
+            const linea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            linea.setAttribute('x1', x1);
+            linea.setAttribute('y1', y1);
+            linea.setAttribute('x2', x2);
+            linea.setAttribute('y2', y2);
+            linea.setAttribute('data-conexion', conceptoId);
+            linea.classList.add('linea-conexion');
+            
+            svg.appendChild(linea);
+        },
+        
+        _eliminarConexionExistente: function(conexiones, nuevoConceptoId, nuevaDefinicionId, svg) {
+            // Eliminar conexiones que involucren el mismo concepto o definición
+            const conexionesAEliminar = [];
+            
+            conexiones.forEach((definicionId, conceptoId) => {
+                if (conceptoId === nuevoConceptoId || definicionId === nuevaDefinicionId) {
+                    conexionesAEliminar.push(conceptoId);
+                }
+            });
+            
+            conexionesAEliminar.forEach(conceptoId => {
+                conexiones.delete(conceptoId);
+                // Eliminar línea SVG correspondiente
+                const lineaExistente = svg.querySelector(`[data-conexion="${conceptoId}"]`);
+                if (lineaExistente) {
+                    lineaExistente.remove();
+                }
+            });
+            
+            // Limpiar estilos de elementos desconectados
+            const elementosConceptos = document.querySelectorAll('.elemento-concepto');
+            const elementosDefiniciones = document.querySelectorAll('.elemento-definicion');
+            
+            elementosConceptos.forEach(el => {
+                const id = el.getAttribute('data-concepto-id');
+                if (!conexiones.has(id)) {
+                    el.classList.remove('relacionado');
+                    const nodo = el.querySelector('.nodo-conexion');
+                    if (nodo) nodo.classList.remove('conectado');
+                }
+            });
+            
+            elementosDefiniciones.forEach(el => {
+                const id = el.getAttribute('data-definicion-id');
+                let estaConectado = false;
+                conexiones.forEach(defId => {
+                    if (defId === id) estaConectado = true;
+                });
+                if (!estaConectado) {
+                    el.classList.remove('relacionado');
+                    const nodo = el.querySelector('.nodo-conexion');
+                    if (nodo) nodo.classList.remove('conectado');
+                }
+            });
+            
+            // Actualizar campos ocultos del formulario
+            this._actualizarCamposFormulario(svg.closest('.actividad-relacionar-pares'));
+            
+            // Notificar actualización de progreso si existe función global
+            if (typeof window !== 'undefined' && typeof window.updateProgress === 'function') {
+                window.updateProgress();
+            }
+        },
+        
+        _actualizarCamposFormulario: function(contenedor) {
+            if (!contenedor) return;
+            
+            // Buscar el contenedor de la actividad
+            let actividadId = contenedor.getAttribute('data-actividad-id') || contenedor.getAttribute('data-pregunta-id');
+            if (!actividadId) return;
+            
+            console.log('Actualizando campos para actividad ID:', actividadId);
+            
+            // Obtener las conexiones actuales desde las líneas SVG
+            const conexiones = new Map();
+            const svg = contenedor.querySelector('svg');
+            if (!svg) return;
+            
+            const lineas = svg.querySelectorAll('line[data-conexion]');
+            
+            lineas.forEach(linea => {
+                const conceptoId = linea.getAttribute('data-conexion');
+                
+                // Obtener las coordenadas de la línea para encontrar los elementos conectados
+                const x1 = parseFloat(linea.getAttribute('x1'));
+                const y1 = parseFloat(linea.getAttribute('y1'));
+                const x2 = parseFloat(linea.getAttribute('x2'));
+                const y2 = parseFloat(linea.getAttribute('y2'));
+                
+                // Buscar elementos conectados por posición
+                const elementosConcepto = contenedor.querySelectorAll('.elemento-concepto');
+                const elementosDefinicion = contenedor.querySelectorAll('.elemento-definicion');
+                
+                let conceptoEncontrado = null;
+                let definicionEncontrada = null;
+                
+                // Buscar el concepto conectado
+                elementosConcepto.forEach(el => {
+                    if (el.getAttribute('data-concepto-id') === conceptoId) {
+                        conceptoEncontrado = el;
+                    }
+                });
+                
+                // Buscar la definición conectada por proximidad a las coordenadas
+                elementosDefinicion.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const svgRect = svg.getBoundingClientRect();
+                    const relativeX = rect.left + rect.width/2 - svgRect.left;
+                    const relativeY = rect.top + rect.height/2 - svgRect.top;
+                    
+                    // Verificar si las coordenadas de la línea están cerca de este elemento
+                    if ((Math.abs(relativeX - x2) < 50 && Math.abs(relativeY - y2) < 50) ||
+                        (Math.abs(relativeX - x1) < 50 && Math.abs(relativeY - y1) < 50)) {
+                        definicionEncontrada = el;
+                    }
+                });
+                
+                if (conceptoEncontrado && definicionEncontrada) {
+                    const definicionId = definicionEncontrada.getAttribute('data-definicion-id');
+                    if (definicionId) {
+                        conexiones.set(conceptoId, definicionId);
+                    }
+                }
+            });
+            
+            // Crear o actualizar campo oculto con las respuestas
+            let campoRespuesta = document.querySelector(`input[name="respuesta_${actividadId}"]`);
+            if (!campoRespuesta) {
+                campoRespuesta = document.createElement('input');
+                campoRespuesta.type = 'hidden';
+                campoRespuesta.name = `respuesta_${actividadId}`;
+                
+                // Buscar el formulario y agregar el campo
+                const formulario = document.getElementById('evaluation-form');
+                if (formulario) {
+                    formulario.appendChild(campoRespuesta);
+                }
+            }
+            
+            // Convertir conexiones a formato JSON
+            const respuestas = {};
+            conexiones.forEach((definicionId, conceptoId) => {
+                respuestas[conceptoId] = definicionId;
+            });
+            
+            campoRespuesta.value = JSON.stringify(respuestas);
+            
+            console.log('Campos formulario actualizados para actividad', actividadId, ':', respuestas);
+            console.log('Campo oculto valor:', campoRespuesta.value);
+            
+            // Llamar a updateProgress después de actualizar el campo
+            if (typeof window.updateProgress === 'function') {
+                window.updateProgress();
+            }
+        },
+        
+        _dibujarLinea: function(elementoOrigen, elementoDestino, svg, conceptoId) {
+            const rectOrigen = elementoOrigen.getBoundingClientRect();
+            const rectDestino = elementoDestino.getBoundingClientRect();
+            const rectContenedor = svg.getBoundingClientRect();
+            
+            // Calcular posiciones relativas
+            const x1 = rectOrigen.right - rectContenedor.left - 6; // Punto derecho del elemento izquierdo
+            const y1 = rectOrigen.top + rectOrigen.height / 2 - rectContenedor.top;
+            const x2 = rectDestino.left - rectContenedor.left + 6; // Punto izquierdo del elemento derecho
+            const y2 = rectDestino.top + rectDestino.height / 2 - rectContenedor.top;
+            
+            // Crear línea SVG
+            const linea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            linea.setAttribute('x1', x1);
+            linea.setAttribute('y1', y1);
+            linea.setAttribute('x2', x2);
+            linea.setAttribute('y2', y2);
+            linea.setAttribute('class', 'linea-conexion nueva');
+            linea.setAttribute('data-conexion', conceptoId);
+            
+            svg.appendChild(linea);
+            
+            // Remover clase de animación después de la animación
+            setTimeout(() => {
+                linea.classList.remove('nueva');
+            }, 600);
+        },
+        
+        evaluar: function(modelo, conexiones) {
+            let correctas = 0;
+            const total = modelo.pares.length;
+            const detalles = [];
+            
+            modelo.pares.forEach(par => {
+                const conceptoId = par.conceptoId || `concepto_${modelo.pares.indexOf(par)}`;
+                const definicionIdCorrecta = par.definicionId || `definicion_${modelo.pares.indexOf(par)}`;
+                
+                const conexionUsuario = conexiones.find(c => c.conceptoId === conceptoId);
+                const esCorrecta = conexionUsuario && conexionUsuario.definicionId === definicionIdCorrecta;
+                
+                if (esCorrecta) correctas++;
+                
+                detalles.push({
+                    conceptoId: conceptoId,
+                    correcto: esCorrecta,
+                    respuestaUsuario: conexionUsuario ? conexionUsuario.definicionId : null,
+                    respuestaCorrecta: definicionIdCorrecta
+                });
+            });
+            
+            return { correctas, total, detalles };
+        },
+        
+        mostrarResultados: function(contenedor, resultados) {
+            const svg = contenedor.querySelector('.contenedor-lineas');
+            const lineas = svg.querySelectorAll('.linea-conexion');
+            
+            // Actualizar estilos de elementos y líneas según resultados
+            resultados.detalles.forEach(detalle => {
+                const elementoConcepto = contenedor.querySelector(`[data-concepto-id="${detalle.conceptoId}"]`);
+                const elementoDefinicion = contenedor.querySelector(`[data-definicion-id="${detalle.respuestaUsuario}"]`);
+                const linea = svg.querySelector(`[data-conexion="${detalle.conceptoId}"]`);
+                
+                if (elementoConcepto) {
+                    elementoConcepto.classList.add(detalle.correcto ? 'correcto' : 'incorrecto');
+                }
+                
+                if (elementoDefinicion) {
+                    elementoDefinicion.classList.add(detalle.correcto ? 'correcto' : 'incorrecto');
+                }
+                
+                if (linea) {
+                    linea.classList.add(detalle.correcto ? 'correcta' : 'incorrecta');
+                }
+            });
+        },
+        
+        inicializar: async function(idActividad, datosIniciales) {
+            const contenedor = document.getElementById(idActividad);
+            if (!contenedor) throw new Error(`Contenedor ${idActividad} no encontrado`);
+            
+            this.renderizar(contenedor, datosIniciales);
+            return Promise.resolve();
+        }
+    },
+
     // Examen general
     examen: {
         construir: function(configuracion) {
@@ -703,6 +1247,8 @@ actividades.inicializar = function(tipo, idActividad, configuracion) {
             return this.completarTextos.inicializar(idActividad, configuracion);
         case 'relacionarConceptos':
             return this.relacionarConceptos.inicializar(idActividad, configuracion);
+        case 'relacionarColumnasLineas':
+            return this.relacionarColumnasLineas.inicializar(idActividad, configuracion);
         case 'relacionarNormativas':
             return this.relacionarNormativas.inicializar(idActividad, configuracion);
         case 'organigrama':

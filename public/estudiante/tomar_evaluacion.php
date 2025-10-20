@@ -77,6 +77,7 @@ require __DIR__ . '/../partials/nav.php';
 ?>
 
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/actividades.css">
 
 <style>
 .evaluation-container {
@@ -556,22 +557,273 @@ require __DIR__ . '/../partials/nav.php';
                         <?php elseif ($pregunta['tipo'] === 'texto_corto' || $pregunta['tipo'] === 'texto_largo'): ?>
                             <textarea name="respuesta_<?= $pregunta['id'] ?>" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-family: inherit;" placeholder="Escribe tu respuesta aquí..." onchange="updateProgress()" oninput="updateProgress()"></textarea>
                         <?php elseif ($pregunta['tipo'] === 'emparejar_columnas'): ?>
-                            <?php $data = json_decode($pregunta['opciones'], true); $pairs = $data['pairs'] ?? []; $derecha = array_column($pairs, 'right'); shuffle($derecha); ?>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                                <div>
-                                    <?php foreach ($pairs as $idx => $pair): ?>
-                                    <div class="answer-option" style="display:flex;align-items:center;gap:8px;">
-                                        <span style="min-width:20px;"><?= $idx + 1 ?>.</span>
-                                        <span><?= htmlspecialchars($pair['left']) ?></span>
-                                        <select name="respuesta_<?= $pregunta['id'] ?>[<?= $idx ?>]" onchange="updateProgress()" style="margin-left:auto;">
-                                            <option value="">Selecciona</option>
-                                            <?php foreach ($derecha as $opt): ?>
-                                                <option value="<?= htmlspecialchars($opt) ?>"><?= htmlspecialchars($opt) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <?php endforeach; ?>
+                            <?php 
+                            $data = json_decode($pregunta['opciones'], true); 
+                            $pairs = $data['pairs'] ?? []; 
+                            
+                            // Debug: Verificar los datos
+                            echo "<!-- DEBUG: Tipo de pregunta: " . $pregunta['tipo'] . " -->";
+                            echo "<!-- DEBUG: Opciones raw: " . htmlspecialchars($pregunta['opciones']) . " -->";
+                            echo "<!-- DEBUG: Data decoded: " . htmlspecialchars(json_encode($data)) . " -->";
+                            echo "<!-- DEBUG: Pairs: " . htmlspecialchars(json_encode($pairs)) . " -->";
+                            
+                            // Crear array de definiciones con sus índices originales
+                            $definiciones_con_indices = [];
+                            foreach ($pairs as $idx => $pair) {
+                                $definiciones_con_indices[] = [
+                                    'texto' => $pair['right'],
+                                    'indice_original' => $idx
+                                ];
+                            }
+                            
+                            // Mezclar las definiciones manteniendo el índice original
+                            shuffle($definiciones_con_indices);
+                            
+                            echo "<!-- DEBUG: Definiciones con índices: " . htmlspecialchars(json_encode($definiciones_con_indices)) . " -->";
+                            ?>
+                            <script type="application/json" id="pairs-data-<?= $pregunta['id'] ?>"><?= json_encode($pairs) ?></script>
+                            <script type="application/json" id="definiciones-data-<?= $pregunta['id'] ?>"><?= json_encode($definiciones_con_indices) ?></script>
+                            <div class="actividad-relacionar-pares" data-pregunta-id="<?= $pregunta['id'] ?>">
+                                <div class="instrucciones-relacionar">
+                                    <p>Conecta cada concepto de la columna izquierda with su definición correspondiente en la columna derecha haciendo clic en ambos elementos.</p>
                                 </div>
+                                <div class="contenedor-columnas">
+                                    <div class="columna-conceptos">
+                                        <h4>Conceptos</h4>
+                                        <?php foreach ($pairs as $idx => $pair): ?>
+                                            <div class="elemento-concepto" data-id="<?= $idx ?>" data-value="<?= htmlspecialchars($pair['left']) ?>">
+                                                <?= htmlspecialchars($pair['left']) ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="columna-definiciones">
+                                        <h4>Definiciones</h4>
+                                        <?php foreach ($definiciones_con_indices as $idx => $def_data): ?>
+                                            <div class="elemento-definicion" data-id="<?= $idx ?>" data-indice-original="<?= $def_data['indice_original'] ?>" data-value="<?= htmlspecialchars($def_data['texto']) ?>">
+                                                <?= htmlspecialchars($def_data['texto']) ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <svg class="lineas-conexion" width="100%" height="100%">
+                                    <!-- Las líneas se dibujarán aquí dinámicamente -->
+                                </svg>
+                                <input type="hidden" name="respuesta_<?= $pregunta['id'] ?>" value="">
+                            </div>
+                            
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const actividadId = <?= $pregunta['id'] ?>;
+                                console.log('Buscando actividad con ID:', actividadId);
+                                
+                                const container = document.querySelector(`[data-pregunta-id="${actividadId}"]`);
+                                console.log('Container encontrado:', container);
+                                
+                                if (!container) {
+                                    console.error('No se encontró el contenedor para la pregunta', actividadId);
+                                    return;
+                                }
+                                
+                                console.log('Todos los atributos del container:', container.attributes);
+                                
+                                const svg = container.querySelector('.lineas-conexion');
+                                const hiddenInput = container.querySelector('input[type="hidden"]');
+                                
+                                console.log('SVG encontrado:', svg);
+                                console.log('SVG rect:', svg ? svg.getBoundingClientRect() : 'SVG no encontrado');
+                                console.log('Container rect:', container.getBoundingClientRect());
+                                
+                                let conexiones = new Map();
+                                let elementoSeleccionado = null;
+                                
+                                console.log('Inicializando actividad relacionar_pares:', actividadId);
+                                
+                                // Configurar eventos de clic
+                                const elementos = container.querySelectorAll('.elemento-concepto, .elemento-definicion');
+                                console.log('Elementos encontrados:', elementos.length);
+                                
+                                elementos.forEach(elemento => {
+                                    elemento.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        console.log('Clic en elemento:', this.textContent.trim());
+                                        manejarClick(this);
+                                    });
+                                });
+                                
+                                function manejarClick(elemento) {
+                                    if (!elementoSeleccionado) {
+                                        // Primer elemento seleccionado
+                                        elementoSeleccionado = elemento;
+                                        elemento.classList.add('seleccionado');
+                                        console.log('Elemento seleccionado:', elemento.textContent.trim());
+                                    } else if (elementoSeleccionado === elemento) {
+                                        // Deseleccionar el mismo elemento
+                                        elemento.classList.remove('seleccionado');
+                                        elementoSeleccionado = null;
+                                        console.log('Elemento deseleccionado');
+                                    } else {
+                                        // Segundo elemento seleccionado - intentar crear conexión
+                                        const primerEsConcepto = elementoSeleccionado.classList.contains('elemento-concepto');
+                                        const segundoEsConcepto = elemento.classList.contains('elemento-concepto');
+                                        
+                                        console.log('Primer elemento es concepto:', primerEsConcepto);
+                                        console.log('Segundo elemento es concepto:', segundoEsConcepto);
+                                        
+                                        // Solo permitir conexiones entre concepto y definición
+                                        if (primerEsConcepto !== segundoEsConcepto) {
+                                            const concepto = primerEsConcepto ? elementoSeleccionado : elemento;
+                                            const definicion = primerEsConcepto ? elemento : elementoSeleccionado;
+                                            
+                                            crearConexion(concepto, definicion);
+                                        } else {
+                                            console.log('No se puede conectar elementos del mismo tipo');
+                                        }
+                                        
+                                        // Limpiar selección
+                                        elementoSeleccionado.classList.remove('seleccionado');
+                                        elemento.classList.remove('seleccionado');
+                                        elementoSeleccionado = null;
+                                    }
+                                }
+                                
+                                function crearConexion(concepto, definicion) {
+                                    const conceptoId = concepto.getAttribute('data-id');
+                                    const definicionId = definicion.getAttribute('data-id');
+                                    
+                                    console.log('Creando conexión:', conceptoId, '->', definicionId);
+                                    
+                                    // Eliminar conexión existente del concepto si existe
+                                    if (conexiones.has(conceptoId)) {
+                                        const lineaAnterior = svg.querySelector(`line[data-concepto-id="${conceptoId}"]`);
+                                        if (lineaAnterior) {
+                                            const defAnteriorId = lineaAnterior.getAttribute('data-definicion-id');
+                                            const defAnterior = container.querySelector(`[data-id="${defAnteriorId}"]`);
+                                            if (defAnterior) defAnterior.classList.remove('conectado');
+                                            lineaAnterior.remove();
+                                        }
+                                    }
+                                    
+                                    // Eliminar conexión existente de la definición si existe
+                                    const lineaDefinicion = svg.querySelector(`line[data-definicion-id="${definicionId}"]`);
+                                    if (lineaDefinicion) {
+                                        const conceptoAnteriorId = lineaDefinicion.getAttribute('data-concepto-id');
+                                        const conceptoAnterior = container.querySelector(`[data-id="${conceptoAnteriorId}"]`);
+                                        if (conceptoAnterior) conceptoAnterior.classList.remove('conectado');
+                                        conexiones.delete(conceptoAnteriorId);
+                                        lineaDefinicion.remove();
+                                    }
+                                    
+                                    // Crear nueva conexión
+                                    conexiones.set(conceptoId, definicionId);
+                                    crearLinea(concepto, definicion);
+                                    concepto.classList.add('conectado');
+                                    definicion.classList.add('conectado');
+                                    
+                                    actualizarCampoOculto();
+                                    
+                                    // Llamar a updateProgress después de actualizar el campo
+                                    if (typeof window.updateProgress === 'function') {
+                                        window.updateProgress();
+                                    }
+                                }
+                                
+                                function crearLinea(concepto, definicion) {
+                                    const containerRect = container.getBoundingClientRect();
+                                    const conceptoRect = concepto.getBoundingClientRect();
+                                    const definicionRect = definicion.getBoundingClientRect();
+                                    
+                                    // Calcular coordenadas relativas al contenedor
+                                    const x1 = conceptoRect.right - containerRect.left;
+                                    const y1 = conceptoRect.top + conceptoRect.height / 2 - containerRect.top;
+                                    const x2 = definicionRect.left - containerRect.left;
+                                    const y2 = definicionRect.top + definicionRect.height / 2 - containerRect.top;
+                                    
+                                    console.log('Coordenadas línea:', {x1, y1, x2, y2});
+                                    
+                                    const linea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                    linea.setAttribute('x1', x1);
+                                    linea.setAttribute('y1', y1);
+                                    linea.setAttribute('x2', x2);
+                                    linea.setAttribute('y2', y2);
+                                    linea.setAttribute('stroke', '#007bff');
+                                    linea.setAttribute('stroke-width', '3');
+                                    linea.setAttribute('data-concepto-id', concepto.getAttribute('data-id'));
+                                    linea.setAttribute('data-definicion-id', definicion.getAttribute('data-id'));
+                                    linea.style.pointerEvents = 'stroke';
+                                    linea.style.cursor = 'pointer';
+                                    
+                                    svg.appendChild(linea);
+                                    console.log('Línea creada y agregada al SVG');
+                                    
+                                    // Agregar evento de clic para eliminar la línea
+                                    linea.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const conceptoId = linea.getAttribute('data-concepto-id');
+                                        const definicionId = linea.getAttribute('data-definicion-id');
+                                        
+                                        conexiones.delete(conceptoId);
+                                        linea.remove();
+                                        
+                                        const conceptoEl = container.querySelector(`[data-id="${conceptoId}"]`);
+                                        const definicionEl = container.querySelector(`[data-id="${definicionId}"]`);
+                                        
+                                        if (conceptoEl) conceptoEl.classList.remove('conectado');
+                                        if (definicionEl) definicionEl.classList.remove('conectado');
+                                        
+                                        actualizarCampoOculto();
+                                        
+                                        // Llamar a updateProgress después de actualizar el campo
+                                        if (typeof window.updateProgress === 'function') {
+                                            window.updateProgress();
+                                        }
+                                    });
+                                }
+                                
+                                function actualizarCampoOculto() {
+                                    if (hiddenInput) {
+                                        // Crear array de respuestas usando índices numéricos
+                                        const respuestas = [];
+                                        
+                                        // Obtener los pares originales y las definiciones con índices desde los script tags
+                                        const preguntaId = container.getAttribute('data-pregunta-id');
+                                        const pairsScript = document.getElementById(`pairs-data-${preguntaId}`);
+                                        const definicionesScript = document.getElementById(`definiciones-data-${preguntaId}`);
+                                        
+                                        console.log('Script pairs:', pairsScript);
+                                        console.log('Script definiciones:', definicionesScript);
+                                        
+                                        const pairs = pairsScript ? JSON.parse(pairsScript.textContent) : [];
+                                        const definiciones = definicionesScript ? JSON.parse(definicionesScript.textContent) : [];
+                                        
+                                        console.log('Pairs originales:', pairs);
+                                        console.log('Definiciones con índices:', definiciones);
+                                        console.log('Conexiones Map:', Array.from(conexiones.entries()));
+                                        
+                                        // Para cada concepto (índice de la izquierda), encontrar qué definición está conectada
+                                        pairs.forEach((pair, conceptoIdx) => {
+                                            const conceptoId = conceptoIdx.toString();
+                                            if (conexiones.has(conceptoId)) {
+                                                const definicionIdMezclado = conexiones.get(conceptoId);
+                                                // Obtener el índice original de la definición seleccionada
+                                                const indiceOriginal = definiciones[parseInt(definicionIdMezclado)].indice_original;
+                                                respuestas[conceptoIdx] = indiceOriginal;
+                                                console.log(`Concepto ${conceptoIdx} (${pair.left}) → Definición mezclada ${definicionIdMezclado} → Índice original ${indiceOriginal}`);
+                                            }
+                                        });
+                                        
+                                        hiddenInput.value = JSON.stringify(respuestas);
+                                        console.log('Campo actualizado con índices originales:', respuestas);
+                                        
+                                        // Llamar a updateProgress
+                                        if (typeof window.updateProgress === 'function') {
+                                            window.updateProgress();
+                                        }
+                                    }
+                                }
+                            });
+                            </script>
                             </div>
                         <?php elseif ($pregunta['tipo'] === 'completar_espacios'): ?>
                             <?php 
@@ -665,9 +917,9 @@ function updateProgress() {
         const tipo = container.dataset.tipo;
         let answered = false;
         if (tipo === 'multiple_choice' || tipo === 'verdadero_falso') {
-            answered = !!container.querySelector(`input[type="radio"][name="respuesta_${id}"]:checked`);
+            answered = !!container.querySelector(`input["radio"][name="respuesta_${id}"]:checked`);
         } else if (tipo === 'seleccion_multiple') {
-            answered = container.querySelectorAll(`input[type="checkbox"][name="respuesta_${id}[]"]:checked`).length > 0;
+            answered = container.querySelectorAll(`input["checkbox"][name="respuesta_${id}[]"]:checked`).length > 0;
         } else if (tipo === 'texto_corto' || tipo === 'texto_largo') {
             const ta = container.querySelector(`textarea[name="respuesta_${id}"]`);
             answered = !!(ta && ta.value.trim() !== '');
@@ -677,6 +929,35 @@ function updateProgress() {
         } else if (tipo === 'completar_espacios') {
             const inputs = container.querySelectorAll(`input[name^="respuesta_${id}["]`);
             answered = inputs.length > 0 && Array.from(inputs).every(inp => inp.value && inp.value.trim() !== '');
+        } else if (tipo === 'relacionar_pares') {
+            // Verificar si la actividad de relacionar columnas tiene respuestas en campo oculto
+            const campoRespuesta = document.querySelector(`input[name="respuesta_${id}"]`);
+            console.log(`Verificando pregunta ${id}, campo:`, campoRespuesta);
+            console.log(`Valor del campo:`, campoRespuesta ? campoRespuesta.value : 'null');
+            
+            if (campoRespuesta && campoRespuesta.value) {
+                try {
+                    const respuestas = JSON.parse(campoRespuesta.value);
+                    console.log(`Respuestas parseadas:`, respuestas);
+                    
+                    // Obtener el número total de pares esperados desde los datos JSON
+                    const scriptPairs = document.getElementById(`pairs-data-${id}`);
+                    if (scriptPairs) {
+                        const pairs = JSON.parse(scriptPairs.textContent);
+                        console.log(`Pairs esperados:`, pairs.length, `Respuestas dadas:`, Object.keys(respuestas).length);
+                        answered = Object.keys(respuestas).length === pairs.length;
+                    } else {
+                        console.log(`No se encontró script pairs para pregunta ${id}`);
+                        answered = Object.keys(respuestas).length > 0;
+                    }
+                } catch (e) {
+                    console.log(`Error parseando respuestas:`, e);
+                    answered = false;
+                }
+            } else {
+                answered = false;
+            }
+            console.log(`Pregunta ${id} respondida:`, answered);
         }
         if (answered) answeredQuestions++;
     });
@@ -825,6 +1106,34 @@ function updateProgress() {
         } else if (tipo === 'completar_espacios') {
             const inputs = container.querySelectorAll('.drop-input');
             answered = inputs.length > 0 && Array.from(inputs).every(inp => inp.value && inp.value.trim() !== '');
+        } else if (tipo === 'relacionar_pares' || container.querySelector('.actividad-relacionar-pares')) {
+            // Verificar si la actividad de relacionar columnas tiene conexiones
+            const actividadContainer = container.querySelector('.actividad-relacionar-pares');
+            const campoRespuesta = document.querySelector(`input[name="respuesta_${id}"]`);
+            console.log('Verificando relacionar_pares para ID:', id, 'Campo:', campoRespuesta);
+            if (campoRespuesta && campoRespuesta.value) {
+                console.log('Valor del campo:', campoRespuesta.value);
+                try {
+                    const respuestas = JSON.parse(campoRespuesta.value);
+                    console.log('Respuestas parseadas:', respuestas);
+                    // Obtener el número total de pares esperados desde los datos
+                    const paresData = actividadContainer ? actividadContainer.getAttribute('data-pairs') : null;
+                    if (paresData) {
+                        const pairs = JSON.parse(paresData);
+                        answered = Object.keys(respuestas).length === pairs.length;
+                        console.log('Pares esperados:', pairs.length, 'Respuestas:', Object.keys(respuestas).length, 'Completado:', answered);
+                    } else {
+                        answered = Object.keys(respuestas).length > 0;
+                        console.log('Sin data-pairs, respuestas:', Object.keys(respuestas).length, 'Completado:', answered);
+                    }
+                } catch (e) {
+                    console.log('Error parseando respuestas:', e);
+                    answered = false;
+                }
+            } else {
+                console.log('No hay campo de respuesta o está vacío');
+                answered = false;
+            }
         }
         if (answered) answeredQuestions++;
     });
@@ -856,6 +1165,145 @@ document.getElementById('evaluation-form').addEventListener('submit', function(e
     } else {
         clearInterval(timerInterval);
     }
+});
+</script>
+
+<script src="<?= BASE_URL ?>/styles/js/actividades.js"></script>
+<script>
+// Inicializar actividades de relacionar columnas con líneas
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar todas las actividades de relacionar columnas
+    const actividadesRelacionar = document.querySelectorAll('.actividad-relacionar-pares');
+    console.log('Actividades encontradas:', actividadesRelacionar.length);
+    
+    actividadesRelacionar.forEach(function(actividad, index) {
+        console.log(`Inicializando actividad ${index}:`, actividad);
+        
+        // Configurar directamente los eventos de clic sin usar el renderizador
+        const conceptos = actividad.querySelectorAll('.elemento-concepto');
+        const definiciones = actividad.querySelectorAll('.elemento-definicion');
+        const svg = actividad.querySelector('.lineas-conexion');
+        
+        let elementoSeleccionado = null;
+        let conexiones = new Map();
+        
+        // Función para actualizar el campo oculto
+        function actualizarCampoOculto() {
+            const preguntaId = actividad.getAttribute('data-pregunta-id');
+            const campoRespuesta = actividad.querySelector(`input[name="respuesta_${preguntaId}"]`);
+            
+            if (campoRespuesta) {
+                const respuestas = {};
+                conexiones.forEach((definicionId, conceptoId) => {
+                    respuestas[conceptoId] = definicionId;
+                });
+                
+                campoRespuesta.value = JSON.stringify(respuestas);
+                console.log('Campo actualizado:', respuestas);
+                
+                // Llamar a updateProgress
+                if (typeof window.updateProgress === 'function') {
+                    window.updateProgress();
+                }
+            }
+        }
+        
+        // Función para crear una línea entre dos elementos
+        function crearLinea(concepto, definicion) {
+            const conceptoRect = concepto.getBoundingClientRect();
+            const definicionRect = definicion.getBoundingClientRect();
+            const svgRect = svg.getBoundingClientRect();
+            
+            const x1 = conceptoRect.right - svgRect.left;
+            const y1 = conceptoRect.top + conceptoRect.height / 2 - svgRect.top;
+            const x2 = definicionRect.left - svgRect.left;
+            const y2 = definicionRect.top + definicionRect.height / 2 - svgRect.top;
+            
+            const linea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            linea.setAttribute('x1', x1);
+            linea.setAttribute('y1', y1);
+            linea.setAttribute('x2', x2);
+            linea.setAttribute('y2', y2);
+            linea.setAttribute('stroke', '#007bff');
+            linea.setAttribute('stroke-width', '2');
+            linea.setAttribute('data-concepto-id', concepto.getAttribute('data-id'));
+            linea.setAttribute('data-definicion-id', definicion.getAttribute('data-id'));
+            
+            svg.appendChild(linea);
+            
+            // Agregar evento de clic para eliminar la línea
+            linea.addEventListener('click', function() {
+                const conceptoId = linea.getAttribute('data-concepto-id');
+                conexiones.delete(conceptoId);
+                linea.remove();
+                concepto.classList.remove('conectado');
+                definicion.classList.remove('conectado');
+                actualizarCampoOculto();
+            });
+        }
+        
+        // Agregar eventos de clic a conceptos y definiciones
+        [...conceptos, ...definiciones].forEach(elemento => {
+            elemento.addEventListener('click', function() {
+                if (elementoSeleccionado === null) {
+                    // Primer clic - seleccionar elemento
+                    elementoSeleccionado = elemento;
+                    elemento.classList.add('seleccionado');
+                } else if (elementoSeleccionado === elemento) {
+                    // Clic en el mismo elemento - deseleccionar
+                    elemento.classList.remove('seleccionado');
+                    elementoSeleccionado = null;
+                } else {
+                    // Segundo clic - intentar crear conexión
+                    const esConcepto1 = elementoSeleccionado.classList.contains('elemento-concepto');
+                    const esConcepto2 = elemento.classList.contains('elemento-concepto');
+                    
+                    if (esConcepto1 !== esConcepto2) {
+                        // Uno es concepto y otro definición - crear conexión
+                        const concepto = esConcepto1 ? elementoSeleccionado : elemento;
+                        const definicion = esConcepto1 ? elemento : elementoSeleccionado;
+                        
+                        const conceptoId = concepto.getAttribute('data-id');
+                        const definicionId = definicion.getAttribute('data-id');
+                        
+                        // Eliminar conexión existente del concepto si existe
+                        if (conexiones.has(conceptoId)) {
+                            const lineaAnterior = svg.querySelector(`line[data-concepto-id="${conceptoId}"]`);
+                            if (lineaAnterior) {
+                                const defAnteriorId = lineaAnterior.getAttribute('data-definicion-id');
+                                const defAnterior = actividad.querySelector(`[data-id="${defAnteriorId}"]`);
+                                if (defAnterior) defAnterior.classList.remove('conectado');
+                                lineaAnterior.remove();
+                            }
+                        }
+                        
+                        // Eliminar conexión existente de la definición si existe
+                        const lineaDefinicion = svg.querySelector(`line[data-definicion-id="${definicionId}"]`);
+                        if (lineaDefinicion) {
+                            const conceptoAnteriorId = lineaDefinicion.getAttribute('data-concepto-id');
+                            const conceptoAnterior = actividad.querySelector(`[data-id="${conceptoAnteriorId}"]`);
+                            if (conceptoAnterior) conceptoAnterior.classList.remove('conectado');
+                            conexiones.delete(conceptoAnteriorId);
+                            lineaDefinicion.remove();
+                        }
+                        
+                        // Crear nueva conexión
+                        conexiones.set(conceptoId, definicionId);
+                        crearLinea(concepto, definicion);
+                        concepto.classList.add('conectado');
+                        definicion.classList.add('conectado');
+                        
+                        actualizarCampoOculto();
+                    }
+                    
+                    // Limpiar selección
+                    elementoSeleccionado.classList.remove('seleccionado');
+                    elemento.classList.remove('seleccionado');
+                    elementoSeleccionado = null;
+                }
+            });
+        });
+    });
 });
 </script>
 

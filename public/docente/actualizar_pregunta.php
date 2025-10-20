@@ -70,15 +70,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
             
         case 'emparejar_columnas':
-            $columna1 = $_POST['columna1'] ?? [];
-            $columna2 = $_POST['columna2'] ?? [];
+            $columna1 = $_POST['col_izquierda'] ?? [];
+            $columna2 = $_POST['col_derecha'] ?? [];
             
-            if (count($columna1) < 2 || count($columna2) < 2) {
+            // Filtrar elementos vacíos
+            $columna1 = array_filter($columna1, function($item) { return !empty(trim($item)); });
+            $columna2 = array_filter($columna2, function($item) { return !empty(trim($item)); });
+            
+            if (count($columna1) < 2 || count($columna2) < 2 || count($columna1) !== count($columna2)) {
                 header('Location: ' . BASE_URL . '/docente/editar_pregunta.php?id=' . $pregunta_id . '&evaluacion_id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=parejas_insuficientes');
                 exit;
             }
             
-            $opciones = json_encode(['pairs' => array_map(null, $columna1, $columna2)]);
+            // Crear parejas con formato left/right para compatibilidad con cargarParejas()
+            $pairs = [];
+            for ($i = 0; $i < count($columna1); $i++) {
+                $pairs[] = [
+                    'left' => $columna1[$i],
+                    'right' => $columna2[$i]
+                ];
+            }
+            $opciones = json_encode(['pairs' => $pairs]);
             $respuesta_correcta = json_encode(array_combine(range(0, count($columna1) - 1), range(0, count($columna1) - 1)));
             break;
             

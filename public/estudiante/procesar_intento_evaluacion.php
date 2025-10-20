@@ -152,8 +152,11 @@ try {
         
         // Procesar respuestas y calcular puntaje
         $respuestas_correctas = 0;
-        $total_preguntas = count($preguntas);
+        $total_respuestas = 0; // Cambiar de total_preguntas a total_respuestas
         $respuestas_procesadas = [];
+        
+        error_log("=== DEBUG CÁLCULO PUNTAJE ===");
+        error_log("DEBUG - Total preguntas originales: " . count($preguntas));
         
         foreach ($preguntas as $pregunta) {
             $respuesta_estudiante = $_POST['respuesta_' . $pregunta['id']] ?? '';
@@ -191,10 +194,98 @@ try {
                     break;
 
                  case 'emparejar_columnas':
+                 case 'relacionar_pares':
                      // respuesta es un array mapping índice -> valor derecha seleccionado
-                     $resp = $_POST['respuesta_' . $pregunta['id']] ?? [];
+                     $resp_raw = $_POST['respuesta_' . $pregunta['id']] ?? [];
+                     
+                     // Si la respuesta viene como string JSON, decodificarla
+                     if (is_string($resp_raw)) {
+                         $resp = json_decode($resp_raw, true) ?: [];
+                     } else {
+                         $resp = $resp_raw;
+                     }
+                     
                      $correctas = json_decode($pregunta['respuesta_correcta'], true) ?: [];
-                     $es_correcta = is_array($resp) && count($resp) === count($correctas) && array_values($resp) === array_values($correctas);
+                     
+                     // Debug logging detallado
+                     error_log("=== DEBUG EMPAREJAR/RELACIONAR ===");
+                     error_log("DEBUG - Pregunta ID: " . $pregunta['id']);
+                     error_log("DEBUG - Tipo: " . $pregunta['tipo']);
+                     error_log("DEBUG - Pregunta texto: " . $pregunta['pregunta']);
+                     error_log("DEBUG - POST data RAW: " . json_encode($resp_raw));
+                     error_log("DEBUG - POST data PROCESSED: " . json_encode($resp));
+                     error_log("DEBUG - Respuesta correcta RAW: " . $pregunta['respuesta_correcta']);
+                     error_log("DEBUG - Respuesta correcta PARSED: " . json_encode($correctas));
+                     error_log("DEBUG - Tipo de respuesta estudiante RAW: " . gettype($resp_raw));
+                     error_log("DEBUG - Tipo de respuesta estudiante PROCESSED: " . gettype($resp));
+                     
+                     // Tanto emparejar_columnas como relacionar_pares se evalúan por pares individuales
+                     $total_pares = count($correctas);
+                     $pares_correctos = 0;
+                     
+                     error_log("DEBUG - Total de pares esperados: " . $total_pares);
+                     
+                     // Insertar una respuesta por cada par
+                     foreach ($correctas as $indice => $valor_correcto) {
+                         $respuesta_estudiante_par = $resp[$indice] ?? null;
+                         $par_correcto = isset($resp[$indice]) && $resp[$indice] == $valor_correcto;
+                         
+                         error_log("DEBUG - Par $indice:");
+                         error_log("  - Respuesta estudiante: " . json_encode($respuesta_estudiante_par));
+                         error_log("  - Respuesta correcta: " . json_encode($valor_correcto));
+                         error_log("  - Comparación (==): " . ($resp[$indice] == $valor_correcto ? 'true' : 'false'));
+                         error_log("  - Comparación (===): " . ($resp[$indice] === $valor_correcto ? 'true' : 'false'));
+                         error_log("  - Par correcto: " . ($par_correcto ? 'true' : 'false'));
+                         
+                         if ($par_correcto) {
+                             $pares_correctos++;
+                         }
+                         
+                         // Crear respuesta individual para cada par
+                         $respuesta_par = json_encode([
+                             'par_indice' => $indice,
+                             'respuesta_estudiante' => $respuesta_estudiante_par,
+                             'respuesta_correcta' => $valor_correcto
+                         ]);
+                         
+                         // Insertar respuesta individual para este par
+                         $stmt_par = $conn->prepare("
+                             INSERT INTO respuestas_estudiante (intento_id, pregunta_id, respuesta, es_correcta, requiere_revision)
+                             VALUES (:intento_id, :pregunta_id, :respuesta, :es_correcta, :requiere_revision)
+                         ");
+                         
+                         // Crear respuesta JSON con información del par
+                         $respuesta_par_json = json_encode([
+                             'par_indice' => $indice,
+                             'respuesta_estudiante' => $respuesta_estudiante_par,
+                             'respuesta_correcta' => $valor_correcto,
+                             'par_correcto' => $par_correcto
+                         ]);
+                         
+                         $stmt_par->execute([
+                             ':intento_id' => $intento_id,
+                             ':pregunta_id' => $pregunta['id'], // Solo el ID numérico de la pregunta
+                             ':respuesta' => $respuesta_par_json,
+                             ':es_correcta' => $par_correcto ? 1 : 0,
+                             ':requiere_revision' => 0
+                         ]);
+                         
+                         error_log("DEBUG - Insertado par $indice con es_correcta: " . ($par_correcto ? 1 : 0));
+                         
+                         if ($par_correcto) {
+                             $respuestas_correctas++;
+                         }
+                         $total_respuestas++; // Incrementar por cada par
+                     }
+                     
+                     error_log("DEBUG - Pares correctos: $pares_correctos de $total_pares");
+                     error_log("DEBUG - Respuestas correctas totales hasta ahora: $respuestas_correctas");
+                     error_log("DEBUG - Total respuestas hasta ahora: $total_respuestas");
+                     error_log("=== FIN DEBUG EMPAREJAR/RELACIONAR ===");
+                     
+                     // No insertar respuesta general ya que cada par se maneja individualmente
+                     continue 2; // Saltar al siguiente pregunta en el bucle principal
+                     
                      $respuesta_estudiante = json_encode($resp);
                      break;
 
@@ -232,6 +323,8 @@ try {
                  $respuestas_correctas++;
              }
              
+             $total_respuestas++; // Incrementar por cada pregunta normal
+             
              $respuestas_procesadas[] = [
                  'pregunta_id' => $pregunta['id'],
                  'respuesta' => $respuesta_estudiante,
@@ -239,6 +332,10 @@ try {
                  'tipo' => $pregunta['tipo']
              ];
          }
+         
+         error_log("DEBUG - Respuestas correctas finales: $respuestas_correctas");
+         error_log("DEBUG - Total respuestas finales: $total_respuestas");
+         error_log("=== FIN DEBUG CÁLCULO PUNTAJE ===");
          
          // Calcular puntaje
          $preguntas_automaticas = array_filter($respuestas_procesadas, function($r) {
@@ -255,10 +352,15 @@ try {
              $estado_intento = 'completado';
          } else {
              // Todas las preguntas son automáticas: calcular como porcentaje (0-100)
-             $puntaje_obtenido = ($total_preguntas > 0)
-                 ? (($respuestas_correctas / $total_preguntas) * 100.0)
+             $puntaje_obtenido = ($total_respuestas > 0)
+                 ? (($respuestas_correctas / $total_respuestas) * 100.0)
                  : 0.0;
              $estado_intento = 'completado';
+             
+             error_log("DEBUG - Cálculo final del puntaje:");
+             error_log("  - Respuestas correctas: $respuestas_correctas");
+             error_log("  - Total respuestas: $total_respuestas");
+             error_log("  - Puntaje calculado: $puntaje_obtenido");
          }
          
          // Actualizar intento con el resultado
@@ -412,9 +514,15 @@ try {
       exit;
       
   } catch (Exception $e) {
-      // Debug: Log del error
-      error_log("Error en procesar_intento_evaluacion: " . $e->getMessage());
+      // Debug: Log del error con más detalles
+      error_log("=== ERROR EN PROCESAR_INTENTO_EVALUACION ===");
+      error_log("Error: " . $e->getMessage());
+      error_log("Archivo: " . $e->getFile());
+      error_log("Línea: " . $e->getLine());
       error_log("Stack trace: " . $e->getTraceAsString());
+      error_log("POST data: " . print_r($_POST, true));
+      error_log("SESSION data: " . print_r($_SESSION, true));
+      error_log("=== FIN ERROR ===");
       
       // Asegurar que solo se haga rollback si hay una transacción activa
       if (isset($conn)) {
@@ -447,6 +555,7 @@ try {
       $redirect_url = $curso_id
           ? BASE_URL . '/estudiante/curso_contenido.php?id=' . $curso_id . '&error=' . urlencode($error_message)
         : BASE_URL . '/estudiante/dashboard.php?error=' . urlencode($error_message);
+    error_log("Redirigiendo por error a: " . $redirect_url);
     header('Location: ' . $redirect_url);
     exit;
 }
