@@ -67,17 +67,21 @@ function nav_active_class(string $href, string $current_path): string {
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
                     Dashboard
                 </a>
-                <a href="<?= BASE_URL ?>/ejecutivo/reportes_estudiantes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/reportes_estudiantes.php', $current_path) ?>">
+                <a href="<?= BASE_URL ?>/ejecutivo/detalles_estudiantes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/detalles_estudiantes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" class="nav-icon">
-                    Reportes Estudiantes
+                    Detalles Estudiantes
                 </a>
-                <a href="<?= BASE_URL ?>/ejecutivo/reportes_docentes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/reportes_docentes.php', $current_path) ?>">
-                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" class="nav-icon">
-                    Reportes Docentes
-                </a>
-                <a href="<?= BASE_URL ?>/ejecutivo/reportes_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/reportes_cursos.php', $current_path) ?>">
+                <a href="<?= BASE_URL ?>/ejecutivo/detalles_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/detalles_cursos.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" class="nav-icon">
-                    Reportes Cursos
+                    Detalles Cursos
+                </a>
+                <a href="<?= BASE_URL ?>/ejecutivo/generar_reportes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/generar_reportes.php', $current_path) ?>">
+                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" class="nav-icon">
+                    Generar Reportes
+                </a>
+                <a href="<?= BASE_URL ?>/ejecutivo/perfil.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/perfil.php', $current_path) ?>">
+                    <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" alt="" class="nav-icon">
+                    Perfil
                 </a>
             <?php elseif ($role === 'master'): ?>
                 <a href="<?= BASE_URL ?>/master/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/dashboard.php', $current_path) ?>">

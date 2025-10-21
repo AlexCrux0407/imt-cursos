@@ -65,12 +65,12 @@ require __DIR__ . '/../partials/nav.php';
             </div>
             
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 12px; background: white; text-align: center; cursor: pointer; transition: all 0.3s ease;"
-                 onclick="window.location.href='<?= BASE_URL ?>/docente/visualizar_curso.php'"
+                 onclick="window.location.href='<?= BASE_URL ?>/docente/resumen_general.php'"
                  onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.transform='translateY(0)'">
                 <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
-                <h4 style="color: #2c3e50; margin-bottom: 10px;">Progreso Estudiantes</h4>
-                <p style="color: #7f8c8d; margin: 0;">Ver el avance de tus estudiantes</p>
+                <h4 style="color: #2c3e50; margin-bottom: 10px;">Resumen General</h4>
+                <p style="color: #7f8c8d; margin: 0;">Vista completa de cursos y estudiantes</p>
             </div>
             
             <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 12px; background: white; text-align: center; cursor: pointer; transition: all 0.3s ease;"

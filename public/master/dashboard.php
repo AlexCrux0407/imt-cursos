@@ -181,29 +181,29 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         </div>
 
-        <!-- Asignación de Cursos -->
+        <!-- Gestión de Ejecutivos -->
         <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
              onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(46,134,193,0.15)'"
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
-             onclick="window.location.href='<?= BASE_URL ?>/master/asignar_cursos.php'">
+             onclick="window.location.href='<?= BASE_URL ?>/master/admin_ejecutivos.php'">
             <div class="div-fila-alt-start" style="margin-bottom: 20px;">
                 <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Asignar" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Ejecutivos" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </div>
                 <div>
-                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Asignación de Cursos</h3>
-                    <p style="color: #7f8c8d; font-size: 0.9rem;">Asignar cursos a docentes</p>
+                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Ejecutivos</h3>
+                    <p style="color: #7f8c8d; font-size: 0.9rem;">Administrar usuarios ejecutivos</p>
                 </div>
             </div>
             <p style="color: #5a5c69; margin-bottom: 20px; line-height: 1.5;">
-                Asigna cursos a docentes para su gestión y desarrollo, controla las asignaciones existentes.
+                Gestiona usuarios ejecutivos del sistema, crea nuevos perfiles y administra permisos de acceso.
             </p>
             <div class="div-fila-alt">
-                <a href="<?= BASE_URL ?>/master/asignar_cursos.php" 
+                <a href="<?= BASE_URL ?>/master/admin_ejecutivos.php" 
                    style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
                    onmouseover="this.style.background='var(--master-secondary)'"
                    onmouseout="this.style.background='var(--master-primary)'">
-                    Asignar →
+                    Gestionar →
                 </a>
             </div>
         </div>

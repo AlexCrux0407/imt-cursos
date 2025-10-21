@@ -84,12 +84,12 @@ $estadisticas = $stmt->fetch();
                 <div class="feature-icon">
                     <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="Visualizar">
                 </div>
-                <h3 class="feature-title">Visualización de Progreso</h3>
+                <h3 class="feature-title">Resumen General</h3>
                 <p class="feature-description">
-                    Monitorea el progreso de tus estudiantes, revisa estadísticas de avance y fechas de finalización de cursos.
+                    Visualiza un resumen completo de todos tus cursos, estudiantes y estadísticas de progreso en una sola vista.
                 </p>
-                <a href="<?= BASE_URL ?>/docente/visualizar_curso.php" class="feature-link">
-                    Ver Progreso &rarr;
+                <a href="<?= BASE_URL ?>/docente/resumen_general.php" class="feature-link">
+                    Ver Resumen &rarr;
                 </a>
             </div>
         </div>

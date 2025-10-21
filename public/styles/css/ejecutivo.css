@@ -340,3 +340,447 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Estilos para detalles de estudiantes */
+.exec-filters {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-top: 4px solid var(--exec-accent);
+}
+
+.filters-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-input, .filter-select {
+    padding: 12px 15px;
+    border: 2px solid var(--exec-light);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.filter-input:focus, .filter-select:focus {
+    outline: none;
+    border-color: var(--exec-accent);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.btn-filter, .btn-clear {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-filter {
+    background: var(--exec-accent);
+    color: white;
+}
+
+.btn-filter:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.btn-clear {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-clear:hover {
+    background: #7f8c8d;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--exec-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-export:hover {
+    background: var(--exec-secondary);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.btn-export img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+}
+
+/* Lista de estudiantes */
+.students-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.student-detail-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border-left: 5px solid var(--exec-accent);
+}
+
+.student-detail-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.student-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--exec-light);
+}
+
+.student-info h3.student-name {
+    color: var(--exec-primary);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.student-email {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+}
+
+.student-phone {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.student-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.student-registro, .student-actividad {
+    font-size: 0.85rem;
+    color: #95a5a6;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.student-stats-summary {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--exec-accent), #2980b9);
+    color: white;
+    border-radius: 10px;
+    min-width: 80px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+/* Detalles del estudiante */
+.student-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.detail-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid var(--exec-accent);
+}
+
+.detail-section h4 {
+    color: var(--exec-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.course-distribution {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+}
+
+.distribution-item {
+    text-align: center;
+    padding: 15px 10px;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.distribution-item.completados {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+}
+
+.distribution-item.en-progreso {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.distribution-item.sin-iniciar {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
+}
+
+.distribution-count {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.distribution-label {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.learning-activity {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.activity-item img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+}
+
+.activity-count {
+    font-weight: bold;
+    color: var(--exec-primary);
+    min-width: 30px;
+}
+
+.activity-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Barra de progreso */
+.progress-bar-container {
+    margin-top: 10px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--exec-accent), #2980b9);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.progress-bar-small {
+    width: 100px;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 10px;
+}
+
+.progress-bar-small .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--exec-accent), #2980b9);
+}
+
+/* Rendimiento por curso */
+.course-performance {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.course-performance-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.course-name {
+    font-weight: 500;
+    color: var(--exec-primary);
+}
+
+.course-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.course-modules, .course-grade {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Acciones del estudiante */
+.student-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-detail, .btn-export-small {
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-detail {
+    background: var(--exec-accent);
+    color: white;
+}
+
+.btn-detail:hover {
+    background: #2980b9;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-export-small {
+    background: var(--exec-primary);
+    color: white;
+}
+
+.btn-export-small:hover {
+    background: var(--exec-secondary);
+    color: white;
+    text-decoration: none;
+}
+
+/* Sin resultados */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.no-results p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Responsive para detalles de estudiantes */
+@media (max-width: 768px) {
+    .filters-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .student-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .student-stats-summary {
+        justify-content: center;
+    }
+    
+    .student-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .course-distribution {
+        flex-direction: column;
+    }
+    
+    .course-performance-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .student-actions {
+        flex-direction: column;
+    }
+}

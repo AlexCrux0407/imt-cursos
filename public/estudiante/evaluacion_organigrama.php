@@ -85,59 +85,80 @@ require __DIR__ . '/../partials/header.php';
 ?>
 
 <div class="main-content">
-    <div class="content-header">
-        <h2><?= htmlspecialchars($evaluacion['titulo']) ?></h2>
-        <p><?= htmlspecialchars($evaluacion['modulo_titulo']) ?> - <?= htmlspecialchars($evaluacion['curso_titulo']) ?></p>
-    </div>
+    <div class="evaluation-container">
+        <div class="evaluation-header">
+            <h1 class="evaluation-title"><?= htmlspecialchars($evaluacion['titulo']) ?></h1>
+            <p><?= htmlspecialchars($evaluacion['modulo_titulo']) ?> - <?= htmlspecialchars($evaluacion['curso_titulo']) ?></p>
+        </div>
 
-    <?php if ($ya_completada_100): ?>
-        <div class="alert alert-success">
-            <h4>✅ Evaluación completada con 100%</h4>
-            <p>Ya has completado esta evaluación con un puntaje perfecto de <strong>100%</strong>.</p>
-            <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $evaluacion['curso_id'] ?>" class="btn-submit">Volver al curso</a>
-        </div>
-    <?php elseif (!$puede_tomar): ?>
-        <div class="alert alert-warning">
-            <h4>⚠️ No puedes tomar esta evaluación</h4>
-            <p>Has agotado el número máximo de intentos permitidos (<?= $evaluacion['intentos_permitidos'] ?>).</p>
-            <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $evaluacion['curso_id'] ?>" class="btn-submit">Volver al curso</a>
-        </div>
-    <?php else: ?>
-        <div class="evaluation-info">
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Tipo</div>
-                    <div class="info-value">Organigrama Interactivo</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Puntaje Máximo</div>
-                    <div class="info-value"><?= $evaluacion['puntaje_maximo'] ?>%</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Puntaje Mínimo</div>
-                    <div class="info-value"><?= $evaluacion['puntaje_minimo_aprobacion'] ?>%</div>
-                </div>
-                <?php if ($evaluacion['tiempo_limite'] > 0): ?>
-                <div class="info-item">
-                    <div class="info-label">Tiempo Límite</div>
-                    <div class="info-value"><?= $evaluacion['tiempo_limite'] ?> min</div>
-                </div>
-                <?php endif; ?>
-                <div class="info-item">
-                    <div class="info-label">Intentos</div>
-                    <div class="info-value"><?= $intentos_realizados + 1 ?>/<?= $evaluacion['intentos_permitidos'] ?: '∞' ?></div>
-                </div>
+        <?php if ($ya_completada_100): ?>
+            <div class="alert alert-success">
+                <h4>✅ Evaluación completada con 100%</h4>
+                <p>Ya has completado esta evaluación con un puntaje perfecto de <strong>100%</strong>.</p>
+                <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $evaluacion['curso_id'] ?>" class="btn-submit">Volver al curso</a>
             </div>
-            
-            <?php if (!empty($evaluacion['instrucciones'])): ?>
-                <div class="instructions-section">
-                    <h5 class="instructions-title">📋 Instrucciones:</h5>
-                    <p class="instructions-text"><?= nl2br(htmlspecialchars($evaluacion['instrucciones'])) ?></p>
+        <?php elseif (!$puede_tomar): ?>
+            <div class="alert alert-warning">
+                <h4>⚠️ No puedes tomar esta evaluación</h4>
+                <p>Has agotado el número máximo de intentos permitidos (<?= $evaluacion['intentos_permitidos'] ?>).</p>
+                <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $evaluacion['curso_id'] ?>" class="btn-submit">Volver al curso</a>
+            </div>
+        <?php else: ?>
+            <div class="evaluation-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Tipo</div>
+                        <div class="info-value">Organigrama Interactivo</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Puntaje Máximo</div>
+                        <div class="info-value"><?= $evaluacion['puntaje_maximo'] ?>%</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Puntaje Mínimo</div>
+                        <div class="info-value"><?= $evaluacion['puntaje_minimo_aprobacion'] ?>%</div>
+                    </div>
+                    <?php if ($evaluacion['tiempo_limite'] > 0): ?>
+                    <div class="info-item">
+                        <div class="info-label">Tiempo Límite</div>
+                        <div class="info-value"><?= $evaluacion['tiempo_limite'] ?> min</div>
+                    </div>
+                    <?php endif; ?>
+                    <div class="info-item">
+                        <div class="info-label">Intentos</div>
+                        <div class="info-value"><?= $intentos_realizados + 1 ?>/<?= $evaluacion['intentos_permitidos'] ?: '∞' ?></div>
+                    </div>
                 </div>
-            <?php endif; ?>
-        </div>
+                
+                <?php if (!empty($evaluacion['instrucciones'])): ?>
+                    <div class="instructions-section">
+                        <h5 class="instructions-title">📋 Instrucciones:</h5>
+                        <p class="instructions-text"><?= nl2br(htmlspecialchars($evaluacion['instrucciones'])) ?></p>
+                    </div>
+                <?php endif; ?>
+            </div>
 
 <style>
+.evaluation-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.evaluation-header {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.evaluation-title {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
 .evaluation-info {
     background: white;
     border-radius: 12px;
@@ -196,20 +217,57 @@ require __DIR__ . '/../partials/header.php';
     margin: 0;
     font-size: 0.95rem;
 }
+
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.btn-submit {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-submit:hover {
+    background: #229954;
+    transform: translateY(-2px);
+}
 </style>
 
-        <?php if ($evaluacion['tiempo_limite'] > 0): ?>
-        <div class="timer-container" id="timer-container">
-            <div class="timer-display" id="timer-display"><?= $evaluacion['tiempo_limite'] ?>:00</div>
-            <div class="timer-label">Tiempo restante</div>
-        </div>
-        <?php endif; ?>
-
-        <!-- Contenedor del organigrama -->
-        <div class="organigrama-evaluation-container">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+            <?php if ($evaluacion['tiempo_limite'] > 0): ?>
+            <div class="timer-container" id="timer-container">
+                <div class="timer-display" id="timer-display"><?= $evaluacion['tiempo_limite'] ?>:00</div>
+                <div class="timer-label">Tiempo restante</div>
             </div>
+            <?php endif; ?>
+
+            <!-- Contenedor del organigrama -->
+            <div class="organigrama-evaluation-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
 
             <div class="exercise-area">
                 <div class="pieces-bank">
@@ -246,6 +304,7 @@ require __DIR__ . '/../partials/header.php';
             </form>
         </div>
     <?php endif; ?>
+    </div>
 </div>
 
 <style>
@@ -254,11 +313,9 @@ require __DIR__ . '/../partials/header.php';
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     padding: 20px;
-    margin: 20px 0;
-    max-width: 1600px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+    margin: 20px auto;
+    max-width: 1400px;
+    width: 95%;
     box-sizing: border-box;
 }
 
@@ -296,13 +353,13 @@ require __DIR__ . '/../partials/header.php';
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     border: none;
     border-radius: 20px;
-    padding: 20px;
+    padding: 15px;
     position: relative;
-    min-height: 600px;
+    min-height: 450px;
     box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
     overflow-x: auto;
     overflow-y: hidden;
-    min-width: 1100px;
+    max-width: 100%;
 }
 
 .organigrama-container::before {
@@ -312,9 +369,7 @@ require __DIR__ . '/../partials/header.php';
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+    background: transparent;
     pointer-events: none;
 }
 
@@ -356,15 +411,16 @@ require __DIR__ . '/../partials/header.php';
 
 .organigrama {
     position: relative;
-    width: 1200px;
-    height: 500px;
+    width: 1000px;
+    height: 450px;
     margin: 0 auto;
+    max-width: 100%;
 }
 
 .drop-zone {
     position: absolute;
-    width: 160px;
-    height: 70px;
+    width: 170px;
+    height: 75px;
     border: 2px dashed #cbd5e1;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.9);
@@ -421,29 +477,29 @@ require __DIR__ . '/../partials/header.php';
     font-weight: 600;
 }
 
-/* Posiciones específicas del organigrama - Mejoradas para evitar cortes */
-.director-general { top: 20px; left: 50%; transform: translateX(-50%); }
+/* Posiciones específicas del organigrama - Optimizadas para mejor distribución */
+.director-general { top: 15px; left: 50%; transform: translateX(-50%); }
 
-/* Segunda fila - Coordinadores principales */
-.coord-seguridad { top: 120px; left: 40px; }
-.coord-infraestructura { top: 120px; left: 220px; }
-.coord-transporte { top: 120px; left: 400px; }
-.coord-logistica { top: 120px; left: 580px; }
-.coord-administracion { top: 120px; left: 760px; }
+/* Segunda fila - Coordinadores principales con más espacio */
+.coord-seguridad { top: 110px; left: 20px; }
+.coord-infraestructura { top: 110px; left: 200px; }
+.coord-transporte { top: 110px; left: 380px; }
+.coord-logistica { top: 110px; left: 560px; }
+.coord-administracion { top: 110px; left: 740px; }
 
-/* Tercera fila - Divisiones */
-.div-desarrollo { top: 220px; left: 20px; }
-.div-investigacion { top: 220px; left: 200px; }
-.div-laboratorios { top: 220px; left: 380px; }
-.div-transito { top: 220px; left: 560px; }
-.div-recursos { top: 220px; left: 740px; }
+/* Tercera fila - Divisiones con mejor separación */
+.div-desarrollo { top: 210px; left: 20px; }
+.div-investigacion { top: 210px; left: 200px; }
+.div-laboratorios { top: 210px; left: 380px; }
+.div-transito { top: 210px; left: 560px; }
+.div-recursos { top: 210px; left: 740px; }
 
-/* Cuarta fila - Unidades específicas */
-.unidad-seguridad { top: 320px; left: 20px; }
-.unidad-transporte { top: 320px; left: 200px; }
-.unidad-sistemas { top: 320px; left: 380px; }
-.unidad-laboratorio { top: 320px; left: 560px; }
-.unidad-adquisiciones { top: 320px; left: 740px; }
+/* Cuarta fila - Unidades específicas con espaciado mejorado */
+.unidad-seguridad { top: 310px; left: 30px; }
+.unidad-transporte { top: 310px; left: 210px; }
+.unidad-sistemas { top: 310px; left: 390px; }
+.unidad-laboratorio { top: 310px; left: 570px; }
+.unidad-adquisiciones { top: 310px; left: 750px; }
 
 .controls {
     text-align: center;
@@ -558,35 +614,34 @@ require __DIR__ . '/../partials/header.php';
 
 @media (max-width: 768px) {
     .organigrama {
-        width: 800px;
-        height: 400px;
+        width: 900px;
+        height: 380px;
     }
     
     .drop-zone {
-        width: 120px;
-        height: 50px;
-        font-size: 0.65em;
-        padding: 4px;
+        width: 130px;
+        height: 55px;
+        font-size: 0.7em;
     }
     
     /* Ajustar posiciones para pantallas pequeñas */
-    .coord-seguridad { left: 30px; }
-    .coord-infraestructura { left: 170px; }
-    .coord-transporte { left: 310px; }
-    .coord-logistica { left: 450px; }
-    .coord-administracion { left: 590px; }
+    .coord-seguridad { left: 40px; }
+    .coord-infraestructura { left: 180px; }
+    .coord-transporte { left: 320px; }
+    .coord-logistica { left: 460px; }
+    .coord-administracion { left: 600px; }
     
-    .div-desarrollo { left: 15px; }
-    .div-investigacion { left: 155px; }
-    .div-laboratorios { left: 295px; }
-    .div-transito { left: 435px; }
-    .div-recursos { left: 575px; }
+    .div-desarrollo { left: 40px; }
+    .div-investigacion { left: 180px; }
+    .div-laboratorios { left: 320px; }
+    .div-transito { left: 460px; }
+    .div-recursos { left: 600px; }
     
-    .unidad-seguridad { left: 15px; }
-    .unidad-transporte { left: 155px; }
-    .unidad-sistemas { left: 295px; }
-    .unidad-laboratorio { left: 435px; }
-    .unidad-adquisiciones { left: 575px; }
+    .unidad-seguridad { left: 40px; }
+    .unidad-transporte { left: 180px; }
+    .unidad-sistemas { left: 320px; }
+    .unidad-laboratorio { left: 460px; }
+    .unidad-adquisiciones { left: 600px; }
 }
 
 .progress-bar {
