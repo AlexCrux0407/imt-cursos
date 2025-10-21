@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio: Organigrama del IMT</title>
+    <link rel="stylesheet" href="../styles/css/actividades.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .instructions {
+            background: #e8f4fd;
+            border-left: 5px solid #3498db;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .exercise-area {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .pieces-bank {
+            flex: 0 0 300px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .pieces-bank h3 {
+            margin-top: 0;
+            color: #495057;
+            text-align: center;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .organigrama-container {
+            flex: 1;
+            background: #ffffff;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            min-height: 600px;
+        }
+
+        .piece {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: grab;
+            user-select: none;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            font-size: 0.9em;
+            line-height: 1.3;
+        }
+
+        .piece:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+
+        .piece:active {
+            cursor: grabbing;
+        }
+
+        .piece.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .organigrama {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .drop-zone {
+            position: absolute;
+            width: 180px;
+            height: 80px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            border-style: solid;
+        }
+
+        .drop-zone.filled {
+            border-color: #27ae60;
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .drop-zone.filled .piece {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            cursor: pointer;
+        }
+
+        /* Posiciones específicas del organigrama */
+        .director-general { top: 20px; left: 50%; transform: translateX(-50%); }
+        
+        /* Segunda fila - Coordinadores principales */
+        .coord-seguridad { top: 140px; left: 50px; }
+        .coord-infraestructura { top: 140px; left: 250px; }
+        .coord-transporte { top: 140px; left: 450px; }
+        .coord-logistica { top: 140px; left: 650px; }
+        .coord-administracion { top: 140px; left: 850px; }
+
+        /* Tercera fila - Divisiones */
+        .div-desarrollo { top: 260px; left: 30px; }
+        .div-investigacion { top: 260px; left: 230px; }
+        .div-laboratorios { top: 260px; left: 430px; }
+        .div-transito { top: 260px; left: 630px; }
+        .div-recursos { top: 260px; left: 830px; }
+
+        /* Cuarta fila - Unidades específicas */
+        .unidad-seguridad { top: 380px; left: 10px; }
+        .unidad-transporte { top: 380px; left: 210px; }
+        .unidad-sistemas { top: 380px; left: 410px; }
+        .unidad-laboratorio { top: 380px; left: 610px; }
+        .unidad-adquisiciones { top: 380px; left: 810px; }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connection-line {
+            stroke: #bdc3c7;
+            stroke-width: 2;
+            fill: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Organigrama del Instituto Mexicano del Transporte</h1>
+            <p>Ejercicio: Coloca cada pieza en su posición correcta dentro del organigrama</p>
+        </div>
+
+        <div class="content">
+            <div class="instructions">
+                <h3>📋 Instrucciones</h3>
+                <p>Arrastra cada pieza del banco de elementos hacia el espacio correspondiente en el organigrama. Cada posición tiene un lugar específico según la estructura organizacional del IMT.</p>
+                <ul>
+                    <li>🎯 <strong>Objetivo:</strong> Completar correctamente el organigrama institucional</li>
+                    <li>🖱️ <strong>Interacción:</strong> Arrastra y suelta las piezas en los espacios indicados</li>
+                    <li>✅ <strong>Validación:</strong> El sistema verificará automáticamente las respuestas</li>
+                </ul>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="exercise-area">
+                <div class="pieces-bank">
+                    <h3>🧩 Banco de Elementos</h3>
+                    <div id="piecesContainer">
+                        <!-- Las piezas se generarán dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="organigrama-container">
+                    <svg class="connections" id="connections">
+                        <!-- Líneas de conexión del organigrama -->
+                    </svg>
+                    <div class="organigrama" id="organigrama">
+                        <!-- Los espacios se generarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="verificarRespuestas()">🔍 Verificar Respuestas</button>
+                <button class="btn danger" onclick="reiniciarEjercicio()">🔄 Reiniciar</button>
+                <button class="btn success" onclick="mostrarSolucion()">💡 Mostrar Solución</button>
+            </div>
+
+            <div id="resultado" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="../styles/js/actividades.js"></script>
+    <script>
+        // Configuración del organigrama del IMT
+        const organigramaConfig = {
+            piezas: [
+                { id: 'director-general', texto: 'Director General', posicion: 'director-general' },
+                { id: 'coord-seguridad', texto: 'Coordinación de Seguridad y Operación del Transporte', posicion: 'coord-seguridad' },
+                { id: 'coord-infraestructura', texto: 'Coordinación de Infraestructura del Transporte', posicion: 'coord-infraestructura' },
+                { id: 'coord-transporte', texto: 'Coordinación de Transporte Integrado y Logística', posicion: 'coord-transporte' },
+                { id: 'coord-logistica', texto: 'Coordinación de Infraestructura de las Tecnologías', posicion: 'coord-logistica' },
+                { id: 'coord-administracion', texto: 'Coordinación de Administración y Finanzas', posicion: 'coord-administracion' },
+                { id: 'div-desarrollo', texto: 'División de Desarrollo y Diseño de Normas', posicion: 'div-desarrollo' },
+                { id: 'div-investigacion', texto: 'División de Investigación y Desarrollo de Tecnologías', posicion: 'div-investigacion' },
+                { id: 'div-laboratorios', texto: 'División de Laboratorios de Investigación', posicion: 'div-laboratorios' },
+                { id: 'div-transito', texto: 'División de Tránsito Sostenible y Calidad Operativa', posicion: 'div-transito' },
+                { id: 'div-recursos', texto: 'División de Recursos Financieros y Materiales', posicion: 'div-recursos' },
+                { id: 'unidad-seguridad', texto: 'Unidad de Seguridad', posicion: 'unidad-seguridad' },
+                { id: 'unidad-transporte', texto: 'Unidad de Transporte del Transporte', posicion: 'unidad-transporte' },
+                { id: 'unidad-sistemas', texto: 'Unidad de Sistemas de Información Georreferenciada', posicion: 'unidad-sistemas' },
+                { id: 'unidad-laboratorio', texto: 'Unidad de Laboratorio Nacional en Sistemas Logísticos', posicion: 'unidad-laboratorio' },
+                { id: 'unidad-adquisiciones', texto: 'Unidad de Adquisiciones, Recursos Materiales y Servicios', posicion: 'unidad-adquisiciones' }
+            ],
+            espacios: [
+                { id: 'director-general', clase: 'director-general', acepta: ['director-general'] },
+                { id: 'coord-seguridad', clase: 'coord-seguridad', acepta: ['coord-seguridad'] },
+                { id: 'coord-infraestructura', clase: 'coord-infraestructura', acepta: ['coord-infraestructura'] },
+                { id: 'coord-transporte', clase: 'coord-transporte', acepta: ['coord-transporte'] },
+                { id: 'coord-logistica', clase: 'coord-logistica', acepta: ['coord-logistica'] },
+                { id: 'coord-administracion', clase: 'coord-administracion', acepta: ['coord-administracion'] },
+                { id: 'div-desarrollo', clase: 'div-desarrollo', acepta: ['div-desarrollo'] },
+                { id: 'div-investigacion', clase: 'div-investigacion', acepta: ['div-investigacion'] },
+                { id: 'div-laboratorios', clase: 'div-laboratorios', acepta: ['div-laboratorios'] },
+                { id: 'div-transito', clase: 'div-transito', acepta: ['div-transito'] },
+                { id: 'div-recursos', clase: 'div-recursos', acepta: ['div-recursos'] },
+                { id: 'unidad-seguridad', clase: 'unidad-seguridad', acepta: ['unidad-seguridad'] },
+                { id: 'unidad-transporte', clase: 'unidad-transporte', acepta: ['unidad-transporte'] },
+                { id: 'unidad-sistemas', clase: 'unidad-sistemas', acepta: ['unidad-sistemas'] },
+                { id: 'unidad-laboratorio', clase: 'unidad-laboratorio', acepta: ['unidad-laboratorio'] },
+                { id: 'unidad-adquisiciones', clase: 'unidad-adquisiciones', acepta: ['unidad-adquisiciones'] }
+            ]
+        };
+
+        let respuestasUsuario = {};
+        let totalPiezas = organigramaConfig.piezas.length;
+
+        // Inicializar el ejercicio
+        function inicializarEjercicio() {
+            crearPiezas();
+            crearEspacios();
+            dibujarConexiones();
+            actualizarProgreso();
+        }
+
+        // Crear las piezas arrastrables
+        function crearPiezas() {
+            const container = document.getElementById('piecesContainer');
+            container.innerHTML = '';
+
+            // Mezclar las piezas para que aparezcan en orden aleatorio
+            const piezasMezcladas = [...organigramaConfig.piezas].sort(() => Math.random() - 0.5);
+
+            piezasMezcladas.forEach(pieza => {
+                const elemento = document.createElement('div');
+                elemento.className = 'piece';
+                elemento.draggable = true;
+                elemento.dataset.pieceId = pieza.id;
+                elemento.textContent = pieza.texto;
+
+                elemento.addEventListener('dragstart', iniciarArrastre);
+                elemento.addEventListener('dragend', finalizarArrastre);
+
+                container.appendChild(elemento);
+            });
+        }
+
+        // Crear los espacios de destino
+        function crearEspacios() {
+            const organigrama = document.getElementById('organigrama');
+            organigrama.innerHTML = '';
+
+            organigramaConfig.espacios.forEach(espacio => {
+                const elemento = document.createElement('div');
+                elemento.className = `drop-zone ${espacio.clase}`;
+                elemento.dataset.espacioId = espacio.id;
+                elemento.dataset.acepta = JSON.stringify(espacio.acepta);
+                elemento.textContent = 'Colocar aquí';
+
+                elemento.addEventListener('dragover', permitirSoltar);
+                elemento.addEventListener('dragleave', salirZona);
+                elemento.addEventListener('drop', soltarPieza);
+
+                organigrama.appendChild(elemento);
+            });
+        }
+
+        // Dibujar las líneas de conexión del organigrama
+        function dibujarConexiones() {
+            const svg = document.getElementById('connections');
+            svg.innerHTML = '';
+
+            // Aquí se pueden agregar las líneas SVG que conectan los elementos del organigrama
+            // Por simplicidad, se omiten en esta versión inicial
+        }
+
+        // Eventos de drag and drop
+        function iniciarArrastre(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.pieceId);
+            e.target.classList.add('dragging');
+        }
+
+        function finalizarArrastre(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function permitirSoltar(e) {
+            e.preventDefault();
+            e.target.classList.add('drag-over');
+        }
+
+        function salirZona(e) {
+            e.target.classList.remove('drag-over');
+        }
+
+        function soltarPieza(e) {
+            e.preventDefault();
+            const espacioId = e.target.dataset.espacioId;
+            const pieceId = e.dataTransfer.getData('text/plain');
+            const acepta = JSON.parse(e.target.dataset.acepta);
+
+            e.target.classList.remove('drag-over');
+
+            if (acepta.includes(pieceId)) {
+                // Remover pieza anterior si existe
+                if (respuestasUsuario[espacioId]) {
+                    devolverPiezaAlBanco(respuestasUsuario[espacioId]);
+                }
+
+                // Colocar nueva pieza
+                const pieza = document.querySelector(`[data-piece-id="${pieceId}"]`);
+                const piezaClonada = pieza.cloneNode(true);
+                piezaClonada.draggable = false;
+                piezaClonada.addEventListener('click', () => devolverPiezaAlBanco(pieceId));
+
+                e.target.innerHTML = '';
+                e.target.appendChild(piezaClonada);
+                e.target.classList.add('filled');
+
+                // Ocultar pieza original
+                pieza.style.display = 'none';
+
+                // Guardar respuesta
+                respuestasUsuario[espacioId] = pieceId;
+
+                actualizarProgreso();
+            }
+        }
+
+        // Devolver pieza al banco
+        function devolverPiezaAlBanco(pieceId) {
+            const piezaOriginal = document.querySelector(`[data-piece-id="${pieceId}"]`);
+            piezaOriginal.style.display = 'block';
+
+            // Remover de espacios ocupados
+            Object.keys(respuestasUsuario).forEach(espacioId => {
+                if (respuestasUsuario[espacioId] === pieceId) {
+                    const espacio = document.querySelector(`[data-espacio-id="${espacioId}"]`);
+                    espacio.innerHTML = 'Colocar aquí';
+                    espacio.classList.remove('filled');
+                    delete respuestasUsuario[espacioId];
+                }
+            });
+
+            actualizarProgreso();
+        }
+
+        // Actualizar barra de progreso
+        function actualizarProgreso() {
+            const completadas = Object.keys(respuestasUsuario).length;
+            const porcentaje = (completadas / totalPiezas) * 100;
+            document.getElementById('progressFill').style.width = porcentaje + '%';
+        }
+
+        // Verificar respuestas
+        function verificarRespuestas() {
+            let correctas = 0;
+            let total = organigramaConfig.espacios.length;
+            const resultado = document.getElementById('resultado');
+
+            organigramaConfig.espacios.forEach(espacio => {
+                const respuestaUsuario = respuestasUsuario[espacio.id];
+                if (respuestaUsuario && espacio.acepta.includes(respuestaUsuario)) {
+                    correctas++;
+                }
+            });
+
+            const porcentaje = Math.round((correctas / total) * 100);
+
+            if (correctas === total) {
+                resultado.className = 'result success';
+                resultado.innerHTML = `🎉 ¡Excelente! Has completado correctamente el organigrama del IMT. Puntuación: ${correctas}/${total} (${porcentaje}%)`;
+            } else {
+                resultado.className = 'result error';
+                resultado.innerHTML = `❌ Algunas piezas no están en la posición correcta. Puntuación: ${correctas}/${total} (${porcentaje}%). Revisa y vuelve a intentar.`;
+            }
+
+            resultado.style.display = 'block';
+        }
+
+        // Reiniciar ejercicio
+        function reiniciarEjercicio() {
+            respuestasUsuario = {};
+            document.getElementById('resultado').style.display = 'none';
+            inicializarEjercicio();
+        }
+
+        // Mostrar solución
+        function mostrarSolucion() {
+            organigramaConfig.piezas.forEach(pieza => {
+                const espacio = document.querySelector(`[data-espacio-id="${pieza.posicion}"]`);
+                const piezaOriginal = document.querySelector(`[data-piece-id="${pieza.id}"]`);
+                
+                if (espacio && piezaOriginal) {
+                    const piezaClonada = piezaOriginal.cloneNode(true);
+                    piezaClonada.draggable = false;
+                    
+                    espacio.innerHTML = '';
+                    espacio.appendChild(piezaClonada);
+                    espacio.classList.add('filled');
+                    
+                    piezaOriginal.style.display = 'none';
+                    respuestasUsuario[pieza.posicion] = pieza.id;
+                }
+            });
+
+            actualizarProgreso();
+            
+            const resultado = document.getElementById('resultado');
+            resultado.className = 'result success';
+            resultado.innerHTML = '💡 Solución mostrada. El organigrama está ahora completo con todas las posiciones correctas.';
+            resultado.style.display = 'block';
+        }
+
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', inicializarEjercicio);
+    </script>
+</body>
+</html>

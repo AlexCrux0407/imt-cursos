@@ -172,7 +172,28 @@
   border-radius: 50%; font-weight: 700;
 }
 .contenido-principal .tema-titulo { flex: 1; color: #2c3e50; font-weight: 700; }
-.subtemas-count { background: #f0f3f6; color: #7f8c8d; padding: 4px 10px; border-radius: 999px; font-size: .8rem; }
+.subtemas-count { 
+  background: #f0f3f6; 
+  color: #7f8c8d; 
+  padding: 4px 10px; 
+  border-radius: 999px; 
+  font-size: .8rem; 
+}
+
+.subtemas-count.clickable {
+  background: #3498db;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.subtemas-count.clickable:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
 .tema-descripcion { color: #5a5c69; margin: 8px 0 10px; }
 .tema-acciones { display: flex; gap: 10px; }
 .btn-tema, .btn-leccion {

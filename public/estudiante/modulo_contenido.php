@@ -713,21 +713,14 @@ require __DIR__ . '/../partials/nav.php';
                                     <h3 class="tema-titulo"><?= htmlspecialchars($tema['titulo']) ?></h3>
                                 </a>
                                 <?php if ((int)$tema['total_subtemas'] > 0): ?>
-                                    <span class="subtemas-count">
+                                    <a href="<?= BASE_URL ?>/estudiante/subtemas.php?tema_id=<?= (int)$tema['id'] ?>" class="subtemas-count clickable">
                                         <?= (int)$tema['total_subtemas'] ?> subtema<?= ((int)$tema['total_subtemas'] !== 1 ? 's' : '') ?>
-                                    </span>
+                                    </a>
                                 <?php endif; ?>
                             </div>
                             <?php if (!empty($tema['descripcion'])): ?>
                                 <p class="tema-descripcion"><?= htmlspecialchars($tema['descripcion']) ?></p>
                             <?php endif; ?>
-                            <div class="tema-acciones">
-                                <?php if ((int)$tema['total_subtemas'] > 0): ?>
-                                    <a class="btn-tema subtemas" href="<?= BASE_URL ?>/estudiante/subtemas.php?tema_id=<?= (int)$tema['id'] ?>">
-                                        Ver Subtemas
-                                    </a>
-                                <?php endif; ?>
-                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -837,25 +830,41 @@ require __DIR__ . '/../partials/nav.php';
                                     </button>
                                 <?php else: ?>
                                     <?php if ((int)$evaluacion['intentos_realizados'] > 0 && $evaluacion['mejor_calificacion'] !== null && $evaluacion['mejor_calificacion'] < 100.0): ?>
-                                        <!-- Botón principal para rehacer -->
-                                        <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
-                                           class="btn-evaluacion rehacer">
-                                            <i class="icon-refresh"></i>
-                                            <span>Rehacer Evaluación</span>
-                                        </a>
-                                        <!-- Botón secundario para ver resultado -->
-                                        <a href="<?= BASE_URL ?>/estudiante/resultado_evaluacion.php?evaluacion_id=<?= (int)$evaluacion['id'] ?>"
-                                           class="btn-evaluacion secundario">
-                                            <i class="icon-eye"></i>
-                                            <span>Ver Resultado (<?= number_format((float)$evaluacion['mejor_calificacion'], 1) ?>%)</span>
-                                        </a>
+                        <!-- Botón principal para rehacer -->
+                        <?php if (strpos(strtolower($evaluacion['titulo']), 'organigrama') !== false): ?>
+                            <a href="<?= BASE_URL ?>/estudiante/evaluacion_organigrama.php?id=<?= (int)$evaluacion['id'] ?>"
+                               class="btn-evaluacion rehacer">
+                                <i class="icon-refresh"></i>
+                                <span>Rehacer Evaluación</span>
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
+                               class="btn-evaluacion rehacer">
+                                <i class="icon-refresh"></i>
+                                <span>Rehacer Evaluación</span>
+                            </a>
+                        <?php endif; ?>
+                        <!-- Botón secundario para ver resultado -->
+                        <a href="<?= BASE_URL ?>/estudiante/resultado_evaluacion.php?evaluacion_id=<?= (int)$evaluacion['id'] ?>"
+                           class="btn-evaluacion secundario">
+                            <i class="icon-eye"></i>
+                            <span>Ver Resultado (<?= number_format((float)$evaluacion['mejor_calificacion'], 1) ?>%)</span>
+                        </a>
                                     <?php else: ?>
                                         <!-- Botón para iniciar por primera vez -->
-                                        <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
-                                           class="btn-evaluacion disponible">
-                                            <i class="icon-play"></i>
-                                            <span>Iniciar Evaluación</span>
-                                        </a>
+                                        <?php if (strpos(strtolower($evaluacion['titulo']), 'organigrama') !== false): ?>
+                                            <a href="<?= BASE_URL ?>/estudiante/evaluacion_organigrama.php?id=<?= (int)$evaluacion['id'] ?>"
+                                               class="btn-evaluacion disponible">
+                                                <i class="icon-sitemap"></i>
+                                                <span>Iniciar Organigrama</span>
+                                            </a>
+                                        <?php else: ?>
+                                            <a href="<?= BASE_URL ?>/estudiante/tomar_evaluacion.php?id=<?= (int)$evaluacion['id'] ?>"
+                                               class="btn-evaluacion disponible">
+                                                <i class="icon-play"></i>
+                                                <span>Iniciar Evaluación</span>
+                                            </a>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </div>

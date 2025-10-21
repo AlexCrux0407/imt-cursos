@@ -1,7 +1,34 @@
 <?php
+// Debug: Capturar toda la salida
+ob_start();
+
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
+
+// Debug: Log de inicio
+error_log("=== INICIO PROCESAR_INTENTO_EVALUACION ===");
+error_log("POST data: " . print_r($_POST, true));
+error_log("SESSION data: " . print_r($_SESSION, true));
+
+// Detectar si es una solicitud AJAX (del organigrama)
+$is_ajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+
+// También detectar por el contenido - si hay respuesta_organigrama es del organigrama
+$is_organigrama = false;
+foreach ($_POST as $key => $value) {
+    if (strpos($key, 'respuesta_') === 0 && !empty($value)) {
+        $decoded = json_decode($value, true);
+        if ($decoded !== null && is_array($decoded)) {
+            $is_organigrama = true;
+            break;
+        }
+    }
+}
+
+error_log("Es AJAX: " . ($is_ajax ? 'SI' : 'NO'));
+error_log("Es organigrama: " . ($is_organigrama ? 'SI' : 'NO'));
 
 // Función para normalizar texto y hacer comparación flexible
 function normalizeAndCompare($text1, $text2) {
@@ -332,6 +359,56 @@ try {
                      $es_correcta = is_array($resp) && count($resp) === count($correctas) && array_map('strtolower', array_map('trim', $resp)) === array_map('strtolower', array_map('trim', $correctas));
                      $respuesta_estudiante = json_encode($resp);
                      break;
+                     
+                case 'organigrama':
+                    // Manejar respuestas del organigrama
+                    $resp_raw = $_POST['respuesta_' . $pregunta['id']] ?? '';
+                    
+                    // Si la respuesta viene como string JSON, decodificarla
+                    if (is_string($resp_raw)) {
+                        $resp = json_decode($resp_raw, true) ?: [];
+                    } else {
+                        $resp = $resp_raw;
+                    }
+                    
+                    $correctas_raw = json_decode($pregunta['respuesta_correcta'], true) ?: [];
+                    
+                    // Extraer los espacios de la estructura JSON
+                    $espacios_correctos_data = $correctas_raw['espacios'] ?? [];
+                    
+                    // Convertir a formato espacio_id => respuesta_correcta
+                    $correctas = [];
+                    foreach ($espacios_correctos_data as $espacio_data) {
+                        $correctas[$espacio_data['id']] = $espacio_data['respuesta_correcta'];
+                    }
+                    
+                    error_log("=== DEBUG ORGANIGRAMA ===");
+                    error_log("DEBUG - Pregunta ID: " . $pregunta['id']);
+                    error_log("DEBUG - Respuesta estudiante RAW: " . json_encode($resp_raw));
+                    error_log("DEBUG - Respuesta estudiante PARSED: " . json_encode($resp));
+                    error_log("DEBUG - Respuesta correcta RAW: " . json_encode($correctas_raw));
+                    error_log("DEBUG - Respuesta correcta PROCESADA: " . json_encode($correctas));
+                    
+                    // Contar espacios correctos
+                    $espacios_correctos = 0;
+                    $total_espacios = count($correctas);
+                    
+                    foreach ($correctas as $espacio_id => $pieza_correcta) {
+                        $pieza_estudiante = $resp[$espacio_id] ?? null;
+                        if ($pieza_estudiante === $pieza_correcta) {
+                            $espacios_correctos++;
+                        }
+                        error_log("DEBUG - Espacio $espacio_id: estudiante='$pieza_estudiante', correcto='$pieza_correcta', match=" . ($pieza_estudiante === $pieza_correcta ? 'SI' : 'NO'));
+                    }
+                    
+                    // Calcular si está completamente correcto
+                    $es_correcta = ($espacios_correctos === $total_espacios);
+                    $respuesta_estudiante = json_encode($resp);
+                    
+                    error_log("DEBUG - Espacios correctos: $espacios_correctos de $total_espacios");
+                    error_log("DEBUG - Evaluación completa correcta: " . ($es_correcta ? 'SI' : 'NO'));
+                    error_log("=== FIN DEBUG ORGANIGRAMA ===");
+                    break;
              }
              
              // Guardar respuesta del estudiante
@@ -399,6 +476,9 @@ try {
              error_log("  - Total respuestas: $total_respuestas");
              error_log("  - Puntaje calculado: $puntaje_obtenido");
          }
+         
+         // Definir total_preguntas para uso posterior
+         $total_preguntas = $total_respuestas;
          
          // Actualizar intento con el resultado
          $stmt = $conn->prepare("
@@ -545,6 +625,26 @@ try {
       // Redirigir con mensaje
       $mensaje = $resultado_tercera['mensaje'];
       $tipo = $resultado_tercera['tipo'];
+      
+      // Si es una solicitud del organigrama (AJAX), enviar respuesta JSON
+      if ($is_ajax || $is_organigrama) {
+          // Limpiar cualquier salida previa
+          ob_clean();
+          
+          header('Content-Type: application/json');
+          echo json_encode([
+              'success' => true,
+              'mensaje' => $mensaje,
+              'tipo' => $tipo,
+              'puntaje_obtenido' => $puntaje_obtenido,
+              'respuestas_correctas' => $respuestas_correctas,
+              'total_preguntas' => $total_preguntas,
+              'intento_id' => $intento_id
+          ]);
+          exit;
+      }
+      
+      // Para evaluaciones normales, redirigir como antes
       error_log("Redirigiendo a resultado_evaluacion.php con intento_id: $intento_id");
       $redirect_url = BASE_URL . '/estudiante/resultado_evaluacion.php?intento_id=' . $intento_id . '&mensaje=' . urlencode($mensaje) . '&tipo=' . $tipo;
       header('Location: ' . $redirect_url);
@@ -575,6 +675,20 @@ try {
               error_log("Error durante rollback: " . $rollbackException->getMessage());
           }
       }
+      
+      // Si es una solicitud del organigrama (AJAX), enviar error JSON
+      if ($is_ajax || $is_organigrama) {
+          // Limpiar cualquier salida previa
+          ob_clean();
+          
+          header('Content-Type: application/json');
+          echo json_encode([
+              'success' => false,
+              'error' => 'Error al procesar la evaluación: ' . $e->getMessage()
+          ]);
+          exit;
+      }
+      
       $error_message = 'Error al procesar la evaluación: ' . $e->getMessage();
       $curso_id = isset($evaluacion['curso_id']) ? $evaluacion['curso_id'] : null;
       if (!$curso_id && !empty($evaluacion_id)) {
