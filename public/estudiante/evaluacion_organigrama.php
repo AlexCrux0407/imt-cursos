@@ -253,26 +253,29 @@ require __DIR__ . '/../partials/header.php';
     background: white;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    padding: 30px;
+    padding: 20px;
     margin: 20px 0;
-    max-width: 1400px;
+    max-width: 1600px;
     margin-left: auto;
     margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .exercise-area {
     display: flex;
-    gap: 30px;
+    gap: 20px;
     margin-bottom: 30px;
     min-height: 500px;
+    width: 100%;
 }
 
 .pieces-bank {
-    flex: 0 0 280px;
+    flex: 0 0 260px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 15px;
-    padding: 25px;
+    padding: 20px;
     max-height: 600px;
     overflow-y: auto;
     color: white;
@@ -283,8 +286,8 @@ require __DIR__ . '/../partials/header.php';
     margin-top: 0;
     color: white;
     text-align: center;
-    font-size: 1.2em;
-    margin-bottom: 20px;
+    font-size: 1.1em;
+    margin-bottom: 15px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
@@ -293,11 +296,13 @@ require __DIR__ . '/../partials/header.php';
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     border: none;
     border-radius: 20px;
-    padding: 30px;
+    padding: 20px;
     position: relative;
     min-height: 600px;
     box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    min-width: 1100px;
 }
 
 .organigrama-container::before {
@@ -316,17 +321,17 @@ require __DIR__ . '/../partials/header.php';
 .piece {
     background: linear-gradient(135deg, #ffffff, #f8f9fa);
     color: #2c3e50;
-    padding: 12px 16px;
-    margin: 8px 0;
-    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 6px 0;
+    border-radius: 10px;
     cursor: grab;
     user-select: none;
     font-weight: 600;
     text-align: center;
     transition: all 0.3s ease;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    font-size: 0.9em;
-    line-height: 1.3;
+    font-size: 0.8em;
+    line-height: 1.2;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
 }
@@ -351,27 +356,29 @@ require __DIR__ . '/../partials/header.php';
 
 .organigrama {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: 1200px;
+    height: 500px;
+    margin: 0 auto;
 }
 
 .drop-zone {
     position: absolute;
-    width: 180px;
-    height: 80px;
+    width: 160px;
+    height: 70px;
     border: 2px dashed #cbd5e1;
-    border-radius: 12px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8em;
+    font-size: 0.75em;
     color: #64748b;
     transition: all 0.3s ease;
     text-align: center;
-    padding: 8px;
+    padding: 6px;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    line-height: 1.2;
 }
 
 .drop-zone.drag-over {
@@ -414,29 +421,29 @@ require __DIR__ . '/../partials/header.php';
     font-weight: 600;
 }
 
-/* Posiciones específicas del organigrama */
+/* Posiciones específicas del organigrama - Mejoradas para evitar cortes */
 .director-general { top: 20px; left: 50%; transform: translateX(-50%); }
 
 /* Segunda fila - Coordinadores principales */
-.coord-seguridad { top: 140px; left: 50px; }
-.coord-infraestructura { top: 140px; left: 250px; }
-.coord-transporte { top: 140px; left: 450px; }
-.coord-logistica { top: 140px; left: 650px; }
-.coord-administracion { top: 140px; left: 850px; }
+.coord-seguridad { top: 120px; left: 40px; }
+.coord-infraestructura { top: 120px; left: 220px; }
+.coord-transporte { top: 120px; left: 400px; }
+.coord-logistica { top: 120px; left: 580px; }
+.coord-administracion { top: 120px; left: 760px; }
 
 /* Tercera fila - Divisiones */
-.div-desarrollo { top: 260px; left: 30px; }
-.div-investigacion { top: 260px; left: 230px; }
-.div-laboratorios { top: 260px; left: 430px; }
-.div-transito { top: 260px; left: 630px; }
-.div-recursos { top: 260px; left: 830px; }
+.div-desarrollo { top: 220px; left: 20px; }
+.div-investigacion { top: 220px; left: 200px; }
+.div-laboratorios { top: 220px; left: 380px; }
+.div-transito { top: 220px; left: 560px; }
+.div-recursos { top: 220px; left: 740px; }
 
 /* Cuarta fila - Unidades específicas */
-.unidad-seguridad { top: 380px; left: 10px; }
-.unidad-transporte { top: 380px; left: 210px; }
-.unidad-sistemas { top: 380px; left: 410px; }
-.unidad-laboratorio { top: 380px; left: 610px; }
-.unidad-adquisiciones { top: 380px; left: 810px; }
+.unidad-seguridad { top: 320px; left: 20px; }
+.unidad-transporte { top: 320px; left: 200px; }
+.unidad-sistemas { top: 320px; left: 380px; }
+.unidad-laboratorio { top: 320px; left: 560px; }
+.unidad-adquisiciones { top: 320px; left: 740px; }
 
 .controls {
     text-align: center;
@@ -496,6 +503,90 @@ require __DIR__ . '/../partials/header.php';
     background: linear-gradient(135deg, #f8d7da, #f5c6cb);
     color: #721c24;
     border: 2px solid #ef4444;
+}
+
+/* Responsive design para pantallas más pequeñas */
+@media (max-width: 1400px) {
+    .organigrama-evaluation-container {
+        max-width: 100%;
+        padding: 15px;
+    }
+    
+    .exercise-area {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .pieces-bank {
+        flex: none;
+        max-height: 200px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+    }
+    
+    .pieces-bank #piecesContainer {
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+    }
+    
+    .pieces-bank .piece {
+        flex: 0 0 auto;
+        margin: 0;
+        white-space: normal;
+        min-width: 120px;
+    }
+    
+    .organigrama-container {
+        min-width: auto;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+    
+    .organigrama {
+        width: 1000px;
+        height: 450px;
+    }
+    
+    .drop-zone {
+        width: 140px;
+        height: 60px;
+        font-size: 0.7em;
+    }
+}
+
+@media (max-width: 768px) {
+    .organigrama {
+        width: 800px;
+        height: 400px;
+    }
+    
+    .drop-zone {
+        width: 120px;
+        height: 50px;
+        font-size: 0.65em;
+        padding: 4px;
+    }
+    
+    /* Ajustar posiciones para pantallas pequeñas */
+    .coord-seguridad { left: 30px; }
+    .coord-infraestructura { left: 170px; }
+    .coord-transporte { left: 310px; }
+    .coord-logistica { left: 450px; }
+    .coord-administracion { left: 590px; }
+    
+    .div-desarrollo { left: 15px; }
+    .div-investigacion { left: 155px; }
+    .div-laboratorios { left: 295px; }
+    .div-transito { left: 435px; }
+    .div-recursos { left: 575px; }
+    
+    .unidad-seguridad { left: 15px; }
+    .unidad-transporte { left: 155px; }
+    .unidad-sistemas { left: 295px; }
+    .unidad-laboratorio { left: 435px; }
+    .unidad-adquisiciones { left: 575px; }
 }
 
 .progress-bar {
@@ -1067,28 +1158,68 @@ function reiniciarEjercicio() {
 
 // Mostrar solución (solo para aprendizaje, no afecta calificación)
 function mostrarSolucion() {
+    console.log('=== MOSTRAR SOLUCIÓN ===');
+    console.log('organigramaConfig:', organigramaConfig);
+    
+    // Limpiar el organigrama primero
+    document.querySelectorAll('.drop-zone').forEach(espacio => {
+        espacio.innerHTML = 'Colocar aquí';
+        espacio.classList.remove('filled');
+        espacio.style.background = '';
+    });
+    
+    // Mostrar todas las piezas en el banco
+    document.querySelectorAll('[data-piece-id]').forEach(pieza => {
+        pieza.style.display = 'block';
+    });
+    
+    // Colocar cada pieza en su posición correcta
     organigramaConfig.piezas.forEach(pieza => {
+        console.log('Procesando pieza:', pieza);
+        
+        // Buscar el espacio de destino usando el ID de la posición
         const espacio = document.querySelector(`[data-espacio-id="${pieza.posicion}"]`);
+        console.log('Espacio encontrado:', espacio);
+        
+        // Buscar la pieza original en el banco
         const piezaOriginal = document.querySelector(`[data-piece-id="${pieza.id}"]`);
+        console.log('Pieza original encontrada:', piezaOriginal);
         
         if (espacio && piezaOriginal) {
+            // Crear una copia de la pieza
             const piezaClonada = piezaOriginal.cloneNode(true);
             piezaClonada.draggable = false;
-            piezaClonada.style.opacity = '0.8';
+            piezaClonada.style.opacity = '0.9';
             piezaClonada.style.border = '3px solid #28a745';
-            piezaClonada.style.boxShadow = '0 0 10px rgba(40, 167, 69, 0.3)';
+            piezaClonada.style.boxShadow = '0 0 10px rgba(40, 167, 69, 0.5)';
             
+            // Colocar la pieza en el espacio
             espacio.innerHTML = '';
             espacio.appendChild(piezaClonada);
             espacio.classList.add('filled');
             espacio.style.background = 'rgba(40, 167, 69, 0.1)';
             
+            // Ocultar la pieza original del banco
             piezaOriginal.style.display = 'none';
+            
+            console.log(`Pieza ${pieza.id} colocada en ${pieza.posicion}`);
+        } else {
+            console.error(`No se pudo colocar la pieza ${pieza.id} en ${pieza.posicion}`);
+            console.error('Espacio:', espacio);
+            console.error('Pieza original:', piezaOriginal);
         }
     });
 
     const resultado = document.getElementById('resultado');
+    
+    // Remover información de solución previa si existe
+    const solucionExistente = resultado.querySelector('.solucion-info');
+    if (solucionExistente) {
+        solucionExistente.remove();
+    }
+    
     const solucionInfo = document.createElement('div');
+    solucionInfo.className = 'solucion-info';
     solucionInfo.style.marginTop = '20px';
     solucionInfo.style.padding = '15px';
     solucionInfo.style.background = 'linear-gradient(135deg, #d4edda, #c3e6cb)';
@@ -1106,8 +1237,12 @@ function mostrarSolucion() {
     resultado.appendChild(solucionInfo);
     
     // Deshabilitar botón de mostrar solución
-    document.getElementById('mostrarSolucionBtn').disabled = true;
-    document.getElementById('mostrarSolucionBtn').textContent = '✅ Solución Mostrada';
+    const botonSolucion = document.getElementById('mostrarSolucionBtn');
+    botonSolucion.disabled = true;
+    botonSolucion.textContent = '✅ Solución Mostrada';
+    
+    solucionMostrada = true;
+    console.log('=== SOLUCIÓN MOSTRADA ===');
 }
 
 // Inicializar cuando se carga la página
