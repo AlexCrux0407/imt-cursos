@@ -88,12 +88,12 @@ require __DIR__ . '/../partials/nav.php';
     text-transform: uppercase;
 }
 
-.tipo-multiple_choice { background: #e8f4fd; color: #2980b9; }
+.tipo-multiple_choice { background: #e8f4fd; color: #3498db; }
 .tipo-verdadero_falso { background: #e8f5e8; color: #27ae60; }
 .tipo-texto_corto { background: #fef9e7; color: #f39c12; }
 .tipo-texto_largo { background: #fdeaea; color: #e74c3c; }
 .tipo-seleccion_multiple { background: #f3e5f5; color: #8e44ad; }
-.tipo-emparejar_columnas { background: #e8f4fd; color: #2980b9; }
+.tipo-emparejar_columnas { background: #e8f4fd; color: #3498db; }
 .tipo-completar_espacios { background: #fef9e7; color: #f39c12; }
 
 .modal {
@@ -209,7 +209,7 @@ require __DIR__ . '/../partials/nav.php';
 </style>
 
 <div class="contenido">
-    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white;">
         <div class="div-fila-alt-start">
             <div>
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Editar Pregunta</h1>

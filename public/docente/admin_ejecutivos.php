@@ -444,7 +444,7 @@ require __DIR__ . '/../partials/nav.php';
 }
 
 .btn-filter {
-    background-color: #007bff;
+    background-color: #3498db;
     color: white;
 }
 

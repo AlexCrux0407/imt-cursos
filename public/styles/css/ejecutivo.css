@@ -2,8 +2,8 @@
 
 /* Colores para ejecutivos - Azul profesional */
 :root {
-    --exec-primary: #2c3e50;
-    --exec-secondary: #34495e;
+    --exec-primary: #3498db;
+    --exec-secondary: #3498db;
     --exec-accent: #3498db;
     --exec-light: #ecf0f1;
     --exec-bg: #f7fafc;
@@ -41,7 +41,7 @@
 }
 
 .exec-header {
-    background: linear-gradient(135deg, var(--exec-primary), var(--exec-secondary));
+    background: linear-gradient(135deg, #3498db, #3498db);
     color: white;
     padding: 30px;
     border-radius: 15px;
@@ -153,7 +153,7 @@
 }
 
 .report-link:hover {
-    background: #2980b9;
+    background: #3498db;
     transform: translateX(5px);
 }
 
@@ -166,7 +166,7 @@
 }
 
 .exec-stat-item {
-    background: linear-gradient(135deg, var(--exec-accent), #2980b9);
+    background: linear-gradient(135deg, #3498db, #3498db);
     color: white;
     padding: 25px;
     border-radius: 12px;
@@ -309,7 +309,207 @@
 }
 
 .exec-btn.secondary:hover {
-    background: #2980b9;
+    background: #3498db;
+}
+
+/* Estilos para generar reportes */
+.reports-options {
+    margin-top: 30px;
+}
+
+.report-section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border-top: 4px solid var(--exec-accent);
+}
+
+.report-section h3 {
+    color: var(--exec-primary);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--exec-light);
+}
+
+.report-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.report-content {
+    flex: 1;
+}
+
+.report-content h4 {
+    color: var(--exec-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.report-content p {
+    color: #7f8c8d;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.report-stats {
+    background: var(--exec-light);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--exec-primary);
+    font-weight: 500;
+}
+
+.btn-export-pdf, .btn-export-excel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.btn-export-pdf {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-export-pdf:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+.btn-export-excel {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-export-excel:hover {
+    background: #229954;
+    transform: translateY(-2px);
+}
+
+.btn-export-pdf img, .btn-export-excel img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+}
+
+.specific-reports {
+    margin-top: 20px;
+}
+
+.selector-section {
+    margin-bottom: 20px;
+}
+
+.selector-section label {
+    display: block;
+    color: var(--exec-primary);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.report-selector {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--exec-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.report-selector:focus {
+    outline: none;
+    border-color: var(--exec-accent);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.selector-actions {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    border-left: 4px solid var(--exec-accent);
+}
+
+.action-description h4 {
+    color: var(--exec-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.action-description p {
+    color: #7f8c8d;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.report-info {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border-top: 4px solid var(--exec-accent);
+}
+
+.report-info h3 {
+    color: var(--exec-primary);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.info-item {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.info-item h4 {
+    color: var(--exec-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.info-item p {
+    color: #7f8c8d;
+    line-height: 1.5;
+    font-size: 0.95rem;
 }
 
 /* Responsive para ejecutivos */
@@ -326,12 +526,24 @@
         grid-template-columns: 1fr;
     }
     
+    .report-cards {
+        grid-template-columns: 1fr;
+    }
+    
     .exec-stats {
         grid-template-columns: repeat(2, 1fr);
     }
     
     .exec-buttons {
         flex-direction: column;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -397,7 +609,7 @@
 }
 
 .btn-filter:hover {
-    background: #2980b9;
+    background: #3498db;
     transform: translateY(-2px);
 }
 
@@ -509,7 +721,7 @@
 .stat-item {
     text-align: center;
     padding: 15px;
-    background: linear-gradient(135deg, var(--exec-accent), #2980b9);
+    background: linear-gradient(135deg, #3498db, #3498db);
     color: white;
     border-radius: 10px;
     min-width: 80px;
@@ -638,7 +850,7 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--exec-accent), #2980b9);
+    background: linear-gradient(90deg, #3498db, #3498db);
     border-radius: 6px;
     transition: width 0.3s ease;
 }
@@ -659,7 +871,7 @@
 
 .progress-bar-small .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--exec-accent), #2980b9);
+    background: linear-gradient(90deg, #3498db, #3498db);
 }
 
 /* Rendimiento por curso */
@@ -720,7 +932,7 @@
 }
 
 .btn-detail:hover {
-    background: #2980b9;
+    background: #3498db;
     color: white;
     text-decoration: none;
 }

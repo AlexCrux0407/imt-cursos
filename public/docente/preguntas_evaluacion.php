@@ -249,7 +249,7 @@ require __DIR__ . '/../partials/nav.php';
 </style>
 
 <div class="contenido">
-    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white;">
         <div class="div-fila-alt-start">
             <div>
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Gestionar Preguntas</h1>

@@ -15,7 +15,7 @@ require __DIR__ . '/../partials/nav.php';
 ?>
 
 <div class="contenido">
-    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; text-align: center;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h1 style="font-size: 2rem; margin-bottom: 10px;">Mi Perfil</h1>
         <p style="opacity: 0.9;">Gestiona tu información personal y preferencias</p>
     </div>

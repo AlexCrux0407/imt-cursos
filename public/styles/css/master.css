@@ -38,7 +38,7 @@
 }
 
 .admin-header {
-    background: linear-gradient(135deg, var(--master-primary), var(--master-secondary));
+    background: linear-gradient(135deg,#3498db, #3498db);
     color: white;
     padding: 30px;
     border-radius: 15px;

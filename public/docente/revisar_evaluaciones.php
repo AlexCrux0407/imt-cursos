@@ -272,7 +272,7 @@ require __DIR__ . '/../partials/header.php';
 }
 
 .btn-primary:hover {
-    background: #2980b9;
+    background: #3498db;
     color: white;
     text-decoration: none;
 }

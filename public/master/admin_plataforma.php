@@ -58,7 +58,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido">
     <!-- Header Principal -->
-    <div class="form-container-head" style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; text-align: center;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px; font-weight: 600;">
             <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="Config" style="width: 40px; height: 40px; margin-right: 15px; vertical-align: middle; filter: brightness(0) invert(1);">
             Administración de Plataforma
@@ -179,7 +179,7 @@ require __DIR__ . '/../partials/nav.php';
             <!-- Botones de Acción -->
             <div style="display: flex; gap: 15px; margin-top: 30px;">
                 <button type="submit" 
-                        style="flex: 1; background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; border: none; padding: 15px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
+                        style="flex: 1; background: linear-gradient(135deg,#3498db, #3498db); color: white; border: none; padding: 15px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease;">
                     <img src="<?= BASE_URL ?>/styles/iconos/plus.png" alt="Guardar" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle; filter: brightness(0) invert(1);">
                     Guardar Configuración
                 </button>
@@ -187,7 +187,7 @@ require __DIR__ . '/../partials/nav.php';
                 <button type="button" 
                         onclick="window.location.href='<?= BASE_URL ?>/master/dashboard.php'"
                         style="flex: 0 0 auto; background: transparent; color: var(--master-primary); border: 2px solid var(--master-primary); padding: 15px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                    <img src="<?= BASE_URL ?>/styles/iconos/back.png" alt="Volver" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;">
+                    <img src="<?= BASE_URL ?>/styles/iconos/back_bl.png" alt="Volver" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;">
                     Volver al Dashboard
                 </button>
             </div>

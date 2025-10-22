@@ -46,7 +46,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido">
     <!-- Header Principal -->
-    <div class="form-container-head" style="background: linear-gradient(135deg, #0066cc, #004d99); color: white; text-align: center;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h1 style="margin: 0; font-size: 2rem; font-weight: 600;">Administración de Cursos</h1>
         <p style="margin: 10px 0 0 0; opacity: 0.9;">Gestiona el catálogo completo de cursos de la plataforma</p>
     </div>

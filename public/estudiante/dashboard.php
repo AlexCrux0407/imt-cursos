@@ -375,32 +375,6 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-
-    <!-- Cursos completados -->
-    <?php if (!empty($cursos_completados)): ?>
-    <div class="dashboard-section">
-        <div class="section-header">
-            <h2 class="section-title">Cursos Completados</h2>
-        </div>
-        
-        <div class="completed-courses">
-            <?php foreach ($cursos_completados as $curso): ?>
-                <div class="completed-course-item">
-                    <div class="completed-icon">🏆</div>
-                    <div class="completed-content">
-                        <h5 class="completed-title"><?= htmlspecialchars($curso['titulo']) ?></h5>
-                        <p class="completed-instructor">Por <?= htmlspecialchars($curso['docente_nombre']) ?></p>
-                        <small class="completed-date">Completado el <?= date('d/m/Y', strtotime($curso['fecha_completado'])) ?></small>
-                    </div>
-                    <div class="completed-actions">
-                        <a href="<?= BASE_URL ?>/estudiante/certificado.php?curso_id=<?= $curso['id'] ?>" class="btn-certificate">Ver Certificado</a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <!-- Recomendaciones o actividad reciente -->
     <div class="dashboard-section">
         <div class="section-header">

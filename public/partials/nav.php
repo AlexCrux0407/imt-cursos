@@ -49,6 +49,10 @@ function nav_active_class(string $href, string $current_path): string {
                     <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" class="nav-icon">
                     Mis cursos
                 </a>
+                <a href="<?= BASE_URL ?>/estudiante/cursos_completados.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/estudiante/cursos_completados.php', $current_path) ?>">
+                    <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="" class="nav-icon">
+                    Cursos completados
+                </a>
                 <a href="<?= BASE_URL ?>/estudiante/perfil.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/estudiante/perfil.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" alt="" class="nav-icon">
                     Perfil
@@ -86,23 +90,27 @@ function nav_active_class(string $href, string $current_path): string {
             <?php elseif ($role === 'master'): ?>
                 <a href="<?= BASE_URL ?>/master/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
-                    Dashboard
+                    Tablero
                 </a>
                 <a href="<?= BASE_URL ?>/master/admin_estudiantes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_estudiantes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" class="nav-icon">
-                    Admin Estudiantes
+                    Estudiantes
                 </a>
                 <a href="<?= BASE_URL ?>/master/admin_docentes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_docentes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" class="nav-icon">
-                    Admin Docentes
+                    Docentes
+                </a>
+                <a href="<?= BASE_URL ?>/master/admin_ejecutivos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_ejecutivos.php', $current_path) ?>">
+                    <img src="<?= BASE_URL ?>/styles/iconos/entrada.png" alt="" class="nav-icon">
+                    Ejecutivos
                 </a>
                 <a href="<?= BASE_URL ?>/master/admin_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_cursos.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="" class="nav-icon">
-                    Admin Cursos
+                    Cursos
                 </a>
                 <a href="<?= BASE_URL ?>/master/admin_plataforma.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/master/admin_plataforma.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="" class="nav-icon">
-                    Admin plataforma
+                    Plataforma
                 </a>
             <?php endif; ?>
         </div>

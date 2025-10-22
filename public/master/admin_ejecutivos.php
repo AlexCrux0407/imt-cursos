@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('master');
 require_once __DIR__ . '/../../config/database.php';
 
-$page_title = 'Master – Administración de Ejecutivos';
+$page_title = 'Master – cutivos';
 
 // Obtener filtros
 $filtro_estado = $_GET['estado'] ?? '';
@@ -63,23 +63,23 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido">
     <!-- Header Principal -->
-    <div class="form-container-head" style="background: linear-gradient(135deg, #0066cc, #004d99); color: white; text-align: center;">
-        <h1 style="margin: 0; font-size: 2rem; font-weight: 600;">Administración de Ejecutivos</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 1.1rem;">Gestiona los usuarios ejecutivos del sistema</p>
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
+        <h2 style="margin: 0; font-size: 1.8rem; font-weight: 600;">Administración de ejecutivos</h2>
+        <p style="margin: 5px 0 0 0; opacity: 0.9;">Gestiona los usuarios ejecutivos de la plataforma</p>
     </div>
 
     <!-- Estadísticas -->
     <div class="form-container-body" style="margin-bottom: 25px;">
         <div class="div-fila" style="gap: 20px;">
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border-radius: 12px;">
+            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #3498db, #3498db); color: white; border-radius: 12px;">
                 <h3 style="margin: 0 0 10px 0; font-size: 2rem; font-weight: 700;"><?= $stats['total'] ?></h3>
                 <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Total Ejecutivos</p>
             </div>
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #27ae60, #229954); color: white; border-radius: 12px;">
+            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #28a745, #1e7e34); color: white; border-radius: 12px;">
                 <h3 style="margin: 0 0 10px 0; font-size: 2rem; font-weight: 700;"><?= $stats['activos'] ?></h3>
                 <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Activos</p>
             </div>
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 12px;">
+            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #dc3545, #bd2130); color: white; border-radius: 12px;">
                 <h3 style="margin: 0 0 10px 0; font-size: 2rem; font-weight: 700;"><?= $stats['inactivos'] ?></h3>
                 <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Inactivos</p>
             </div>
@@ -89,7 +89,7 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Filtros -->
     <div class="form-container-body" style="margin-bottom: 25px;">
         <h3 style="color: var(--master-primary); margin-bottom: 20px; font-size: 1.3rem;">
-            <img src="<?= BASE_URL ?>/styles/iconos/search.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+            <img src="<?= BASE_URL ?>/styles/iconos/tablefull.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
             Filtros de Búsqueda
         </h3>
         
@@ -114,7 +114,7 @@ require __DIR__ . '/../partials/nav.php';
                        style="width: 100%; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
             </div>
             <div>
-                <button type="submit" style="padding: 10px 20px; background: linear-gradient(135deg, #0066cc, #004d99); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-right: 10px;">
+                <button type="submit" style="padding: 10px 20px; background: linear-gradient(135deg, #3498db, #3498db); color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-right: 10px;">
                     Filtrar
                 </button>
                 <a href="admin_ejecutivos.php" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 8px; font-size: 1rem;">
@@ -124,18 +124,22 @@ require __DIR__ . '/../partials/nav.php';
         </form>
     </div>
 
-    <!-- Lista de Ejecutivos -->
+    <!-- Tabla de Ejecutivos -->
     <div class="form-container-body">
-        <div class="div-fila-alt" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px;">
             <h3 style="color: var(--master-primary); margin: 0; font-size: 1.3rem;">
-                <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
-                Lista de Ejecutivos (<?= count($ejecutivos) ?>)
+                Tabla de Ejecutivos (<?= count($ejecutivos) ?>)
             </h3>
+            <button onclick="mostrarFormularioCrearEjecutivo()" 
+                    style="background: var(--master-primary); color: white; padding: 10px 20px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500;">
+                <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;">
+                Crear Nuevo Ejecutivo
+            </button>
         </div>
 
         <?php if (empty($ejecutivos)): ?>
             <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                <img src="<?= BASE_URL ?>/styles/iconos/search.png" alt="" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 15px;">
+                <img src="<?= BASE_URL ?>/styles/iconos/tablefull.png" alt="" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 15px;">
                 <p style="font-size: 1.1rem; margin: 0;">No se encontraron ejecutivos con los filtros aplicados</p>
             </div>
         <?php else: ?>
@@ -144,10 +148,11 @@ require __DIR__ . '/../partials/nav.php';
                     <thead style="background: #f8f9fa;">
                         <tr>
                             <th style="padding: 15px; text-align: left; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Ejecutivo</th>
+                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Email</th>
                             <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Estado</th>
-                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Cursos Asignados</th>
+                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Cursos</th>
                             <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Estudiantes</th>
-                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Fecha Registro</th>
+                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Registro</th>
                             <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Acciones</th>
                         </tr>
                     </thead>
@@ -155,16 +160,16 @@ require __DIR__ . '/../partials/nav.php';
                         <?php foreach ($ejecutivos as $ejecutivo): ?>
                             <tr style="border-bottom: 1px solid #e8ecef;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
                                 <td style="padding: 15px; vertical-align: middle;">
-                                    <div>
-                                        <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
-                                            <?= htmlspecialchars($ejecutivo['nombre']) ?>
-                                        </div>
-                                        <div style="color: #7f8c8d; font-size: 0.9rem;">
-                                            <?= htmlspecialchars($ejecutivo['email']) ?>
-                                        </div>
-                                        <div style="color: #95a5a6; font-size: 0.85rem;">
-                                            Usuario: <?= htmlspecialchars($ejecutivo['usuario']) ?>
-                                        </div>
+                                    <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
+                                        <?= htmlspecialchars($ejecutivo['nombre']) ?>
+                                    </div>
+                                    <div style="color: #95a5a6; font-size: 0.85rem;">
+                                        Usuario: <?= htmlspecialchars($ejecutivo['usuario']) ?>
+                                    </div>
+                                </td>
+                                <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                    <div style="color: #7f8c8d; font-size: 0.9rem;">
+                                        <?= htmlspecialchars($ejecutivo['email']) ?>
                                     </div>
                                 </td>
                                 <td style="padding: 15px; text-align: center; vertical-align: middle;">
@@ -195,7 +200,7 @@ require __DIR__ . '/../partials/nav.php';
                                 <td style="padding: 15px; text-align: center; vertical-align: middle;">
                                     <button onclick="toggleEjecutivo(<?= $ejecutivo['id'] ?>, '<?= $ejecutivo['estado'] ?>')" 
                                             style="padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; font-weight: 500;
-                                                   background: <?= $ejecutivo['estado'] === 'activo' ? 'linear-gradient(135deg, #e74c3c, #c0392b)' : 'linear-gradient(135deg, #27ae60, #229954)' ?>; 
+                                                   background: <?= $ejecutivo['estado'] === 'activo' ? 'linear-gradient(135deg, #dc3545, #bd2130)' : 'linear-gradient(135deg, #28a745, #1e7e34)' ?>; 
                                                    color: white;">
                                         <?= $ejecutivo['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>
                                     </button>
@@ -211,6 +216,116 @@ require __DIR__ . '/../partials/nav.php';
 </div>
 
 <script>
+// Modal para crear ejecutivo
+function mostrarFormularioCrearEjecutivo() {
+    const modal = document.createElement('div');
+    modal.id = 'modalCrearEjecutivo';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0,0,0,0.5); display: flex; justify-content: center; 
+        align-items: center; z-index: 1000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="margin: 0; color: var(--master-primary); font-size: 1.4rem;">Crear Nuevo Ejecutivo</h3>
+                <button onclick="cerrarModalEjecutivo()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+            </div>
+            
+            <form id="formCrearEjecutivo" onsubmit="crearEjecutivo(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nombre Completo *</label>
+                    <input type="text" name="nombre" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Email *</label>
+                    <input type="email" name="email" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Usuario *</label>
+                    <input type="text" name="usuario" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Contraseña *</label>
+                    <input type="password" name="password" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Estado</label>
+                    <select name="estado" style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                    <button type="button" onclick="cerrarModalEjecutivo()" 
+                            style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            style="background: var(--master-primary); color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                        Crear Ejecutivo
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function cerrarModalEjecutivo() {
+    const modal = document.getElementById('modalCrearEjecutivo');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function crearEjecutivo(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const data = {
+        nombre: formData.get('nombre'),
+        email: formData.get('email'),
+        usuario: formData.get('usuario'),
+        password: formData.get('password'),
+        estado: formData.get('estado'),
+        role: 'ejecutivo'
+    };
+    
+    fetch('<?= BASE_URL ?>/master/crear_usuario.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Ejecutivo creado exitosamente');
+            cerrarModalEjecutivo();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear el ejecutivo');
+    });
+}
+
 function toggleEjecutivo(id, estadoActual) {
     const nuevoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
     const accion = nuevoEstado === 'activo' ? 'activar' : 'desactivar';
@@ -238,6 +353,9 @@ function toggleEjecutivo(id, estadoActual) {
             console.error('Error:', error);
             alert('Error al procesar la solicitud');
         });
+    }
+}
+</script>
     }
 }
 </script>

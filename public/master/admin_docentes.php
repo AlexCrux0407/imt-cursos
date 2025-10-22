@@ -75,29 +75,29 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido">
     <!-- Header Principal -->
-    <div class="form-container-head" style="background: linear-gradient(135deg, #0066cc, #004d99); color: white; text-align: center;">
-        <h1 style="margin: 0; font-size: 2rem; font-weight: 600;">Administración de Docentes</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 1.1rem;">Gestiona el personal docente del instituto</p>
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
+        <h2 style="margin: 0; font-size: 1.8rem; font-weight: 600;">Administración de Docentes</h2>
+        <p style="margin: 5px 0 0 0; opacity: 0.9;">Gestiona los docentes de la plataforma</p>
     </div>
 
     <!-- Estadísticas -->
     <div class="form-container-body" style="margin-bottom: 25px;">
         <div class="div-fila" style="gap: 20px;">
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #3498db, #2980b9); color: white; border-radius: 12px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 2rem; font-weight: 700;"><?= $stats['total_docentes'] ?></h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Total Docentes</p>
+            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #3498db, #3498db); color: white; border-radius: 12px;">
+                <h3 style="margin: 0; font-size: 2rem;"><?= $stats['total_docentes'] ?></h3>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Total Docentes</p>
             </div>
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #27ae60, #229954); color: white; border-radius: 12px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 2rem; font-weight: 700;"><?= $stats['docentes_activos'] ?></h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Activos</p>
+            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #28a745, #1e7e34); color: white; border-radius: 12px;">
+                <h3 style="margin: 0; font-size: 2rem;"><?= $stats['docentes_activos'] ?></h3>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Activos</p>
             </div>
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border-radius: 12px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 2rem; font-weight: 700;"><?= $stats['docentes_inactivos'] ?></h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Inactivos</p>
+            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #dc3545, #bd2130); color: white; border-radius: 12px;">
+                <h3 style="margin: 0; font-size: 2rem;"><?= $stats['docentes_inactivos'] ?></h3>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Inactivos</p>
             </div>
-            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #f39c12, #e67e22); color: white; border-radius: 12px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 2rem; font-weight: 700;"><?= $stats['nuevos_mes'] ?></h3>
-                <p style="margin: 0; opacity: 0.9; font-size: 1rem;">Nuevos (30 días)</p>
+            <div style="flex: 1; text-align: center; padding: 20px; background: linear-gradient(135deg, #ffc107, #e0a800); color: white; border-radius: 12px;">
+                <h3 style="margin: 0; font-size: 2rem;"><?= $stats['nuevos_mes'] ?></h3>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Nuevos (30 días)</p>
             </div>
         </div>
     </div>
@@ -105,7 +105,7 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Filtros -->
     <div class="form-container-body" style="margin-bottom: 25px;">
         <h3 style="color: var(--master-primary); margin-bottom: 20px; font-size: 1.3rem;">
-            <img src="<?= BASE_URL ?>/styles/iconos/search.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+            <img src="<?= BASE_URL ?>/styles/iconos/tablefull.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
             Filtros de Búsqueda
         </h3>
         
@@ -154,106 +154,213 @@ require __DIR__ . '/../partials/nav.php';
         </form>
     </div>
 
-    <!-- Lista de Docentes -->
-    <div class="form-container-body">
-        <div class="div-fila-alt" style="margin-bottom: 20px;">
-            <h3 style="color: var(--master-primary); margin: 0; font-size: 1.3rem;">
+    <!-- Tabla de Docentes -->
+    <div class="form-container-body" style="padding: 0; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-bottom: 2px solid #dee2e6;">
+            <h3 style="color: var(--master-primary); margin: 0; font-size: 1.3rem; font-weight: 600;">
                 <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
                 Lista de Docentes (<?= count($docentes) ?>)
             </h3>
+            <button onclick="mostrarFormularioCrear()" 
+                    style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 12px 24px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; font-weight: 500; box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3); transition: all 0.3s ease;">
+                <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;">
+                Crear Nuevo Docente
+            </button>
         </div>
-
-        <?php if (empty($docentes)): ?>
-            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                <img src="<?= BASE_URL ?>/styles/iconos/search.png" alt="" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 15px;">
-                <p style="font-size: 1.1rem; margin: 0;">No se encontraron docentes con los filtros aplicados</p>
-            </div>
-        <?php else: ?>
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <thead style="background: #f8f9fa;">
-                        <tr>
-                            <th style="padding: 15px; text-align: left; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Docente</th>
-                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Estado</th>
-                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Cursos Asignados</th>
-                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Estudiantes</th>
-                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Fecha Registro</th>
-                            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Acciones</th>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 15px; text-align: left; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Docente</th>
+                        <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Email</th>
+                        <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Estado</th>
+                        <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Cursos</th>
+                        <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Estudiantes</th>
+                        <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Registro</th>
+                        <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Última Asignación</th>
+                        <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #e8ecef;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($docentes as $docente): ?>
+                        <tr style="border-bottom: 1px solid #e8ecef;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
+                            <td style="padding: 15px; vertical-align: middle;">
+                                <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
+                                    <?= htmlspecialchars($docente['nombre']) ?>
+                                </div>
+                                <div style="color: #95a5a6; font-size: 0.85rem;">
+                                    Usuario: <?= htmlspecialchars($docente['usuario']) ?>
+                                </div>
+                            </td>
+                            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                <div style="color: #7f8c8d; font-size: 0.9rem;">
+                                    <?= htmlspecialchars($docente['email']) ?>
+                                </div>
+                            </td>
+                            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                <span style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; 
+                                             background: <?= $docente['estado'] === 'activo' ? '#d4edda' : '#f8d7da' ?>; 
+                                             color: <?= $docente['estado'] === 'activo' ? '#155724' : '#721c24' ?>;">
+                                    <?= ucfirst($docente['estado']) ?>
+                                </span>
+                            </td>
+                            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
+                                    <?= $docente['cursos_asignados'] ?>
+                                </div>
+                                <div style="color: #7f8c8d; font-size: 0.85rem;">
+                                    <?= $docente['cursos_activos'] ?> activos
+                                </div>
+                            </td>
+                            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                <span style="color: #2c3e50; font-weight: 600; font-size: 1.1rem;">
+                                    <?= $docente['total_estudiantes'] ?>
+                                </span>
+                            </td>
+                            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                <div style="color: #7f8c8d; font-size: 0.9rem;">
+                                    <?= date('d/m/Y', strtotime($docente['created_at'])) ?>
+                                </div>
+                            </td>
+                            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                <div style="color: #7f8c8d; font-size: 0.9rem;">
+                                    <?= $docente['ultima_asignacion'] ? date('d/m/Y', strtotime($docente['ultima_asignacion'])) : 'Sin asignaciones' ?>
+                                </div>
+                            </td>
+                            <td style="padding: 15px; text-align: center; vertical-align: middle;">
+                                <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                    <button onclick="asignarCurso(<?= $docente['id'] ?>, '<?= htmlspecialchars($docente['nombre']) ?>')"
+                                            style="background: #3498db; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;"
+                                            title="Asignar curso">
+                                        Asignar
+                                    </button>
+                                    <button onclick="toggleEstado(<?= $docente['id'] ?>, '<?= $docente['estado'] ?>')"
+                                            style="background: <?= $docente['estado'] === 'activo' ? '#e74c3c' : '#27ae60' ?>; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;"
+                                            title="<?= $docente['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?> docente">
+                                        <?= $docente['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($docentes as $docente): ?>
-                            <tr style="border-bottom: 1px solid #e8ecef;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
-                                <td style="padding: 15px; vertical-align: middle;">
-                                    <div>
-                                        <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
-                                            <?= htmlspecialchars($docente['nombre']) ?>
-                                        </div>
-                                        <div style="color: #7f8c8d; font-size: 0.9rem;">
-                                            <?= htmlspecialchars($docente['email']) ?>
-                                        </div>
-                                        <div style="color: #95a5a6; font-size: 0.85rem;">
-                                            Usuario: <?= htmlspecialchars($docente['usuario']) ?>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style="padding: 15px; text-align: center; vertical-align: middle;">
-                                    <span style="padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; 
-                                                 background: <?= $docente['estado'] === 'activo' ? '#d4edda' : '#f8d7da' ?>; 
-                                                 color: <?= $docente['estado'] === 'activo' ? '#155724' : '#721c24' ?>;">
-                                        <?= ucfirst($docente['estado']) ?>
-                                    </span>
-                                </td>
-                                <td style="padding: 15px; text-align: center; vertical-align: middle;">
-                                    <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
-                                        <?= $docente['cursos_asignados'] ?>
-                                    </div>
-                                    <div style="color: #7f8c8d; font-size: 0.85rem;">
-                                        <?= $docente['cursos_activos'] ?> activos
-                                    </div>
-                                </td>
-                                <td style="padding: 15px; text-align: center; vertical-align: middle;">
-                                    <span style="color: #2c3e50; font-weight: 600; font-size: 1.1rem;">
-                                        <?= $docente['total_estudiantes'] ?>
-                                    </span>
-                                </td>
-                                <td style="padding: 15px; text-align: center; vertical-align: middle;">
-                                    <div style="color: #2c3e50; font-size: 0.9rem;">
-                                        <?= date('d/m/Y', strtotime($docente['created_at'])) ?>
-                                    </div>
-                                    <?php if ($docente['ultima_asignacion']): ?>
-                                        <div style="color: #7f8c8d; font-size: 0.8rem;">
-                                            Últ. asignación: <?= date('d/m/Y', strtotime($docente['ultima_asignacion'])) ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </td>
-                                <td style="padding: 15px; text-align: center; vertical-align: middle;">
-                                    <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                                        <button onclick="toggleEstadoDocente(<?= $docente['id'] ?>, '<?= $docente['estado'] ?>', '<?= htmlspecialchars($docente['nombre']) ?>')"
-                                                style="background: <?= $docente['estado'] === 'activo' ? '#dc3545' : '#28a745' ?>; 
-                                                       color: white; padding: 6px 12px; border: none; border-radius: 4px; 
-                                                       font-size: 0.85rem; cursor: pointer;"
-                                                title="<?= $docente['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?> docente">
-                                            <?= $docente['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>
-                                        </button>
-                                        <a href="<?= BASE_URL ?>/master/asignar_cursos.php?docente_id=<?= $docente['id'] ?>"
-                                           style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; 
-                                                  text-decoration: none; font-size: 0.85rem;"
-                                           title="Asignar cursos">
-                                            Asignar Cursos
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
+// Modal para crear docente
+function mostrarFormularioCrear() {
+    const modal = document.createElement('div');
+    modal.id = 'modalCrearDocente';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0,0,0,0.5); display: flex; justify-content: center; 
+        align-items: center; z-index: 1000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="margin: 0; color: var(--master-primary); font-size: 1.4rem;">Crear Nuevo Docente</h3>
+                <button onclick="cerrarModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+            </div>
+            
+            <form id="formCrearDocente" onsubmit="crearDocente(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nombre Completo *</label>
+                    <input type="text" name="nombre" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Email *</label>
+                    <input type="email" name="email" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Usuario *</label>
+                    <input type="text" name="usuario" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Contraseña *</label>
+                    <input type="password" name="password" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Estado</label>
+                    <select name="estado" style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                    <button type="button" onclick="cerrarModal()" 
+                            style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            style="background: var(--master-primary); color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                        Crear Docente
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('modalCrearDocente');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function crearDocente(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const data = {
+        nombre: formData.get('nombre'),
+        email: formData.get('email'),
+        usuario: formData.get('usuario'),
+        password: formData.get('password'),
+        estado: formData.get('estado'),
+        role: 'docente'
+    };
+    
+    fetch('<?= BASE_URL ?>/master/crear_usuario.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Docente creado exitosamente');
+            cerrarModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear el docente');
+    });
+}
+
 function toggleEstadoDocente(docenteId, estadoActual, nombreDocente) {
     const nuevoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
     const accion = nuevoEstado === 'activo' ? 'activar' : 'desactivar';

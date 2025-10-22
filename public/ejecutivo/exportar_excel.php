@@ -3,70 +3,11 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('ejecutivo');
 require_once __DIR__ . '/../../config/database.php';
 
-// Verificar si PhpSpreadsheet está disponible, si no, usar una implementación básica
-$phpspreadsheet_available = class_exists('PhpOffice\PhpSpreadsheet\Spreadsheet');
+// Cargar autoloader
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-if (!$phpspreadsheet_available) {
-    // Implementación básica sin PhpSpreadsheet - generar CSV
-    $tipo = $_GET['tipo'] ?? '';
-    $id = $_GET['id'] ?? '';
-    
-    // Configurar headers para CSV (compatible con Excel)
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="reporte_' . $tipo . '_' . date('Y-m-d') . '.csv"');
-    
-    // Crear output
-    $output = fopen('php://output', 'w');
-    
-    // BOM para UTF-8
-    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-    
-    switch ($tipo) {
-        case 'cursos':
-            generarCSVCursos($output, $conn, $id);
-            break;
-        case 'estudiantes':
-            generarCSVEstudiantes($output, $conn, $id);
-            break;
-        case 'curso':
-            generarCSVCursoEspecifico($output, $conn, $id);
-            break;
-        case 'estudiante':
-            generarCSVEstudianteEspecifico($output, $conn, $id);
-            break;
-        case 'resumen':
-            generarCSVResumen($output, $conn);
-            break;
-        default:
-            generarCSVGeneral($output, $conn);
-    }
-    
-    fclose($output);
-    exit;
-}
-
-// Si PhpSpreadsheet está disponible, usar implementación completa
-if ($phpspreadsheet_available) {
-    // Intentar cargar PhpSpreadsheet desde diferentes ubicaciones posibles
-    $autoload_paths = [
-        __DIR__ . '/../../vendor/autoload.php',
-        __DIR__ . '/../../vendor/phpspreadsheet/autoload.php',
-        __DIR__ . '/../../../vendor/autoload.php'
-    ];
-    
-    $loaded = false;
-    foreach ($autoload_paths as $path) {
-        if (file_exists($path)) {
-            require_once $path;
-            $loaded = true;
-            break;
-        }
-    }
-    
-    if (!$loaded) {
-        $phpspreadsheet_available = false;
-    }
-}
+// Verificar si PhpSpreadsheet está disponible
+$phpspreadsheet_available = class_exists('PhpOffice\\PhpSpreadsheet\\Spreadsheet');
 
 $tipo = $_GET['tipo'] ?? '';
 $id = $_GET['id'] ?? '';
@@ -75,29 +16,6 @@ if (!$tipo) {
     header('Location: ' . BASE_URL . '/ejecutivo/generar_reportes.php');
     exit;
 }
-
-// Si PhpSpreadsheet no está disponible, usar CSV
-if (!$phpspreadsheet_available) {
-    // Configurar headers para CSV (compatible con Excel)
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="reporte_' . $tipo . '_' . date('Y-m-d') . '.csv"');
-    
-    // Crear output
-    $output = fopen('php://output', 'w');
-    
-    // BOM para UTF-8
-    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-    
-    switch ($tipo) {
-        case 'cursos':
-            generarCSVCursos($output, $conn, $id);
-            break;
-        case 'estudiantes':
-            generarCSVEstudiantes($output, $conn, $id);
-            break;
-        case 'curso':
-            generarCSVCursoEspecifico($output, $conn, $id);
-            break;
         case 'estudiante':
             generarCSVEstudianteEspecifico($output, $conn, $id);
             break;

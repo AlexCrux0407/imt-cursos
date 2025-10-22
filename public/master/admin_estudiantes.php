@@ -245,7 +245,7 @@ require __DIR__ . '/../partials/nav.php';
 }
 
 .btn-view {
-    background: #3498db;
+    background: #007bff;
     color: white;
 }
 
@@ -293,10 +293,10 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="students-container">
     <!-- Header -->
-    <div class="form-container-head" style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white;">
+    <div class="form-container-head" style="background: linear-gradient(#3498db, #3498db); color: white;">
         <div class="div-fila-alt-start">
             <div>
-                <h1 style="font-size: 2rem; margin-bottom: 10px;">Administración de Estudiantes</h1>
+                <h1 style="font-size: 2rem; margin-bottom: 10px;">Administración de estudiantes</h1>
                 <p style="opacity: 0.9;">Gestión completa de estudiantes registrados en la plataforma</p>
             </div>
             <a href="<?= BASE_URL ?>/master/dashboard.php" class="btn" 
@@ -356,6 +356,17 @@ require __DIR__ . '/../partials/nav.php';
 
     <!-- Tabla de Estudiantes -->
     <div class="students-table">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+            <h3 style="color: var(--master-primary); margin: 0; font-size: 1.3rem;">
+                <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                Lista de Estudiantes (<?= count($estudiantes) ?>)
+            </h3>
+            <button onclick="mostrarFormularioCrearEstudiante()" 
+                    style="background: var(--master-primary); color: white; padding: 10px 20px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 500;">
+                <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;">
+                Crear Nuevo Estudiante
+            </button>
+        </div>
         <table>
             <thead>
                 <tr>
@@ -456,6 +467,116 @@ require __DIR__ . '/../partials/nav.php';
 </div>
 
 <script>
+// Modal para crear estudiante
+function mostrarFormularioCrearEstudiante() {
+    const modal = document.createElement('div');
+    modal.id = 'modalCrearEstudiante';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(0,0,0,0.5); display: flex; justify-content: center; 
+        align-items: center; z-index: 1000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="margin: 0; color: var(--master-primary); font-size: 1.4rem;">Crear Nuevo Estudiante</h3>
+                <button onclick="cerrarModalEstudiante()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
+            </div>
+            
+            <form id="formCrearEstudiante" onsubmit="crearEstudiante(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nombre Completo *</label>
+                    <input type="text" name="nombre" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Email *</label>
+                    <input type="email" name="email" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Usuario *</label>
+                    <input type="text" name="usuario" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Contraseña *</label>
+                    <input type="password" name="password" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Estado</label>
+                    <select name="estado" style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                    <button type="button" onclick="cerrarModalEstudiante()" 
+                            style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            style="background: var(--master-primary); color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer;">
+                        Crear Estudiante
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function cerrarModalEstudiante() {
+    const modal = document.getElementById('modalCrearEstudiante');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function crearEstudiante(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const data = {
+        nombre: formData.get('nombre'),
+        email: formData.get('email'),
+        usuario: formData.get('usuario'),
+        password: formData.get('password'),
+        estado: formData.get('estado'),
+        role: 'estudiante'
+    };
+    
+    fetch('<?= BASE_URL ?>/master/crear_usuario.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Estudiante creado exitosamente');
+            cerrarModalEstudiante();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al crear el estudiante');
+    });
+}
+
 function toggleEstudiante(id, estadoActual) {
     const nuevoEstado = estadoActual === 'activo' ? 'inactivo' : 'activo';
     const accion = nuevoEstado === 'activo' ? 'activar' : 'desactivar';
@@ -478,6 +599,15 @@ function toggleEstudiante(id, estadoActual) {
                 location.reload();
             } else {
                 alert('Error al cambiar el estado del estudiante');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
+}
+</script>
             }
         })
         .catch(error => {

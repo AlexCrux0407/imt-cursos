@@ -203,7 +203,7 @@ require __DIR__ . '/../partials/nav.php';
 
 .intentos-badge {
     background: #e3f2fd;
-    color: #1565c0;
+    color: #3498db;
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 0.8rem;

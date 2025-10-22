@@ -3,32 +3,11 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('ejecutivo');
 require_once __DIR__ . '/../../config/database.php';
 
-// Verificar si TCPDF está disponible, si no, usar una implementación básica
+// Cargar autoloader
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+// Verificar si TCPDF está disponible
 $tcpdf_available = class_exists('TCPDF');
-
-if (!$tcpdf_available) {
-    // Implementación básica sin TCPDF
-    $tipo = $_GET['tipo'] ?? '';
-    $id = $_GET['id'] ?? '';
-    
-    // Configurar headers para PDF
-    header('Content-Type: application/pdf');
-    header('Content-Disposition: attachment; filename="reporte_' . $tipo . '_' . date('Y-m-d') . '.pdf"');
-    
-    // Generar contenido básico (esto sería reemplazado por TCPDF en producción)
-    echo "%PDF-1.4\n";
-    echo "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
-    echo "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n";
-    echo "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n";
-    echo "4 0 obj\n<< /Length 44 >>\nstream\nBT /F1 12 Tf 100 700 Td (Reporte " . ucfirst($tipo) . ") Tj ET\nendstream\nendobj\n";
-    echo "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n";
-    echo "xref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000244 00000 n \n0000000338 00000 n \n";
-    echo "trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n408\n%%EOF";
-    exit;
-}
-
-// Si TCPDF está disponible, usar implementación completa
-require_once __DIR__ . '/../../vendor/tcpdf/tcpdf.php';
 
 $tipo = $_GET['tipo'] ?? '';
 $id = $_GET['id'] ?? '';

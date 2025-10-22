@@ -173,45 +173,28 @@ $stmt = $conn->prepare("
 $stmt->execute([':curso_id' => $modulo['curso_id'], ':orden_actual' => $modulo['orden']]);
 $siguiente_modulo = $stmt->fetch();
 
-/** Estructura completa del curso (para la barra lateral) */
+// Estructura del curso para la sidebar
 $stmt = $conn->prepare("
-    SELECT m.id  AS modulo_id, m.titulo AS modulo_titulo, m.orden AS modulo_orden,
-           t.id  AS tema_id,   t.titulo AS tema_titulo,   t.orden AS tema_orden,
+    SELECT m.id AS modulo_id, m.titulo AS modulo_titulo, m.orden AS modulo_orden,
+           t.id AS tema_id, t.titulo AS tema_titulo, t.orden AS tema_orden,
            st.id AS subtema_id, st.titulo AS subtema_titulo, st.orden AS subtema_orden,
-           l.id  AS leccion_id, l.titulo AS leccion_titulo, l.orden AS leccion_orden,
-           IF(pl.id IS NULL, 0, 1) AS leccion_completada
+           l.id AS leccion_id, l.titulo AS leccion_titulo, l.orden AS leccion_orden,
+           IF(pl.id IS NULL, 0, 1) AS leccion_completada,
+           IF(pm.evaluacion_completada = 1, 1, 0) AS evaluacion_completada
     FROM modulos m
-    LEFT JOIN temas t      ON m.id = t.modulo_id
-    LEFT JOIN subtemas st  ON t.id = st.tema_id
-    LEFT JOIN lecciones l  ON st.id = l.subtema_id
-    LEFT JOIN progreso_lecciones pl
-           ON l.id = pl.leccion_id AND pl.usuario_id = :uid
+    LEFT JOIN temas t ON m.id = t.modulo_id
+    LEFT JOIN subtemas st ON t.id = st.tema_id
+    LEFT JOIN lecciones l ON st.id = l.subtema_id
+    LEFT JOIN progreso_lecciones pl ON l.id = pl.leccion_id AND pl.usuario_id = :uid1
+    LEFT JOIN progreso_modulos pm ON m.id = pm.modulo_id AND pm.usuario_id = :uid2
     WHERE m.curso_id = :curso_id
     ORDER BY m.orden, t.orden, st.orden, l.orden
 ");
-$stmt->execute([':curso_id' => $modulo['curso_id'], ':uid' => $estudiante_id]);
-$estructura_curso = $stmt->fetchAll();
+$stmt->execute([':curso_id' => $modulo['curso_id'], ':uid1' => $estudiante_id, ':uid2' => $estudiante_id]);
+$rows = $stmt->fetchAll();
 
-/** Obtener información de progreso de módulos para el sidebar */
-$stmt = $conn->prepare("
-    SELECT m.id, 
-           IF(pm.evaluacion_completada = 1, 1, 0) AS evaluacion_completada
-    FROM modulos m
-    LEFT JOIN progreso_modulos pm ON m.id = pm.modulo_id AND pm.usuario_id = :uid
-    WHERE m.curso_id = :curso_id
-");
-$stmt->execute([':curso_id' => $modulo['curso_id'], ':uid' => $estudiante_id]);
-$progreso_modulos_info = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-
-// Convertir a array asociativo para fácil acceso
-$progreso_modulos_map = [];
-foreach ($progreso_modulos_info as $mod_id => $eval_completada) {
-    $progreso_modulos_map[$mod_id] = $eval_completada;
-}
-
-/** Armar arreglo $curso_estructura para el sidebar */
 $curso_estructura = [];
-foreach ($estructura_curso as $row) {
+foreach ($rows as $row) {
     $mid = (int)$row['modulo_id'];
     if (!isset($curso_estructura[$mid])) {
         $curso_estructura[$mid] = [
@@ -221,9 +204,10 @@ foreach ($estructura_curso as $row) {
             'temas' => [],
             'total_lecciones' => 0,
             'lecciones_completadas' => 0,
-            'evaluacion_completada' => isset($progreso_modulos_map[$mid]) ? (bool)$progreso_modulos_map[$mid] : false
+            'evaluacion_completada' => (bool)$row['evaluacion_completada']
         ];
     }
+
     if (!empty($row['tema_id'])) {
         $tid = (int)$row['tema_id'];
         if (!isset($curso_estructura[$mid]['temas'][$tid])) {
@@ -234,6 +218,7 @@ foreach ($estructura_curso as $row) {
                 'subtemas' => []
             ];
         }
+
         if (!empty($row['subtema_id'])) {
             $sid = (int)$row['subtema_id'];
             if (!isset($curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid])) {
@@ -244,6 +229,7 @@ foreach ($estructura_curso as $row) {
                     'lecciones' => []
                 ];
             }
+
             if (!empty($row['leccion_id'])) {
                 $curso_estructura[$mid]['temas'][$tid]['subtemas'][$sid]['lecciones'][] = [
                     'id' => (int)$row['leccion_id'],
@@ -259,6 +245,22 @@ foreach ($estructura_curso as $row) {
         }
     }
 }
+
+// Función para verificar si un módulo puede ser accedido
+$__puedeAcceder = function($estructura, $moduloId) {
+    $modulos = array_values($estructura);
+    usort($modulos, fn($a, $b) => $a['orden'] <=> $b['orden']);
+
+    foreach ($modulos as $i => $mod) {
+        if ($mod['id'] == $moduloId) {
+            if ($i == 0) return true; // Primer módulo siempre accesible
+            $anterior = $modulos[$i - 1];
+            // Un módulo es accesible si el anterior tiene su evaluación completada
+            return isset($anterior['evaluacion_completada']) && $anterior['evaluacion_completada'];
+        }
+    }
+    return false;
+};
 
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';

@@ -64,7 +64,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido">
     <!-- Header Principal -->
-    <div class="form-container-head" style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; text-align: center;">
+    <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px; font-weight: 600;">Panel de Administración</h1>
         <p style="font-size: 1.1rem; opacity: 0.9;">Sistema de gestión integral IMT Cursos</p>
         <small style="opacity: 0.8;">Último acceso: <?= date('d/m/Y H:i') ?></small>
@@ -73,22 +73,22 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Métricas Principales -->
     <div class="form-container-body" style="margin-bottom: 20px;">
         <div class="div-fila" style="gap: 20px;">
-            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg,#3498db, #3498db); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_usuarios['total_usuarios'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Total Usuarios</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;">Estudiantes y Docentes</small>
             </div>
-            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg,#3498db, #3498db); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_usuarios['total_docentes'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Docentes</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;"><?= $stats_usuarios['docentes_activos'] ?: 0 ?> activos este mes</small>
             </div>
-            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg,#3498db, #3498db); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_usuarios['total_estudiantes'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Estudiantes</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;">Registrados</small>
             </div>
-            <div style="background: linear-gradient(135deg, var(--master-primary), var(--master-secondary)); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
+            <div style="background: linear-gradient(135deg,#3498db, #3498db); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
                 <div style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;"><?= $stats_cursos['cursos_activos'] ?: 0 ?></div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Cursos Activos</div>
                 <small style="opacity: 0.7; font-size: 0.8rem;"><?= $stats_cursos['cursos_borrador'] ?: 0 ?> en borrador</small>
@@ -244,30 +244,42 @@ require __DIR__ . '/../partials/nav.php';
             Estado del Sistema
         </h2>
         <div class="div-fila" style="gap: 20px;">
-            <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: #fafbfc; transition: all 0.3s ease;"
-                 onmouseover="this.style.borderColor='var(--master-primary)'; this.style.background='white'"
-                 onmouseout="this.style.borderColor='#e3f2fd'; this.style.background='#fafbfc'">
-                <h4 style="color: var(--master-primary); margin-bottom: 8px;">Registros Recientes</h4>
+            <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: linear-gradient(135deg, #f8f9fa, #ffffff); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <div style="width: 12px; height: 12px; background: #3498db; border-radius: 50%; margin-right: 10px;"></div>
+                    <h4 style="color: var(--master-primary); margin: 0; font-size: 1.1rem;">Registros Recientes</h4>
+                </div>
                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;"><?= $solicitudes['solicitudes_pendientes'] ?> nuevos usuarios esta semana</p>
-                <small style="color: <?= $solicitudes['solicitudes_pendientes'] > 0 ? '#e74c3c' : '#27ae60' ?>; font-weight: 500;">
-                    <?= $solicitudes['solicitudes_pendientes'] > 0 ? 'Requiere revisión' : 'Todo al día' ?>
-                </small>
+                <div style="display: flex; align-items: center;">
+                    <span style="width: 8px; height: 8px; background: <?= $solicitudes['solicitudes_pendientes'] > 0 ? '#e74c3c' : '#27ae60' ?>; border-radius: 50%; margin-right: 8px;"></span>
+                    <small style="color: <?= $solicitudes['solicitudes_pendientes'] > 0 ? '#e74c3c' : '#27ae60' ?>; font-weight: 500;">
+                        <?= $solicitudes['solicitudes_pendientes'] > 0 ? 'Requiere revisión' : 'Todo al día' ?>
+                    </small>
+                </div>
             </div>
-            <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: #fafbfc; transition: all 0.3s ease;"
-                 onmouseover="this.style.borderColor='var(--master-primary)'; this.style.background='white'"
-                 onmouseout="this.style.borderColor='#e3f2fd'; this.style.background='#fafbfc'">
-                <h4 style="color: var(--master-primary); margin-bottom: 8px;">Cursos en Revisión</h4>
+            <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: linear-gradient(135deg, #f8f9fa, #ffffff); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <div style="width: 12px; height: 12px; background: #f39c12; border-radius: 50%; margin-right: 10px;"></div>
+                    <h4 style="color: var(--master-primary); margin: 0; font-size: 1.1rem;">Cursos en Revisión</h4>
+                </div>
                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;"><?= $revision['cursos_revision'] ?> cursos pendientes de publicación</p>
-                <small style="color: <?= $revision['cursos_revision'] > 0 ? '#f39c12' : '#27ae60' ?>; font-weight: 500;">
-                    <?= $revision['cursos_revision'] > 0 ? 'En proceso' : 'Todo publicado' ?>
-                </small>
+                <div style="display: flex; align-items: center;">
+                    <span style="width: 8px; height: 8px; background: <?= $revision['cursos_revision'] > 0 ? '#f39c12' : '#27ae60' ?>; border-radius: 50%; margin-right: 8px;"></span>
+                    <small style="color: <?= $revision['cursos_revision'] > 0 ? '#f39c12' : '#27ae60' ?>; font-weight: 500;">
+                        <?= $revision['cursos_revision'] > 0 ? 'En proceso' : 'Todo publicado' ?>
+                    </small>
+                </div>
             </div>
-            <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: #fafbfc; transition: all 0.3s ease;"
-                 onmouseover="this.style.borderColor='var(--master-primary)'; this.style.background='white'"
-                 onmouseout="this.style.borderColor='#e3f2fd'; this.style.background='#fafbfc'">
-                <h4 style="color: var(--master-primary); margin-bottom: 8px;">Sistema</h4>
+            <div style="flex: 1; padding: 20px; border: 2px solid #e3f2fd; border-radius: 10px; background: linear-gradient(135deg, #f8f9fa, #ffffff); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <div style="width: 12px; height: 12px; background: #27ae60; border-radius: 50%; margin-right: 10px;"></div>
+                    <h4 style="color: var(--master-primary); margin: 0; font-size: 1.1rem;">Estado del Sistema</h4>
+                </div>
                 <p style="color: #7f8c8d; margin-bottom: 10px; font-size: 0.9rem;">Funcionando correctamente</p>
-                <small style="color: #27ae60; font-weight: 500;">Operativo</small>
+                <div style="display: flex; align-items: center;">
+                    <span style="width: 8px; height: 8px; background: #27ae60; border-radius: 50%; margin-right: 8px;"></span>
+                    <small style="color: #27ae60; font-weight: 500;">Operativo</small>
+                </div>
             </div>
         </div>
 
