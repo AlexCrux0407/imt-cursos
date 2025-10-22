@@ -200,13 +200,14 @@ require __DIR__ . '/../partials/nav.php';
             <div style="flex: 1; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                 <h5 style="margin: 0 0 10px 0; color: #495057;">Estado Actual</h5>
                 <?php
-                $estado_color = match($curso['estado']) {
+                // Compatibilidad PHP < 8: reemplazo de match por mapeo
+                $estado_map = [
                     'activo' => '#28a745',
                     'borrador' => '#ffc107',
                     'revision' => '#17a2b8',
-                    'inactivo' => '#dc3545',
-                    default => '#6c757d'
-                };
+                    'inactivo' => '#dc3545'
+                ];
+                $estado_color = isset($estado_map[$curso['estado']]) ? $estado_map[$curso['estado']] : '#6c757d';
                 ?>
                 <span style="background: <?= $estado_color ?>; color: white; padding: 6px 12px; border-radius: 4px; font-weight: 500;">
                     <?= ucfirst($curso['estado']) ?>

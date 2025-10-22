@@ -28,13 +28,13 @@ if (!empty($buscar)) {
 
 $where_clause = implode(' AND ', $where_conditions);
 
-// Determinar ordenamiento
-$order_clause = match($ordenar) {
+// Determinar ordenamiento (compatibilidad PHP < 8)
+$order_map = [
     'alfabetico' => 'c.titulo ASC',
     'populares' => 'total_inscritos DESC',
-    'recientes' => 'c.created_at DESC',
-    default => 'c.created_at DESC'
-};
+    'recientes' => 'c.created_at DESC'
+];
+$order_clause = isset($order_map[$ordenar]) ? $order_map[$ordenar] : 'c.created_at DESC';
 
 // Obtener cursos disponibles
 $stmt = $conn->prepare("

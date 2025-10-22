@@ -5,6 +5,11 @@ require_once __DIR__ . '/../../config/database.php';
 
 $page_title = 'Master – Administración de Cursos';
 
+// Generar token CSRF si no existe
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Obtener todos los cursos del sistema
 $stmt = $conn->prepare("
     SELECT c.*, 
@@ -248,13 +253,14 @@ require __DIR__ . '/../partials/nav.php';
                                 </td>
                                 <td style="padding: 15px;">
                                     <?php
-                                    $estado_color = match($curso['estado']) {
+                                    // Compatibilidad PHP < 8: reemplazo de match por mapeo
+                                    $estado_map = [
                                         'activo' => '#28a745',
                                         'borrador' => '#ffc107',
                                         'revision' => '#17a2b8',
-                                        'inactivo' => '#dc3545',
-                                        default => '#6c757d'
-                                    };
+                                        'inactivo' => '#dc3545'
+                                    ];
+                                    $estado_color = isset($estado_map[$curso['estado']]) ? $estado_map[$curso['estado']] : '#6c757d';
                                     ?>
                                     <span style="background: <?= $estado_color ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">
                                         <?= ucfirst($curso['estado']) ?>
@@ -443,10 +449,6 @@ document.getElementById('modal-asignar').addEventListener('click', function(e) {
     }
 });
 
-// Generar token CSRF si no existe
-<?php if (!isset($_SESSION['csrf_token'])): ?>
-    <?php $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); ?>
-<?php endif; ?>
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

@@ -233,16 +233,17 @@ require __DIR__ . '/../partials/nav.php';
                                         <h3 style="color: #2c3e50; margin-bottom: 5px;"><?= htmlspecialchars($curso['titulo']) ?></h3>
                                         <div class="div-fila-alt-start" style="gap: 15px;">
                                             <?php if ($nuevas_columnas_existen && isset($curso['estado_asignacion'])): ?>
-                                                <span style="background: 
-                                                    <?php 
-                                                    echo match($curso['estado_asignacion']) {
+                                                <?php 
+                                                    $estado_asignacion = $curso['estado_asignacion'] ?? '';
+                                                    $color_map = [
                                                         'pendiente' => '#f39c12',
-                                                        'en_desarrollo' => '#3498db', 
-                                                        'completado' => '#27ae60',
-                                                        default => '#95a5a6'
-                                                    };
-                                                    ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
-                                                    <?= ucfirst(str_replace('_', ' ', $curso['estado_asignacion'])) ?>
+                                                        'en_desarrollo' => '#3498db',
+                                                        'completado' => '#27ae60'
+                                                    ];
+                                                    $estado_color = isset($color_map[$estado_asignacion]) ? $color_map[$estado_asignacion] : '#95a5a6';
+                                                ?>
+                                                <span style="background: <?= $estado_color ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                                                    <?= ucfirst(str_replace('_', ' ', $estado_asignacion)) ?>
                                                 </span>
                                             <?php else: ?>
                                                 <span style="background: <?= $curso['estado'] === 'activo' ? '#27ae60' : ($curso['estado'] === 'borrador' ? '#f39c12' : '#e74c3c') ?>; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">

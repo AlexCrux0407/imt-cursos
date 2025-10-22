@@ -33,14 +33,14 @@ if (!empty($buscar)) {
 
 $where_clause = implode(' AND ', $where_conditions);
 
-// Determinar ordenamiento
-$order_clause = match($ordenar) {
+// Determinar ordenamiento (compatibilidad PHP < 8)
+$order_map = [
     'alfabetico' => 'c.titulo ASC',
     'progreso_desc' => 'i.progreso DESC',
     'progreso_asc' => 'i.progreso ASC',
-    'recientes' => 'i.fecha_inscripcion DESC',
-    default => 'i.fecha_inscripcion DESC'
-};
+    'recientes' => 'i.fecha_inscripcion DESC'
+];
+$order_clause = isset($order_map[$ordenar]) ? $order_map[$ordenar] : 'i.fecha_inscripcion DESC';
 
 // Obtener cursos del estudiante
 $stmt = $conn->prepare("
