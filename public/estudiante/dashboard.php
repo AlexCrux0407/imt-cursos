@@ -121,19 +121,25 @@ require __DIR__ . '/../partials/nav.php';
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    padding: 25px 20px;
+    background: #fff;
+    color: #2c3e50;
+    padding: 22px 20px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-left: 4px solid var(--estudiante-primary, #3498db);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: block;
+    text-decoration: none;
 }
 
 .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
 }
+
+.stat-card .stat-value { color: #2c3e50; }
+.stat-card .stat-label { color: #7f8c8d; opacity: 1; }
 
 .stat-value {
     font-size: 2.5rem;
@@ -336,43 +342,96 @@ require __DIR__ . '/../partials/nav.php';
         flex-direction: column;
     }
 }
+/* Hero inmersivo (diseño alternativo: grid con tarjeta de video) */
+.welcome-hero { border-radius: 18px; overflow: hidden; margin-bottom: 30px; background: linear-gradient(135deg, var(--estudiante-primary, #3498db), var(--estudiante-secondary, #2980b9)); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
+.hero-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 22px; align-items: center; padding: clamp(24px, 5vw, 48px); }
+.hero-left { color: #fff; }
+.hero-title { font-size: clamp(2rem, 4.2vw, 2.6rem); font-weight: 800; margin-bottom: 10px; letter-spacing: 0.2px; }
+.hero-subtitle { font-size: clamp(1rem, 2.1vw, 1.15rem); opacity: 0.95; }
+.hero-actions { margin-top: 18px; display: inline-flex; gap: 12px; }
+.hero-btn { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.35); padding: 10px 16px; border-radius: 10px; cursor: pointer; backdrop-filter: blur(4px); transition: all .2s; }
+.hero-btn:hover { background: rgba(255,255,255,0.26); transform: translateY(-1px); }
+
+.hero-card { position: relative; border-radius: 14px; overflow: hidden; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
+.hero-card video { display: block; width: 100%; height: auto; }
+.hero-card .card-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.35)); pointer-events: none; }
+.hero-card .card-controls { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 8px; z-index: 2; }
+.hero-card .card-btn { background: rgba(0,0,0,0.45); color: #fff; border: 1px solid rgba(255,255,255,0.35); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all .2s; }
+.hero-card .card-btn:hover { background: rgba(0,0,0,0.6); }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; padding: 22px; }
+}
 </style>
 
 <div class="student-dashboard">
-    <div class="student-welcome">
-        <h1 class="welcome-title">¡Hola, <?= htmlspecialchars($_SESSION['nombre']) ?>!</h1>
-        <p class="welcome-subtitle">Continúa tu aprendizaje y alcanza tus objetivos académicos</p>
+    <?php
+    // Video de bienvenida: detecta y arma URL
+    $welcome_video_filename = 'bienvenida.mp4';
+    $welcome_video_path = PUBLIC_PATH . '/uploads/media/' . $welcome_video_filename;
+    $welcome_video_url  = BASE_URL . '/uploads/media/' . $welcome_video_filename;
+    $has_welcome_video  = file_exists($welcome_video_path);
+    ?>
+
+    <div class="welcome-hero">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <h1 class="hero-title">¡Hola, <?= htmlspecialchars($_SESSION['nombre']) ?>!</h1>
+          <p class="hero-subtitle">Impulsa tu aprendizaje: retoma tu último curso y explora nuevas rutas.</p>
+          <div class="hero-actions">
+            <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="hero-btn">Continuar aprendizaje</a>
+            <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="hero-btn">Explorar cursos</a>
+          </div>
+        </div>
+
+        <?php if ($has_welcome_video): ?>
+        <div class="hero-card" id="heroCard">
+          <video id="heroVideo" controls autoplay muted playsinline preload="metadata">
+            <source src="<?= htmlspecialchars($welcome_video_url) ?>" type="video/mp4">
+          </video>
+          <div class="card-overlay"></div>
+
+        </div>
+        <?php else: ?>
+        <div class="hero-card" style="display:flex; align-items:center; justify-content:center; min-height: 200px;">
+          <span style="color:#fff; opacity:0.85; padding: 12px;">Sube tu video bienvenida.mp4 en uploads/media para activar el hero</span>
+        </div>
+        <?php endif; ?>
+      </div>
     </div>
+
+    <?php if ($has_welcome_video): ?>
+    <?php endif; ?>
 
     <!-- Estadísticas principales -->
     <div class="stats-overview">
-        <div class="stat-card">
+        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/catalogo.php">
             <div class="stat-content">
                 <h3 class="stat-value"><?= $cursos_disponibles ?: 0 ?></h3>
                 <p class="stat-label">Cursos Disponibles</p>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/mis_cursos.php">
             <div class="stat-content">
                 <h3 class="stat-value"><?= $estadisticas['cursos_inscritos'] ?: 0 ?></h3>
                 <p class="stat-label">Cursos Inscritos</p>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/cursos_completados.php">
             <div class="stat-content">
                 <h3 class="stat-value"><?= $estadisticas['cursos_completados'] ?: 0 ?></h3>
                 <p class="stat-label">Cursos Completados</p>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/cursos_completados.php">
             <div class="stat-content">
                 <h3 class="stat-value"><?= $estadisticas['certificados_obtenidos'] ?: 0 ?></h3>
                 <p class="stat-label">Certificados</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Recomendaciones o actividad reciente -->

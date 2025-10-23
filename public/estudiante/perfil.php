@@ -19,7 +19,7 @@ require __DIR__ . '/../partials/nav.php';
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
 
 <div class="student-dashboard">
-    <div class="student-welcome" style="margin-bottom: 25px; background: linear-gradient(135deg, #3498db, #2980b9);">
+    <div class="student-welcome">
         <h1 class="welcome-title">Perfil del Estudiante</h1>
         <p class="welcome-subtitle">Hola, <?= htmlspecialchars($usuario['nombre'] ?? ($_SESSION['nombre'] ?? 'Estudiante')) ?>. Aquí puedes ver tu información y progreso.</p>
     </div>

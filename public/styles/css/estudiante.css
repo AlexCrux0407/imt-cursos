@@ -629,6 +629,8 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     max-width: 900px;
+    margin: 0 auto;
+    align-items: stretch;
 }
 
 .profile-info-card {
@@ -637,11 +639,12 @@
     overflow: hidden;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 1px solid #eef2f7;
 }
 
 .profile-info-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 12px 35px rgba(39, 174, 96, 0.15);
+    box-shadow: 0 12px 35px rgba(52, 152, 219, 0.18);
 }
 
 .profile-info-card .card-top {
@@ -666,6 +669,23 @@
 .info-label {
     font-weight: 600;
     font-size: 1rem;
+}
+
+.info-value {
+    padding: 16px 20px;
+    color: #2c3e50;
+    font-size: 1.05rem;
+}
+
+@media (max-width: 768px) {
+    .profile-grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+}
+
+.profile-section .section-title {
+    color: var(--student-primary);
 }
 
 .info-value {
