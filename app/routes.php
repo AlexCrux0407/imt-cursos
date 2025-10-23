@@ -29,10 +29,10 @@ $router->get('/', function() {
                 header('Location: /ejecutivo/dashboard');
                 break;
             default:
-                header('Location: /login');
+                header('Location: /login.php');
         }
     } else {
-        header('Location: /login');
+        header('Location: /login.php');
     }
     exit;
 });
@@ -73,5 +73,11 @@ $router->get('/ejecutivo/exportar-reporte', 'EjecutivoController@exportarReporte
 
 // ===== RUTAS DE RECURSOS ESTÁTICOS =====
 // Estas se manejan directamente por el servidor web
+
+// Stub para evitar 404 de Vite en entorno docker
+$router->get('/@vite/client', function() {
+    header('Content-Type: application/javascript');
+    echo "// Vite client deshabilitado";
+});
 
 return $router;

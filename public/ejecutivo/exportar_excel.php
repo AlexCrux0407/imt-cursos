@@ -1,34 +1,28 @@
 <?php
+// Iniciar sesión si no está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/../../app/auth.php';
 require_role('ejecutivo');
 require_once __DIR__ . '/../../config/database.php';
 
+// Usar la variable $conn del archivo de configuración
+$pdo = $conn;
+
 // Cargar autoloader
 require_once __DIR__ . '/../../vendor/autoload.php';
-
-// Verificar si PhpSpreadsheet está disponible
-$phpspreadsheet_available = class_exists('PhpOffice\\PhpSpreadsheet\\Spreadsheet');
 
 $tipo = $_GET['tipo'] ?? '';
 $id = $_GET['id'] ?? '';
 
 if (!$tipo) {
-    header('Location: ' . BASE_URL . '/ejecutivo/generar_reportes.php');
+    header('Location: generar_reportes.php');
     exit;
 }
-        case 'estudiante':
-            generarCSVEstudianteEspecifico($output, $conn, $id);
-            break;
-        case 'resumen':
-            generarCSVResumen($output, $conn);
-            break;
-        default:
-            generarCSVGeneral($output, $conn);
-    }
-    
-    fclose($output);
-    exit;
-}
+
+try {
 
 // Crear nuevo spreadsheet
 $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -74,6 +68,36 @@ header('Cache-Control: max-age=0');
 // Crear writer y generar archivo
 $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 $writer->save('php://output');
+
+} catch (Exception $e) {
+    // En caso de error, generar CSV básico
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment;filename="reporte_' . $tipo . '_' . date('Y-m-d_H-i') . '.csv"');
+    
+    $output = fopen('php://output', 'w');
+    
+    switch ($tipo) {
+        case 'cursos':
+            generarCSVCursos($output, $conn, $id);
+            break;
+        case 'estudiantes':
+            generarCSVEstudiantes($output, $conn, $id);
+            break;
+        case 'curso':
+            generarCSVCursoEspecifico($output, $conn, $id);
+            break;
+        case 'estudiante':
+            generarCSVEstudianteEspecifico($output, $conn, $id);
+            break;
+        case 'resumen':
+            generarCSVResumen($output, $conn);
+            break;
+        default:
+            generarCSVGeneral($output, $conn);
+    }
+    
+    fclose($output);
+}
 
 // Funciones para generar diferentes tipos de reportes
 

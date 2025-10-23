@@ -41,7 +41,7 @@
 }
 
 .exec-header {
-    background: linear-gradient(135deg, #3498db, #3498db);
+    background: linear-gradient(#3498db, #3498db);
     color: white;
     padding: 30px;
     border-radius: 15px;

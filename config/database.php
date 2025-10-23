@@ -1,16 +1,18 @@
 <?php
-// Definir BASE_URL si no está definido
+// Definir BASE_URL desde entorno con fallback
 if (!defined('BASE_URL')) {
-    define('BASE_URL', '/imt-cursos/public');
+    $baseUrlEnv = getenv('BASE_URL');
+    define('BASE_URL', $baseUrlEnv !== false ? rtrim($baseUrlEnv, '/') : '/imt-cursos/public');
 }
 
-$host = '127.0.0.1';
-$db   = 'imt_cursos';
-$user = 'root';
-$pass = '1917248zzz';
-$charset = 'utf8mb4';
+$host = getenv('DB_HOST') ?: '127.0.0.1';
+$port = getenv('DB_PORT') ?: '3306';
+$db   = getenv('DB_NAME') ?: 'imt_cursos';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASSWORD') ?: '1917248zzz';
+$charset = getenv('DB_CHARSET') ?: 'utf8mb4';
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
 $options = [
   PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
   PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -19,6 +21,7 @@ $options = [
 
 try {
     $conn = new PDO($dsn, $user, $pass, $options);
+    $pdo = $conn;
     // Verificar que la conexión funciona
     $conn->query("SELECT 1");
 } catch (PDOException $e) {

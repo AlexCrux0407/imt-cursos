@@ -37,10 +37,27 @@ class Router
 
         foreach ($this->routes as $route) {
             if ($route['method'] === $requestMethod && $this->matchPath($route['path'], $requestUri)) {
-                // Ejecutar middleware
-                foreach ($route['middleware'] as $middlewareClass) {
-                    $middleware = new $middlewareClass();
-                    $middleware->handle();
+                // Ejecutar middleware (soporta parámetros con notación 'Clase:parametro')
+                foreach ($route['middleware'] as $mw) {
+                    $middleware = null;
+
+                    if (is_string($mw)) {
+                        if (strpos($mw, ':') !== false) {
+                            [$mwClass, $mwParam] = explode(':', $mw, 2);
+                            $middleware = new $mwClass($mwParam);
+                        } else {
+                            $middleware = new $mw();
+                        }
+                    } elseif (is_array($mw) && count($mw) > 0) {
+                        $mwClass = array_shift($mw);
+                        $middleware = new $mwClass(...$mw);
+                    } elseif (is_object($mw)) {
+                        $middleware = $mw;
+                    }
+
+                    if ($middleware) {
+                        $middleware->handle();
+                    }
                 }
 
                 // Extraer parámetros de la URL

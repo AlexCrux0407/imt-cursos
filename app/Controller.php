@@ -3,29 +3,36 @@
 abstract class Controller
 {
     /**
-     * Render a view with layout
+     * Render a view with layout or fallback to public flat page
      */
     protected function view($viewName, $data = [], $layout = 'layout') {
-        // Extract data to make variables available in the view
+        // Make variables available in the included file
         extract($data);
         
-        // Capture the view content
+        // Preferred: flat page under public/<viewName>.php
+        $publicPath = PUBLIC_PATH . "/{$viewName}.php";
+        if (file_exists($publicPath)) {
+            include $publicPath;
+            return;
+        }
+        
+        // Legacy MVC: public/views/<viewName>.php with optional layout
         $viewPath = PUBLIC_PATH . "/views/{$viewName}.php";
-        if (!file_exists($viewPath)) {
-            throw new Exception("View not found: {$viewName}");
+        if (file_exists($viewPath)) {
+            ob_start();
+            include $viewPath;
+            $content = ob_get_clean();
+            
+            $layoutPath = PUBLIC_PATH . "/views/{$layout}.php";
+            if (file_exists($layoutPath)) {
+                include $layoutPath;
+            } else {
+                echo $content; // Fallback to content only if no layout
+            }
+            return;
         }
         
-        ob_start();
-        include $viewPath;
-        $content = ob_get_clean();
-        
-        // Include the layout
-        $layoutPath = PUBLIC_PATH . "/views/{$layout}.php";
-        if (file_exists($layoutPath)) {
-            include $layoutPath;
-        } else {
-            echo $content; // Fallback to content only if no layout
-        }
+        throw new Exception("View not found: {$viewName}");
     }
 
     protected function json(array $data, int $statusCode = 200): void
@@ -45,7 +52,7 @@ abstract class Controller
     protected function requireAuth(): void
     {
         if (!is_logged_in()) {
-            $this->redirect('/login');
+            $this->redirect('/login.php');
         }
     }
 
@@ -54,9 +61,10 @@ abstract class Controller
         $this->requireAuth();
         
         if (!isset($_SESSION['role']) || $_SESSION['role'] !== $role) {
-            $this->redirect('/login');
+            $this->redirect('/login.php');
         }
     }
+
 
     protected function getParam(string $key, $default = null)
     {

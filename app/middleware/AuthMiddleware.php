@@ -5,7 +5,7 @@ class AuthMiddleware
     public function handle(): void
     {
         if (!is_logged_in()) {
-            header('Location: /login');
+            header('Location: /login.php');
             exit;
         }
     }
@@ -23,12 +23,12 @@ class RoleMiddleware
     public function handle(): void
     {
         if (!is_logged_in()) {
-            header('Location: /login');
+            header('Location: /login.php');
             exit;
         }
 
         if ($this->requiredRole && (!isset($_SESSION['role']) || $_SESSION['role'] !== $this->requiredRole)) {
-            header('Location: /login');
+            header('Location: /login.php');
             exit;
         }
     }

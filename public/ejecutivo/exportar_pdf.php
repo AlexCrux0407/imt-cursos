@@ -1,7 +1,15 @@
 <?php
+// Iniciar sesión si no está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/../../app/auth.php';
 require_role('ejecutivo');
 require_once __DIR__ . '/../../config/database.php';
+
+// Usar la variable $conn del archivo de configuración
+$pdo = $conn;
 
 // Cargar autoloader
 require_once __DIR__ . '/../../vendor/autoload.php';
@@ -13,36 +21,21 @@ $tipo = $_GET['tipo'] ?? '';
 $id = $_GET['id'] ?? '';
 
 if (!$tipo) {
-    header('Location: ' . BASE_URL . '/ejecutivo/generar_reportes.php');
+    header('Location: generar_reportes.php');
     exit;
 }
 
-// Crear nuevo PDF
-$pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-// Configurar información del documento
-$pdf->SetCreator('IMT Cursos');
-$pdf->SetAuthor('Sistema Ejecutivo');
-$pdf->SetTitle('Reporte ' . ucfirst($tipo));
-$pdf->SetSubject('Reporte Ejecutivo');
-
-// Configurar márgenes
-$pdf->SetMargins(15, 27, 15);
-$pdf->SetHeaderMargin(5);
-$pdf->SetFooterMargin(10);
-
-// Configurar auto page breaks
-$pdf->SetAutoPageBreak(TRUE, 25);
-
-// Configurar fuente
-$pdf->SetFont('helvetica', '', 10);
+// Definir constantes si no existen
+if (!defined('PDF_PAGE_ORIENTATION')) define('PDF_PAGE_ORIENTATION', 'P');
+if (!defined('PDF_UNIT')) define('PDF_UNIT', 'mm');
+if (!defined('PDF_PAGE_FORMAT')) define('PDF_PAGE_FORMAT', 'A4');
 
 // Función para header personalizado
 class MYPDF extends TCPDF {
     public function Header() {
-        $this->SetFont('helvetica', 'B', 15);
-        $this->Cell(0, 15, 'IMT Cursos - Reporte Ejecutivo', 0, false, 'C', 0, '', 0, false, 'M', 'M');
-        $this->Ln(10);
+        $this->SetFont('helvetica', 'B', 14);
+        $this->Cell(0, 12, 'IMT Cursos - Reporte Ejecutivo', 0, false, 'C', 0, '', 0, false, 'M', 'M');
+        $this->Ln(15);
     }
     
     public function Footer() {
@@ -52,52 +45,32 @@ class MYPDF extends TCPDF {
     }
 }
 
+// Crear nuevo PDF con la clase personalizada
 $pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+// Configurar información del documento
 $pdf->SetCreator('IMT Cursos');
 $pdf->SetAuthor('Sistema Ejecutivo');
 $pdf->SetTitle('Reporte ' . ucfirst($tipo));
+$pdf->SetSubject('Reporte Ejecutivo');
 
-$pdf->SetMargins(15, 27, 15);
-$pdf->SetHeaderMargin(5);
-$pdf->SetFooterMargin(10);
-$pdf->SetAutoPageBreak(TRUE, 25);
+// Configurar márgenes mejorados
+$pdf->SetMargins(20, 35, 20);
+$pdf->SetHeaderMargin(10);
+$pdf->SetFooterMargin(15);
 
-// Generar contenido según el tipo de reporte
-switch ($tipo) {
-    case 'cursos':
-        generarReporteCursos($pdf, $conn, $id);
-        break;
-    case 'estudiantes':
-        generarReporteEstudiantes($pdf, $conn, $id);
-        break;
-    case 'curso':
-        generarReporteCursoEspecifico($pdf, $conn, $id);
-        break;
-    case 'estudiante':
-        generarReporteEstudianteEspecifico($pdf, $conn, $id);
-        break;
-    case 'resumen':
-        generarReporteResumen($pdf, $conn);
-        break;
-    default:
-        generarReporteGeneral($pdf, $conn);
-}
-
-// Generar nombre del archivo
-$filename = 'reporte_' . $tipo . ($id ? '_' . $id : '') . '_' . date('Y-m-d_H-i') . '.pdf';
-
-// Salida del PDF
-$pdf->Output($filename, 'D');
+// Configurar auto page breaks
+$pdf->SetAutoPageBreak(TRUE, 30);
 
 // Funciones para generar diferentes tipos de reportes
 
 function generarReporteCursos($pdf, $conn, $id = null) {
     $pdf->AddPage();
     
-    // Título
+    // Título con mejor espaciado
     $pdf->SetFont('helvetica', 'B', 16);
-    $pdf->Cell(0, 10, 'Reporte de Cursos', 0, 1, 'C');
-    $pdf->Ln(5);
+    $pdf->Cell(0, 12, 'Reporte de Cursos', 0, 1, 'C');
+    $pdf->Ln(8);
     
     // Obtener datos
     $stmt = $conn->prepare("
@@ -117,38 +90,85 @@ function generarReporteCursos($pdf, $conn, $id = null) {
     $stmt->execute();
     $cursos = $stmt->fetchAll();
     
-    // Estadísticas generales
+    // Estadísticas generales con mejor formato
     $pdf->SetFont('helvetica', 'B', 12);
     $pdf->Cell(0, 8, 'Estadísticas Generales', 0, 1, 'L');
+    $pdf->Ln(2);
     $pdf->SetFont('helvetica', '', 10);
     
     $total_cursos = count($cursos);
     $total_inscritos = array_sum(array_column($cursos, 'total_inscritos'));
     $promedio_general = $total_inscritos > 0 ? array_sum(array_column($cursos, 'promedio_progreso')) / count($cursos) : 0;
     
-    $pdf->Cell(45, 6, 'Total de Cursos:', 0, 0, 'L');
-    $pdf->Cell(0, 6, $total_cursos, 0, 1, 'L');
-    $pdf->Cell(45, 6, 'Total Inscripciones:', 0, 0, 'L');
-    $pdf->Cell(0, 6, $total_inscritos, 0, 1, 'L');
-    $pdf->Cell(45, 6, 'Progreso Promedio:', 0, 0, 'L');
-    $pdf->Cell(0, 6, number_format($promedio_general, 1) . '%', 0, 1, 'L');
-    $pdf->Ln(5);
+    // Usar tabla para las estadísticas
+    $pdf->SetFillColor(245, 245, 245);
+    $pdf->Cell(50, 7, 'Total de Cursos:', 1, 0, 'L', true);
+    $pdf->Cell(40, 7, $total_cursos, 1, 1, 'L');
+    $pdf->Cell(50, 7, 'Total Inscripciones:', 1, 0, 'L', true);
+    $pdf->Cell(40, 7, $total_inscritos, 1, 1, 'L');
+    $pdf->Cell(50, 7, 'Progreso Promedio:', 1, 0, 'L', true);
+    $pdf->Cell(40, 7, number_format($promedio_general, 1) . '%', 1, 1, 'L');
+    $pdf->Ln(8);
     
-    // Tabla de cursos
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(60, 8, 'Curso', 1, 0, 'C');
-    $pdf->Cell(40, 8, 'Docente', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Estudiantes', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Completados', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Progreso %', 1, 1, 'C');
+    // Tabla de cursos con formato mejorado
+    $pdf->SetFont('helvetica', 'B', 9);
+    $pdf->SetFillColor(70, 130, 180); // Azul
+    $pdf->SetTextColor(255, 255, 255); // Blanco
     
-    $pdf->SetFont('helvetica', '', 9);
+    // Encabezados de tabla con alturas consistentes
+    $pdf->Cell(55, 10, 'Curso', 1, 0, 'C', true);
+    $pdf->Cell(35, 10, 'Docente', 1, 0, 'C', true);
+    $pdf->Cell(25, 10, 'Estudiantes', 1, 0, 'C', true);
+    $pdf->Cell(25, 10, 'Completados', 1, 0, 'C', true);
+    $pdf->Cell(25, 10, 'Progreso %', 1, 1, 'C', true);
+    
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetTextColor(0, 0, 0); // Negro
+    $fill = false;
+    
     foreach ($cursos as $curso) {
-        $pdf->Cell(60, 6, substr($curso['titulo'], 0, 25), 1, 0, 'L');
-        $pdf->Cell(40, 6, substr($curso['docente_nombre'], 0, 20), 1, 0, 'L');
-        $pdf->Cell(25, 6, $curso['total_inscritos'], 1, 0, 'C');
-        $pdf->Cell(25, 6, $curso['completados'], 1, 0, 'C');
-        $pdf->Cell(25, 6, number_format($curso['promedio_progreso'], 1) . '%', 1, 1, 'C');
+        // Verificar si necesitamos una nueva página
+        if ($pdf->GetY() > 250) {
+            $pdf->AddPage();
+            // Repetir encabezados
+            $pdf->SetFont('helvetica', 'B', 9);
+            $pdf->SetFillColor(70, 130, 180);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->Cell(55, 10, 'Curso', 1, 0, 'C', true);
+            $pdf->Cell(35, 10, 'Docente', 1, 0, 'C', true);
+            $pdf->Cell(25, 10, 'Estudiantes', 1, 0, 'C', true);
+            $pdf->Cell(25, 10, 'Completados', 1, 0, 'C', true);
+            $pdf->Cell(25, 10, 'Progreso %', 1, 1, 'C', true);
+            $pdf->SetFont('helvetica', '', 8);
+            $pdf->SetTextColor(0, 0, 0);
+        }
+        
+        if ($fill) {
+            $pdf->SetFillColor(240, 240, 240); // Gris claro
+        } else {
+            $pdf->SetFillColor(255, 255, 255); // Blanco
+        }
+        
+        // Filas de datos con altura consistente
+        $pdf->Cell(55, 8, substr($curso['titulo'], 0, 30), 1, 0, 'L', true);
+        $pdf->Cell(35, 8, substr($curso['docente_nombre'] ?? 'N/A', 0, 20), 1, 0, 'L', true);
+        $pdf->Cell(25, 8, $curso['total_inscritos'], 1, 0, 'C', true);
+        $pdf->Cell(25, 8, $curso['completados'], 1, 0, 'C', true);
+        
+        // Color del progreso según el porcentaje
+        $progreso = $curso['promedio_progreso'];
+        if ($progreso >= 80) {
+            $pdf->SetTextColor(0, 128, 0); // Verde
+        } elseif ($progreso >= 60) {
+            $pdf->SetTextColor(255, 165, 0); // Naranja
+        } else {
+            $pdf->SetTextColor(255, 0, 0); // Rojo
+        }
+        
+        $pdf->Cell(25, 8, number_format($progreso, 1) . '%', 1, 1, 'C', true);
+        $pdf->SetTextColor(0, 0, 0); // Volver a negro
+        
+        $fill = !$fill;
     }
 }
 
@@ -166,10 +186,10 @@ function generarReporteEstudiantes($pdf, $conn, $id = null) {
                COUNT(DISTINCT i.id) as total_cursos,
                COUNT(DISTINCT CASE WHEN i.progreso = 100 THEN i.id END) as cursos_completados,
                AVG(COALESCE(i.progreso, 0)) as promedio_progreso,
-               AVG(CASE WHEN em.calificacion IS NOT NULL THEN em.calificacion ELSE NULL END) as promedio_calificaciones
+               AVG(CASE WHEN ie.puntaje_obtenido IS NOT NULL THEN ie.puntaje_obtenido ELSE NULL END) as promedio_calificaciones
         FROM usuarios u 
         LEFT JOIN inscripciones i ON u.id = i.usuario_id
-        LEFT JOIN evaluaciones_modulo em ON u.id = em.usuario_id
+        LEFT JOIN intentos_evaluacion ie ON u.id = ie.usuario_id
         WHERE u.role = 'estudiante' AND u.estado = 'activo'
         GROUP BY u.id 
         ORDER BY u.nombre ASC
@@ -194,21 +214,45 @@ function generarReporteEstudiantes($pdf, $conn, $id = null) {
     $pdf->Cell(0, 6, number_format($promedio_general, 1) . '%', 0, 1, 'L');
     $pdf->Ln(5);
     
-    // Tabla de estudiantes
+    // Tabla de estudiantes con formato mejorado
     $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell(50, 8, 'Estudiante', 1, 0, 'C');
-    $pdf->Cell(60, 8, 'Email', 1, 0, 'C');
-    $pdf->Cell(20, 8, 'Cursos', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Completados', 1, 0, 'C');
-    $pdf->Cell(25, 8, 'Progreso %', 1, 1, 'C');
+    $pdf->SetFillColor(34, 139, 34); // Verde
+    $pdf->SetTextColor(255, 255, 255); // Blanco
+    $pdf->Cell(50, 8, 'Estudiante', 1, 0, 'C', true);
+    $pdf->Cell(60, 8, 'Email', 1, 0, 'C', true);
+    $pdf->Cell(20, 8, 'Cursos', 1, 0, 'C', true);
+    $pdf->Cell(25, 8, 'Completados', 1, 0, 'C', true);
+    $pdf->Cell(25, 8, 'Progreso %', 1, 1, 'C', true);
     
     $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetTextColor(0, 0, 0); // Negro
+    $fill = false;
     foreach ($estudiantes as $estudiante) {
-        $pdf->Cell(50, 6, substr($estudiante['nombre'], 0, 25), 1, 0, 'L');
-        $pdf->Cell(60, 6, substr($estudiante['email'], 0, 30), 1, 0, 'L');
-        $pdf->Cell(20, 6, $estudiante['total_cursos'], 1, 0, 'C');
-        $pdf->Cell(25, 6, $estudiante['cursos_completados'], 1, 0, 'C');
-        $pdf->Cell(25, 6, number_format($estudiante['promedio_progreso'], 1) . '%', 1, 1, 'C');
+        if ($fill) {
+            $pdf->SetFillColor(240, 248, 255); // Azul muy claro
+        } else {
+            $pdf->SetFillColor(255, 255, 255); // Blanco
+        }
+        
+        $pdf->Cell(50, 6, substr($estudiante['nombre'], 0, 25), 1, 0, 'L', true);
+        $pdf->Cell(60, 6, substr($estudiante['email'], 0, 30), 1, 0, 'L', true);
+        $pdf->Cell(20, 6, $estudiante['total_cursos'], 1, 0, 'C', true);
+        $pdf->Cell(25, 6, $estudiante['cursos_completados'], 1, 0, 'C', true);
+        
+        // Color del progreso según el porcentaje
+        $progreso = $estudiante['promedio_progreso'];
+        if ($progreso >= 80) {
+            $pdf->SetTextColor(0, 128, 0); // Verde
+        } elseif ($progreso >= 60) {
+            $pdf->SetTextColor(255, 165, 0); // Naranja
+        } else {
+            $pdf->SetTextColor(255, 0, 0); // Rojo
+        }
+        
+        $pdf->Cell(25, 6, number_format($progreso, 1) . '%', 1, 1, 'C', true);
+        $pdf->SetTextColor(0, 0, 0); // Volver a negro
+        
+        $fill = !$fill;
     }
 }
 
@@ -311,7 +355,7 @@ function generarReporteEstudianteEspecifico($pdf, $conn, $estudiante_id) {
     $pdf->SetFont('helvetica', '', 10);
     $pdf->Cell(30, 6, 'Email:', 0, 0, 'L');
     $pdf->Cell(0, 6, $estudiante['email'], 0, 1, 'L');
-    if ($estudiante['telefono']) {
+    if (isset($estudiante['telefono']) && $estudiante['telefono']) {
         $pdf->Cell(30, 6, 'Teléfono:', 0, 0, 'L');
         $pdf->Cell(0, 6, $estudiante['telefono'], 0, 1, 'L');
     }
@@ -355,9 +399,11 @@ function generarReporteEstudianteEspecifico($pdf, $conn, $estudiante_id) {
 function generarReporteResumen($pdf, $conn) {
     $pdf->AddPage();
     
-    // Título
-    $pdf->SetFont('helvetica', 'B', 16);
-    $pdf->Cell(0, 10, 'Reporte Ejecutivo General', 0, 1, 'C');
+    // Título con formato mejorado
+    $pdf->SetFont('helvetica', 'B', 18);
+    $pdf->SetTextColor(25, 25, 112); // Azul marino
+    $pdf->Cell(0, 12, 'Reporte Ejecutivo General', 0, 1, 'C');
+    $pdf->SetTextColor(0, 0, 0); // Volver a negro
     $pdf->Ln(5);
     
     // Estadísticas generales
@@ -375,27 +421,94 @@ function generarReporteResumen($pdf, $conn) {
     $stmt->execute();
     $stats = $stmt->fetch();
     
-    $pdf->SetFont('helvetica', 'B', 12);
-    $pdf->Cell(0, 8, 'Resumen Ejecutivo', 0, 1, 'L');
-    $pdf->SetFont('helvetica', '', 10);
+    // Sección de estadísticas con formato mejorado
+    $pdf->SetFont('helvetica', 'B', 14);
+    $pdf->SetFillColor(220, 220, 220); // Gris claro
+    $pdf->Cell(0, 10, 'Resumen Ejecutivo', 1, 1, 'C', true);
     
-    $pdf->Cell(50, 6, 'Total de Estudiantes:', 0, 0, 'L');
-    $pdf->Cell(0, 6, number_format($stats['total_estudiantes']), 0, 1, 'L');
-    $pdf->Cell(50, 6, 'Total de Docentes:', 0, 0, 'L');
-    $pdf->Cell(0, 6, number_format($stats['total_docentes']), 0, 1, 'L');
-    $pdf->Cell(50, 6, 'Total de Cursos:', 0, 0, 'L');
-    $pdf->Cell(0, 6, number_format($stats['total_cursos']), 0, 1, 'L');
-    $pdf->Cell(50, 6, 'Total Inscripciones:', 0, 0, 'L');
-    $pdf->Cell(0, 6, number_format($stats['total_inscripciones']), 0, 1, 'L');
-    $pdf->Cell(50, 6, 'Progreso Promedio:', 0, 0, 'L');
-    $pdf->Cell(0, 6, number_format($stats['promedio_progreso'], 1) . '%', 0, 1, 'L');
+    // Crear tabla de estadísticas con formato
+    $pdf->SetFont('helvetica', 'B', 11);
+    $pdf->SetFillColor(70, 130, 180); // Azul
+    $pdf->SetTextColor(255, 255, 255); // Blanco
+    $pdf->Cell(95, 8, 'Métrica', 1, 0, 'C', true);
+    $pdf->Cell(95, 8, 'Valor', 1, 1, 'C', true);
+    
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetTextColor(0, 0, 0); // Negro
+    $fill = false;
+    
+    $metricas = [
+        ['Total de Estudiantes', number_format($stats['total_estudiantes'])],
+        ['Total de Docentes', number_format($stats['total_docentes'])],
+        ['Total de Cursos', number_format($stats['total_cursos'])],
+        ['Total Inscripciones', number_format($stats['total_inscripciones'])],
+        ['Progreso Promedio', number_format($stats['promedio_progreso'], 1) . '%']
+    ];
+    
+    foreach ($metricas as $metrica) {
+        if ($fill) {
+            $pdf->SetFillColor(240, 240, 240); // Gris claro
+        } else {
+            $pdf->SetFillColor(255, 255, 255); // Blanco
+        }
+        
+        $pdf->Cell(95, 7, $metrica[0], 1, 0, 'L', true);
+        
+        // Color especial para el progreso promedio
+        if (strpos($metrica[1], '%') !== false) {
+            $progreso = floatval($metrica[1]);
+            if ($progreso >= 80) {
+                $pdf->SetTextColor(0, 128, 0); // Verde
+            } elseif ($progreso >= 60) {
+                $pdf->SetTextColor(255, 165, 0); // Naranja
+            } else {
+                $pdf->SetTextColor(255, 0, 0); // Rojo
+            }
+        }
+        
+        $pdf->Cell(95, 7, $metrica[1], 1, 1, 'C', true);
+        $pdf->SetTextColor(0, 0, 0); // Volver a negro
+        
+        $fill = !$fill;
+    }
     
     $pdf->Ln(10);
-    $pdf->SetFont('helvetica', '', 9);
+    
+    // Pie de página con formato
+    $pdf->SetFont('helvetica', 'I', 9);
+    $pdf->SetTextColor(128, 128, 128); // Gris
     $pdf->Cell(0, 5, 'Reporte generado el: ' . date('d/m/Y H:i:s'), 0, 1, 'C');
+    $pdf->SetTextColor(0, 0, 0); // Volver a negro
 }
 
 function generarReporteGeneral($pdf, $conn) {
     generarReporteResumen($pdf, $conn);
 }
+
+// Generar contenido según el tipo de reporte
+switch ($tipo) {
+    case 'cursos':
+        generarReporteCursos($pdf, $conn, $id);
+        break;
+    case 'estudiantes':
+        generarReporteEstudiantes($pdf, $conn, $id);
+        break;
+    case 'curso':
+        generarReporteCursoEspecifico($pdf, $conn, $id);
+        break;
+    case 'estudiante':
+        generarReporteEstudianteEspecifico($pdf, $conn, $id);
+        break;
+    case 'resumen':
+        generarReporteResumen($pdf, $conn);
+        break;
+    default:
+        generarReporteGeneral($pdf, $conn);
+}
+
+// Generar nombre del archivo
+$filename = 'reporte_' . $tipo . ($id ? '_' . $id : '') . '_' . date('Y-m-d_H-i') . '.pdf';
+
+// Salida del PDF
+$pdf->Output($filename, 'D');
 ?>

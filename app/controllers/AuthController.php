@@ -12,10 +12,11 @@ class AuthController extends Controller
         }
 
         $error = $_GET['error'] ?? '';
-        $this->view('auth/login', [
-            'page_title' => 'Iniciar Sesión - IMT',
-            'error' => $error
-        ]);
+        $url = (defined('BASE_URL') ? BASE_URL : '') . '/login.php';
+        if (!empty($error)) {
+            $url .= '?error=' . urlencode($error);
+        }
+        $this->redirect($url);
     }
 
     public function login(): void
@@ -24,18 +25,19 @@ class AuthController extends Controller
         $password = trim($_POST['password'] ?? '');
 
         if (empty($email) || empty($password)) {
-            $this->redirect('/login?error=' . urlencode('Por favor, complete todos los campos'));
+            $this->redirect('/login.php?error=' . urlencode('Por favor, complete todos los campos'));
             return;
         }
 
         try {
             require_once __DIR__ . '/../../config/database.php';
+            global $pdo;
             
-            $stmt = $pdo->prepare("SELECT id, nombre, email, password, role FROM usuarios WHERE email = ? AND activo = 1");
+            $stmt = $pdo->prepare("SELECT id, nombre, email, password, role, estado FROM usuarios WHERE email = ? LIMIT 1");
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user && password_verify($password, $user['password'])) {
+            if ($user && $user['estado'] === 'activo' && password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['nombre'];
                 $_SESSION['user_email'] = $user['email'];
@@ -43,11 +45,11 @@ class AuthController extends Controller
 
                 $this->redirectToDashboard();
             } else {
-                $this->redirect('/login?error=' . urlencode('Credenciales incorrectas'));
+                $this->redirect('/login.php?error=' . urlencode('Credenciales incorrectas'));
             }
         } catch (Exception $e) {
             error_log("Error en login: " . $e->getMessage());
-            $this->redirect('/login?error=' . urlencode('Error del sistema. Intente nuevamente.'));
+            $this->redirect('/login.php?error=' . urlencode('Error del sistema. Intente nuevamente.'));
         }
     }
 
@@ -59,7 +61,7 @@ class AuthController extends Controller
             setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
         }
         session_destroy();
-        $this->redirect('/login?message=' . urlencode('Sesión cerrada correctamente'));
+        $this->redirect('/login.php?message=' . urlencode('Sesión cerrada correctamente'));
     }
 
     private function redirectToDashboard(): void
@@ -80,7 +82,7 @@ class AuthController extends Controller
                 $this->redirect('/ejecutivo/dashboard');
                 break;
             default:
-                $this->redirect('/login?error=' . urlencode('Rol no válido'));
+                $this->redirect('/login.php?error=' . urlencode('Rol no válido'));
         }
     }
 }
