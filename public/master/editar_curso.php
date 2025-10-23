@@ -194,6 +194,12 @@ require __DIR__ . '/../partials/nav.php';
 
     <!-- Información adicional del curso -->
     <div class="form-container-body">
+        <h4 style="color: #0066cc; margin-bottom: 15px;">Certificado del Curso</h4>
+        <p style="margin: 0 0 10px 0; color: #6c757d;">Configura el template del certificado, posiciones y estilos.</p>
+        <a href="<?= BASE_URL ?>/master/configurar_certificado.php?id=<?= (int)$curso['id'] ?>"
+           style="background: #3498db; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
+            Configurar Certificado
+        </a>
         <h4 style="color: #0066cc; margin-bottom: 15px;">Información del Curso</h4>
         
         <div class="div-fila" style="gap: 20px;">

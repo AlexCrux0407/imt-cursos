@@ -93,25 +93,6 @@ $estadisticas = $stmt->fetch();
                 </a>
             </div>
         </div>
-
-        <!--  Acciones rápidas  -->
-        <div class="quick-actions">
-            <h3>Acciones Rápidas</h3>
-            <div class="action-buttons">
-                <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/docente/admin_cursos.php'">
-                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                    Nuevo Curso
-                </button>
-                <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/docente/perfil.php'">
-                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                    Editar Perfil
-                </button>
-                <button class="action-btn" onclick="window.location.href='<?= BASE_URL ?>/docente/reportes.php'">
-                    <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
-                    Reportes
-                </button>
-            </div>
-        </div>
     </div>
 </div>
 
