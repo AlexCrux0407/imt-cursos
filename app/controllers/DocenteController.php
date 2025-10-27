@@ -2,16 +2,24 @@
 
 require_once __DIR__ . '/../Controller.php';
 
+/*
+ Controlador Docente
+ Gestiona dashboard, cursos, módulos y reportes del docente.
+*/
+
 class DocenteController extends Controller
 {
+    /**
+     * Muestra métricas y cursos recientes del docente.
+     */
     public function dashboard(): void
     {
         global $conn;
         
         $docente_id = $_SESSION['user_id'];
 
-        // Obtener estadísticas del docente
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT 
                 COUNT(DISTINCT CASE WHEN c.estado = 'activo' THEN c.id END) as cursos_activos,
                 COUNT(DISTINCT i.usuario_id) as total_estudiantes,
@@ -24,8 +32,8 @@ class DocenteController extends Controller
         $stmt->execute([':docente_id' => $docente_id]);
         $estadisticas = $stmt->fetch();
 
-        // Obtener cursos recientes del docente
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT c.*, 
                    COUNT(DISTINCT i.usuario_id) as total_inscritos,
                    AVG(COALESCE(i.progreso, 0)) as progreso_promedio
@@ -46,14 +54,17 @@ class DocenteController extends Controller
         ]);
     }
 
+    /**
+     * Lista todos los cursos creados por el docente.
+     */
     public function adminCursos(): void
     {
         global $conn;
         
         $docente_id = $_SESSION['user_id'];
 
-        // Obtener todos los cursos del docente
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT c.*, 
                    COUNT(DISTINCT i.usuario_id) as total_inscritos,
                    AVG(COALESCE(i.progreso, 0)) as progreso_promedio
@@ -72,6 +83,9 @@ class DocenteController extends Controller
         ]);
     }
 
+    /**
+     * Muestra edición de un curso propio del docente.
+     */
     public function editarCurso(): void
     {
         global $conn;
@@ -84,7 +98,6 @@ class DocenteController extends Controller
             return;
         }
 
-        // Verificar que el curso pertenece al docente
         $stmt = $conn->prepare("SELECT * FROM cursos WHERE id = :id AND creado_por = :docente_id");
         $stmt->execute([':id' => $curso_id, ':docente_id' => $docente_id]);
         $curso = $stmt->fetch();
@@ -100,6 +113,9 @@ class DocenteController extends Controller
         ]);
     }
 
+    /**
+     * Crea o actualiza cursos del docente.
+     */
     public function procesarCurso(): void
     {
         global $conn;
@@ -118,8 +134,8 @@ class DocenteController extends Controller
 
         try {
             if ($curso_id) {
-                // Actualizar curso existente
-                $stmt = $conn->prepare("
+                $stmt = $conn->prepare(
+                    "
                     UPDATE cursos 
                     SET titulo = :titulo, descripcion = :descripcion, estado = :estado, fecha_actualizacion = NOW()
                     WHERE id = :id AND creado_por = :docente_id
@@ -133,8 +149,8 @@ class DocenteController extends Controller
                 ]);
                 $message = 'Curso actualizado exitosamente';
             } else {
-                // Crear nuevo curso
-                $stmt = $conn->prepare("
+                $stmt = $conn->prepare(
+                    "
                     INSERT INTO cursos (titulo, descripcion, estado, creado_por, fecha_creacion, fecha_actualizacion)
                     VALUES (:titulo, :descripcion, :estado, :docente_id, NOW(), NOW())
                 ");
@@ -153,6 +169,9 @@ class DocenteController extends Controller
         }
     }
 
+    /**
+     * Lista módulos del curso del docente.
+     */
     public function modulosCurso(): void
     {
         global $conn;
@@ -165,7 +184,6 @@ class DocenteController extends Controller
             return;
         }
 
-        // Verificar que el curso pertenece al docente
         $stmt = $conn->prepare("SELECT * FROM cursos WHERE id = :id AND creado_por = :docente_id");
         $stmt->execute([':id' => $curso_id, ':docente_id' => $docente_id]);
         $curso = $stmt->fetch();
@@ -175,8 +193,8 @@ class DocenteController extends Controller
             return;
         }
 
-        // Obtener módulos del curso
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT m.*, COUNT(t.id) as total_temas
             FROM modulos m
             LEFT JOIN temas t ON m.id = t.modulo_id
@@ -194,14 +212,17 @@ class DocenteController extends Controller
         ]);
     }
 
+    /**
+     * Genera reportes de desempeño y progreso por curso.
+     */
     public function reportes(): void
     {
         global $conn;
         
         $docente_id = $_SESSION['user_id'];
 
-        // Obtener estadísticas generales
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT 
                 c.titulo,
                 c.id as curso_id,

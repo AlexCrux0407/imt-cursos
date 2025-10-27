@@ -1,4 +1,5 @@
 <?php
+// Parcial Estudiante – Sidebar del curso
 // Seguridad de variables (por si la vista llamante no las definió)
 $curso_estructura   = $curso_estructura   ?? [];
 $cursoTituloSidebar = $cursoTituloSidebar ?? 'Curso';

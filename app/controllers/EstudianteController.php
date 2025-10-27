@@ -2,13 +2,24 @@
 
 require_once __DIR__ . '/../Controller.php';
 
+/*
+ Controlador Estudiante
+ Maneja dashboard, catálogo y contenidos de cursos para estudiantes.
+*/
+
 class EstudianteController extends Controller
 {
+    /**
+     * Requiere rol estudiante para todas las acciones.
+     */
     public function __construct()
     {
         $this->requireRole('estudiante');
     }
 
+    /**
+     * Muestra cursos inscritos y estadísticas del estudiante.
+     */
     public function dashboard(): void
     {
         try {
@@ -16,7 +27,6 @@ class EstudianteController extends Controller
             
             $user_id = $_SESSION['user_id'];
             
-            // Obtener cursos inscritos
             $stmt = $pdo->prepare("
                 SELECT c.*, ic.fecha_inscripcion, ic.progreso
                 FROM cursos c 
@@ -26,8 +36,7 @@ class EstudianteController extends Controller
             ");
             $stmt->execute([$user_id]);
             $cursosInscritos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // Obtener estadísticas
+            
             $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM inscripciones_cursos WHERE usuario_id = ?");
             $stmt->execute([$user_id]);
             $totalCursos = $stmt->fetchColumn();
@@ -51,6 +60,9 @@ class EstudianteController extends Controller
         }
     }
 
+    /**
+     * Lista cursos disponibles que aún no ha inscrito.
+     */
     public function catalogo(): void
     {
         try {
@@ -58,7 +70,6 @@ class EstudianteController extends Controller
             
             $user_id = $_SESSION['user_id'];
             
-            // Obtener cursos disponibles (no inscritos)
             $stmt = $pdo->prepare("
                 SELECT c.* 
                 FROM cursos c 
@@ -84,6 +95,9 @@ class EstudianteController extends Controller
         }
     }
 
+    /**
+     * Muestra todos los cursos inscritos del estudiante.
+     */
     public function misCursos(): void
     {
         try {
@@ -114,6 +128,9 @@ class EstudianteController extends Controller
         }
     }
 
+    /**
+     * Muestra contenido del curso si el estudiante está inscrito.
+     */
     public function verCurso(array $params): void
     {
         $curso_id = $params['id'] ?? null;
@@ -128,7 +145,6 @@ class EstudianteController extends Controller
             
             $user_id = $_SESSION['user_id'];
             
-            // Verificar que el estudiante esté inscrito
             $stmt = $pdo->prepare("
                 SELECT c.*, ic.progreso 
                 FROM cursos c 
@@ -143,7 +159,7 @@ class EstudianteController extends Controller
                 return;
             }
 
-            // Obtener módulos del curso
+            
             $stmt = $pdo->prepare("
                 SELECT * FROM modulos 
                 WHERE curso_id = ? AND activo = 1 
@@ -163,6 +179,9 @@ class EstudianteController extends Controller
         }
     }
 
+    /**
+     * Redirige al detalle de resultado de evaluación.
+     */
     public function resultadoEvaluacion(array $params): void
     {
         $evaluacion_id = $params['evaluacion_id'] ?? null;
@@ -172,7 +191,6 @@ class EstudianteController extends Controller
             return;
         }
 
-        // Redirigir a la página actual por ahora
         $this->redirect("/estudiante/resultado_evaluacion.php?evaluacion_id={$evaluacion_id}");
     }
 }

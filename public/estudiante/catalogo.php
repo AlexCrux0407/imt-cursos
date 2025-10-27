@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Catálogo: filtros y listado de cursos activos
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
@@ -83,7 +84,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Filtros y búsqueda -->
+    
     <div class="filtros-container">
         <form method="GET" class="filtros-form">
             <div class="filtro-grupo">
@@ -121,7 +122,7 @@ require __DIR__ . '/../partials/nav.php';
         </form>
     </div>
 
-    <!-- Resultados -->
+    
     <div class="resultados-container">
         <div class="resultados-header">
             <h2 class="resultados-titulo">
@@ -196,7 +197,7 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 </div>
 
-<!-- Modal de detalles del curso -->
+ 
 <div id="modalDetallesCurso" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">

@@ -1,5 +1,7 @@
 <?php
-// Definir BASE_URL desde entorno con fallback
+/**
+ * Configuración de conexión PDO a MySQL usando variables de entorno.
+ */
 if (!defined('BASE_URL')) {
     $baseUrlEnv = getenv('BASE_URL');
     define('BASE_URL', $baseUrlEnv !== false ? rtrim($baseUrlEnv, '/') : '/imt-cursos/public');
@@ -22,9 +24,7 @@ $options = [
 try {
     $conn = new PDO($dsn, $user, $pass, $options);
     $pdo = $conn;
-    // Verificar que la conexión funciona
     $conn->query("SELECT 1");
 } catch (PDOException $e) {
-    // En desarrollo, mostrar el error. En producción, loggear sin mostrar.
     die("Error de conexión a la base de datos: " . $e->getMessage());
 }

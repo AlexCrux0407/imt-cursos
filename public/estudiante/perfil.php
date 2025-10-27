@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Perfil de usuario
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
@@ -24,7 +25,7 @@ require __DIR__ . '/../partials/nav.php';
         <p class="welcome-subtitle">Hola, <?= htmlspecialchars($usuario['nombre'] ?? ($_SESSION['nombre'] ?? 'Estudiante')) ?>. Aquí puedes ver tu información y progreso.</p>
     </div>
 
-    <!-- Información personal (tarjetas modernas) -->
+    
     <div class="profile-section">
         <h2 class="section-title">Información Personal</h2>
         <div class="profile-grid">

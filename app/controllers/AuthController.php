@@ -1,9 +1,18 @@
 <?php
 
+/*
+ Controlador de Autenticación
+ - Gestiona inicio y cierre de sesión.
+ - Redirige al dashboard según el rol del usuario.
+*/
+
 require_once __DIR__ . '/../Controller.php';
 
 class AuthController extends Controller
 {
+    /**
+     * Muestra la pantalla de login o redirige si ya está autenticado.
+     */
     public function showLogin(): void
     {
         if (is_logged_in()) {
@@ -19,6 +28,9 @@ class AuthController extends Controller
         $this->redirect($url);
     }
 
+    /**
+     * Procesa el inicio de sesión con email y contraseña.
+     */
     public function login(): void
     {
         $email = trim($_POST['email'] ?? '');
@@ -53,6 +65,9 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Cierra la sesión actual y redirige al login.
+     */
     public function logout(): void
     {
         $_SESSION = [];
@@ -64,6 +79,9 @@ class AuthController extends Controller
         $this->redirect('/login.php?message=' . urlencode('Sesión cerrada correctamente'));
     }
 
+    /**
+     * Redirige al dashboard según el rol del usuario.
+     */
     private function redirectToDashboard(): void
     {
         $role = $_SESSION['role'] ?? '';

@@ -1,11 +1,11 @@
 <?php
+// Parcial de navegación: cabecera y enlaces según rol, con activo por ruta
 $role = $_SESSION['role'] ?? null;
 $nombre = $_SESSION['nombre'] ?? 'Usuario';
 
-// Detectar ruta actual (sin query string)
 $current_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
 
-// Helper para aplicar clase activa si coincide con el href
+// Clase 'active' si href coincide con ruta actual
 function nav_active_class(string $href, string $current_path): string {
     return ($current_path === $href) ? ' active' : '';
 }

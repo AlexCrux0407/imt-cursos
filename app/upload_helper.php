@@ -1,7 +1,6 @@
 <?php
 /**
- * Helper para manejo de archivos con estructura organizada por curso
- * Estructura: uploads/cursos/{nombre_curso}/{modulo}/{tema}-{subtema}-{leccion}/
+ * Helper para manejo de archivos organizados por curso.
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -11,20 +10,22 @@ class UploadHelper {
     private $conn;
     private $base_upload_dir;
     
+    /**
+     * Inicializa con conexión a base de datos.
+     */
     public function __construct($database_connection) {
         $this->conn = $database_connection;
         $this->base_upload_dir = __DIR__ . '/../uploads/cursos/';
     }
     
     /**
-     * Obtiene información completa de la jerarquía para crear la ruta
+     * Obtiene información jerárquica para construir rutas.
      */
     private function getHierarchyInfo($entity_type, $entity_id) {
         $info = [];
         
         switch ($entity_type) {
             case 'leccion':
-                // Obtener información de la lección y su jerarquía
                 $stmt = $this->conn->prepare("
                     SELECT l.id as leccion_id, l.titulo as leccion_titulo, l.orden as leccion_orden,
                            s.id as subtema_id, s.titulo as subtema_titulo, s.orden as subtema_orden,
@@ -82,21 +83,17 @@ class UploadHelper {
     }
     
     /**
-     * Limpia un nombre para usar como nombre de carpeta
+     * Normaliza un nombre para usar como carpeta.
      */
     private function sanitizeFolderName($name) {
-        // Remover caracteres especiales y espacios
         $clean = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $name);
-        // Reemplazar espacios con guiones
         $clean = preg_replace('/\s+/', '-', trim($clean));
-        // Convertir a minúsculas
         $clean = strtolower($clean);
-        // Limitar longitud
         return substr($clean, 0, 50);
     }
     
     /**
-     * Construye la ruta de carpeta basada en la jerarquía
+     * Construye la ruta de carpeta basada en la jerarquía.
      */
     public function buildFolderPath($entity_type, $entity_id) {
         $info = $this->getHierarchyInfo($entity_type, $entity_id);
@@ -105,10 +102,8 @@ class UploadHelper {
             throw new Exception("No se pudo obtener información de la entidad");
         }
         
-        // Nombre del curso (carpeta principal)
         $curso_folder = $this->sanitizeFolderName($info['curso_titulo']);
         
-        // Nombre del módulo
         $modulo_folder = sprintf("%02d-%s", 
             $info['modulo_orden'], 
             $this->sanitizeFolderName($info['modulo_titulo'])
@@ -116,7 +111,6 @@ class UploadHelper {
         
         $path_parts = [$curso_folder, $modulo_folder];
         
-        // Agregar tema si existe
         if (!empty($info['tema_id'])) {
             $tema_folder = sprintf("%02d-%s", 
                 $info['tema_orden'], 
@@ -124,7 +118,6 @@ class UploadHelper {
             );
             $path_parts[] = $tema_folder;
             
-            // Agregar subtema si existe
             if (!empty($info['subtema_id'])) {
                 $subtema_folder = sprintf("%02d-%s", 
                     $info['subtema_orden'], 
@@ -132,7 +125,6 @@ class UploadHelper {
                 );
                 $path_parts[] = $subtema_folder;
                 
-                // Agregar lección si existe
                 if (!empty($info['leccion_id'])) {
                     $leccion_folder = sprintf("%02d-%s", 
                         $info['leccion_orden'], 
@@ -147,14 +139,13 @@ class UploadHelper {
     }
     
     /**
-     * Maneja la subida de archivo con la nueva estructura
+     * Maneja subida de archivos según estructura establecida.
      */
     public function handleFileUpload($file_data, $entity_type, $entity_id, $allowed_extensions = null) {
         if (!isset($file_data) || $file_data['error'] !== UPLOAD_ERR_OK) {
             return null;
         }
         
-        // Extensiones permitidas por defecto
         if ($allowed_extensions === null) {
             $allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'mp4', 'avi', 'mov', 'jpg', 'jpeg', 'png'];
         }
@@ -166,32 +157,27 @@ class UploadHelper {
             throw new Exception("Tipo de archivo no permitido: " . $extension);
         }
         
-        // Construir ruta de carpeta
         $folder_path = $this->buildFolderPath($entity_type, $entity_id);
         $full_upload_dir = $this->base_upload_dir . $folder_path . '/';
         
-        // Crear directorio si no existe
         if (!is_dir($full_upload_dir)) {
             if (!mkdir($full_upload_dir, 0755, true)) {
                 throw new Exception("No se pudo crear el directorio: " . $full_upload_dir);
             }
         }
         
-        // Generar nombre único para el archivo
         $new_filename = $entity_type . '_' . $entity_id . '_' . time() . '.' . $extension;
         $upload_path = $full_upload_dir . $new_filename;
         
-        // Mover archivo
         if (!move_uploaded_file($file_data['tmp_name'], $upload_path)) {
             throw new Exception("Error al mover el archivo subido");
         }
         
-        // Retornar URL relativa para guardar en base de datos
         return '/imt-cursos/uploads/cursos/' . $folder_path . '/' . $new_filename;
     }
     
     /**
-     * Elimina un archivo del sistema
+     * Elimina un archivo del sistema.
      */
     public function deleteFile($file_url) {
         if (empty($file_url) || strpos($file_url, '/uploads/cursos/') !== 0) {

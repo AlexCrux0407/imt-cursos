@@ -1,8 +1,10 @@
 <?php
+/**
+ * Página de inicio de sesión.
+ */
 session_start();
 
 require_once __DIR__ . '/../config/database.php';
-// Cargar configuración centralizada de rutas
 require_once __DIR__ . '/../config/paths.php';
 
 $error = '';
@@ -31,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($row['estado'] !== 'activo') {
                 $error = 'Tu cuenta no está activa. Contacta al administrador.';
             } else {
-                // Login exitoso
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = (int) $row['id'];
                 $_SESSION['nombre'] = $row['nombre'];
@@ -39,11 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['usuario'] = $row['usuario'];
                 $_SESSION['role'] = $row['role'];
 
-                // Actualizar last_login_at
                 $upd = $conn->prepare("UPDATE usuarios SET last_login_at = NOW() WHERE id = :id");
                 $upd->execute([':id' => $row['id']]);
 
-                // Redireccionar según el rol
                 switch ($row['role']) {
                     case 'master':
                         header('Location: ' . BASE_URL .'/master/dashboard.php');

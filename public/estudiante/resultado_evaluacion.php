@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Resultado de Evaluación: resumen y detalle de respuestas
 
 declare(strict_types=1);
 

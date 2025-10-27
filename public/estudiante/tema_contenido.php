@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Contenido del tema
 
 declare(strict_types=1);
 
@@ -147,7 +148,7 @@ require __DIR__ . '/../partials/nav.php';
     ?>
 
     <div class="contenido-principal" style="flex:1;">
-        <!-- Breadcrumb con fondo azul -->
+        
         <div class="modulo-header">
             <?php
             $cursoIdLink   = (int)($tema['curso_id'] ?? 0);

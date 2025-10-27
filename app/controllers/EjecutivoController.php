@@ -2,16 +2,24 @@
 
 require_once __DIR__ . '/../Controller.php';
 
+/*
+ Controlador Ejecutivo
+ Analiza y reporta métricas generales del sistema.
+*/
+
 class EjecutivoController extends Controller
 {
+    /**
+     * Muestra estadísticas, gráficos y cursos populares.
+     */
     public function dashboard(): void
     {
         global $conn;
         
         $ejecutivo_id = $_SESSION['user_id'];
 
-        // Obtener estadísticas de reportes y análisis
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT 
                 COUNT(DISTINCT c.id) as total_cursos,
                 COUNT(DISTINCT u.id) as total_usuarios,
@@ -25,8 +33,8 @@ class EjecutivoController extends Controller
         $stmt->execute();
         $estadisticas = $stmt->fetch();
 
-        // Obtener datos para gráficos (últimos 6 meses)
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT 
                 DATE_FORMAT(i.fecha_inscripcion, '%Y-%m') as mes,
                 COUNT(*) as inscripciones
@@ -38,8 +46,8 @@ class EjecutivoController extends Controller
         $stmt->execute();
         $datosGraficos = $stmt->fetchAll();
 
-        // Obtener cursos más populares
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT c.titulo, COUNT(i.id) as total_inscripciones
             FROM cursos c
             LEFT JOIN inscripciones i ON c.id = i.curso_id
@@ -58,11 +66,13 @@ class EjecutivoController extends Controller
         ]);
     }
 
+    /**
+     * Genera reportes por período y tipo (inscripciones/usuarios/general).
+     */
     public function reportes(): void
     {
         global $conn;
 
-        // Obtener filtros
         $fecha_inicio = $_GET['fecha_inicio'] ?? date('Y-m-01');
         $fecha_fin = $_GET['fecha_fin'] ?? date('Y-m-t');
         $tipo_reporte = $_GET['tipo'] ?? 'general';
@@ -71,7 +81,8 @@ class EjecutivoController extends Controller
 
         switch ($tipo_reporte) {
             case 'inscripciones':
-                $stmt = $conn->prepare("
+                $stmt = $conn->prepare(
+                    "
                     SELECT 
                         c.titulo,
                         COUNT(i.id) as total_inscripciones,
@@ -86,7 +97,8 @@ class EjecutivoController extends Controller
                 break;
 
             case 'usuarios':
-                $stmt = $conn->prepare("
+                $stmt = $conn->prepare(
+                    "
                     SELECT 
                         u.role,
                         COUNT(*) as total,
@@ -97,7 +109,8 @@ class EjecutivoController extends Controller
                 break;
 
             default: // general
-                $stmt = $conn->prepare("
+                $stmt = $conn->prepare(
+                    "
                     SELECT 
                         'Cursos Activos' as metrica,
                         COUNT(CASE WHEN c.estado = 'activo' THEN 1 END) as valor
@@ -133,12 +146,15 @@ class EjecutivoController extends Controller
         ]);
     }
 
+    /**
+     * Visualiza tendencias de inscripciones y progreso por curso.
+     */
     public function analytics(): void
     {
         global $conn;
 
-        // Datos para dashboard de analytics
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT 
                 DATE(i.fecha_inscripcion) as fecha,
                 COUNT(*) as inscripciones_dia
@@ -150,8 +166,8 @@ class EjecutivoController extends Controller
         $stmt->execute();
         $inscripcionesDiarias = $stmt->fetchAll();
 
-        // Progreso por curso
-        $stmt = $conn->prepare("
+        $stmt = $conn->prepare(
+            "
             SELECT 
                 c.titulo,
                 AVG(i.progreso) as progreso_promedio,
@@ -172,6 +188,9 @@ class EjecutivoController extends Controller
         ]);
     }
 
+    /**
+     * Exporta reportes en formato CSV según el tipo.
+     */
     public function exportarReporte(): void
     {
         global $conn;
@@ -179,10 +198,10 @@ class EjecutivoController extends Controller
         $tipo = $_GET['tipo'] ?? 'general';
         $formato = $_GET['formato'] ?? 'csv';
 
-        // Obtener datos según el tipo de reporte
         switch ($tipo) {
             case 'inscripciones':
-                $stmt = $conn->prepare("
+                $stmt = $conn->prepare(
+                    "
                     SELECT 
                         c.titulo as 'Curso',
                         u.nombre as 'Estudiante',
@@ -199,7 +218,8 @@ class EjecutivoController extends Controller
                 break;
 
             case 'cursos':
-                $stmt = $conn->prepare("
+                $stmt = $conn->prepare(
+                    "
                     SELECT 
                         c.titulo as 'Título',
                         c.descripcion as 'Descripción',
@@ -230,11 +250,8 @@ class EjecutivoController extends Controller
             
             $output = fopen('php://output', 'w');
             
-            // Escribir encabezados
             if (!empty($data)) {
                 fputcsv($output, array_keys($data[0]));
-                
-                // Escribir datos
                 foreach ($data as $row) {
                     fputcsv($output, $row);
                 }

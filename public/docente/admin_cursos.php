@@ -1,4 +1,5 @@
 <?php
+// Vista Docente – Administración de Cursos: listado, métricas y acciones sobre cursos
 require_once __DIR__ . '/../../app/auth.php';
 require_role('docente');
 require_once __DIR__ . '/../../config/database.php';
@@ -49,7 +50,6 @@ require __DIR__ . '/../partials/nav.php';
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/docente.css">
 
 <style>
-/* Animaciones de entrada para admin cursos */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -83,7 +83,6 @@ require __DIR__ . '/../partials/nav.php';
     }
 }
 
-/* Aplicar animaciones */
 .form-container-head {
     animation: fadeInUp 0.8s ease-out;
 }
@@ -109,7 +108,6 @@ require __DIR__ . '/../partials/nav.php';
     animation: fadeInUp 1s ease-out 0.6s both;
 }
 
-/* Animación para las acciones de los cursos */
 .curso-actions button {
     transition: all 0.3s ease;
 }

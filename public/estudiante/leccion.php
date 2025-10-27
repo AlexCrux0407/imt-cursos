@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Lección: contenido y progreso
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
@@ -170,7 +171,7 @@ require __DIR__ . '/../partials/nav.php';
     ?>
 
     <div class="contenido-principal" style="flex:1;">
-        <!-- Breadcrumb -->
+        
         <div class="breadcrumb">
             <a href="<?= BASE_URL ?>/estudiante/curso_contenido.php?id=<?= $leccion['curso_id'] ?>">
                 <?= htmlspecialchars($leccion['curso_titulo']) ?>
@@ -187,7 +188,7 @@ require __DIR__ . '/../partials/nav.php';
             <span><?= htmlspecialchars($leccion['titulo']) ?></span>
         </div>
 
-    <!-- Header de la lección -->
+    
     <div class="leccion-header">
         <div class="leccion-info">
             <h1 class="leccion-titulo"><?= htmlspecialchars($leccion['titulo']) ?></h1>
@@ -198,7 +199,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Contenido de la lección -->
+    
     <div class="leccion-contenido">
         <div class="contenido-texto">
             <?php 
@@ -218,7 +219,7 @@ require __DIR__ . '/../partials/nav.php';
             ?>
         </div>
 
-        <!-- Recurso adjunto -->
+        
         <?php if (!empty($leccion['recurso_url'])): ?>
             <div class="leccion-resource">
                 <?php

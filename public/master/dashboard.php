@@ -1,4 +1,5 @@
 <?php
+// Dashboard de Master: métricas globales y accesos a administración del sistema
 require_once __DIR__ . '/../../app/auth.php';
 require_role('master');
 require_once __DIR__ . '/../../config/database.php';
@@ -63,14 +64,12 @@ require __DIR__ . '/../partials/nav.php';
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/master.css">
 
 <div class="contenido">
-    <!-- Header Principal -->
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px; font-weight: 600;">Panel de Administración</h1>
         <p style="font-size: 1.1rem; opacity: 0.9;">Sistema de gestión integral IMT Cursos</p>
         <small style="opacity: 0.8;">Último acceso: <?= date('d/m/Y H:i') ?></small>
     </div>
 
-    <!-- Métricas Principales -->
     <div class="form-container-body" style="margin-bottom: 20px;">
         <div class="div-fila" style="gap: 20px;">
             <div style="background: linear-gradient(135deg,#3498db, #3498db); color: white; padding: 25px; border-radius: 12px; text-align: center; flex: 1;">
@@ -96,9 +95,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Módulos de Administración -->
     <div class="div-fila" style="gap: 25px; margin-bottom: 30px;">
-        <!-- Gestión de Estudiantes -->
         <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;" 
              onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,102,204,0.15)'"
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
@@ -125,7 +122,6 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         </div>
 
-        <!-- Gestión de Docentes -->
         <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
              onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(52,152,219,0.15)'"
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
@@ -154,7 +150,6 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="div-fila" style="gap: 25px; margin-bottom: 30px;">
-        <!-- Gestión de Cursos -->
         <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
              onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(93,173,226,0.15)'"
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
@@ -181,7 +176,6 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         </div>
 
-        <!-- Gestión de Ejecutivos -->
         <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
              onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(46,134,193,0.15)'"
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
@@ -210,7 +204,6 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="div-fila" style="gap: 25px; margin-bottom: 30px;">
-        <!-- Configuración del Sistema -->
         <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
              onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(133,193,233,0.15)'"
              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
@@ -238,7 +231,6 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Panel de Estado del Sistema -->
     <div class="form-container-body">
         <h2 style="color: var(--master-primary); font-size: 1.5rem; margin-bottom: 25px; border-bottom: 2px solid #e8ecef; padding-bottom: 15px;">
             Estado del Sistema

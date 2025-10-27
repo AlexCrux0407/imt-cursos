@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Visor de recursos (PDF, video, imagen, URL)
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
@@ -68,28 +69,24 @@ require __DIR__ . '/../partials/nav.php';
     
     <div class="resource-content">
         <?php if (in_array(strtolower($extension), ['pdf'])): ?>
-            <!-- PDF Viewer -->
             <iframe class="resource-frame" 
                     src="<?= htmlspecialchars($recurso_url) ?>#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
                     title="Visualizador de PDF">
             </iframe>
             
         <?php elseif (in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'webm'])): ?>
-            <!-- Video Player -->
             <video class="resource-frame" controls preload="metadata" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                 <source src="<?= htmlspecialchars($recurso_url) ?>" type="video/<?= $extension ?>">
                 Tu navegador no soporta la reproducción de video.
             </video>
             
         <?php elseif (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
-            <!-- Image Viewer -->
             <img class="resource-frame" 
                  src="<?= htmlspecialchars($recurso_url) ?>" 
                  alt="<?= htmlspecialchars($titulo) ?>"
                  style="max-width: 100%; max-height: 100%; object-fit: contain;">
             
         <?php elseif (filter_var($recurso_url, FILTER_VALIDATE_URL)): ?>
-            <!-- External URL -->
             <div class="loading-spinner"></div>
             <iframe class="resource-frame" 
                     src="<?= htmlspecialchars($recurso_url) ?>" 
@@ -101,7 +98,6 @@ require __DIR__ . '/../partials/nav.php';
             </iframe>
             
         <?php else: ?>
-            <!-- Unsupported file type -->
             <div class="resource-message">
                 <h2>Vista previa no disponible</h2>
                 <p>Este tipo de archivo no se puede visualizar en línea.</p>

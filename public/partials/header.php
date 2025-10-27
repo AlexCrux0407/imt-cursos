@@ -1,8 +1,8 @@
 <?php
+// Parcial de encabezado: inicia sesión, carga paths/auth y cabecera HTML base
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-// Cargar configuración centralizada de rutas
 require_once __DIR__ . '/../../config/paths.php';
 require_once __DIR__ . '/../../app/auth.php';
 ?>

@@ -1,4 +1,5 @@
 <?php
+// Dashboard Ejecutivo: estadísticas generales y accesos a reportes y acciones
 require_once __DIR__ . '/../../app/auth.php';
 require_role('ejecutivo');
 require_once __DIR__ . '/../../config/database.php';
@@ -30,7 +31,6 @@ require __DIR__ . '/../partials/nav.php';
         <p class="exec-subtitle">Centro de reportes y análisis - Visualización de datos del sistema educativo</p>
     </div>
 
-    <!-- Stats Overview -->
     <div class="exec-stats">
         <div class="exec-stat-item">
             <span class="exec-stat-value"><?= number_format($stats['total_usuarios']) ?></span>
@@ -54,7 +54,6 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Reports Grid -->
     <div class="reports-grid">
         <div class="report-card">
             <div class="report-icon">
@@ -96,7 +95,6 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Quick Reports -->
     <div class="quick-reports">
         <h2 class="quick-reports-title">Acciones Rápidas</h2>
         <div class="report-actions">

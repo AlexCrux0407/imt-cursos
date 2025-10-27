@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Cursos Completados: estadísticas y tarjetas de cursos finalizados
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
@@ -46,7 +47,6 @@ require __DIR__ . '/../partials/nav.php';
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/mis-cursos.css">
 
 <style>
-/* Animaciones de entrada */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -57,12 +57,10 @@ require __DIR__ . '/../partials/nav.php';
     to { opacity: 1; transform: translateX(0); }
 }
 
-/* Contenedor principal */
 .contenido {
     animation: fadeInUp 0.8s ease-out;
 }
 
-/* Header específico para cursos completados */
 .catalogo-header {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
@@ -83,7 +81,6 @@ require __DIR__ . '/../partials/nav.php';
     opacity: 0.9;
 }
 
-/* Estadísticas específicas para completados */
 .estadisticas-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -122,7 +119,6 @@ require __DIR__ . '/../partials/nav.php';
     font-weight: 500;
 }
 
-/* Grid de cursos completados */
 .cursos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -206,7 +202,6 @@ require __DIR__ . '/../partials/nav.php';
     color: #495057;
 }
 
-/* Información de completado */
 .curso-completado-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -240,7 +235,6 @@ require __DIR__ . '/../partials/nav.php';
     color: #7f8c8d;
 }
 
-/* Acciones del curso */
 .curso-acciones {
     display: flex;
     gap: 10px;

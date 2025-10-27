@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Contenido del subtema
 
 declare(strict_types=1);
 
@@ -150,7 +151,7 @@ require __DIR__ . '/../partials/nav.php';
     ?>
 
     <div class="contenido-principal" style="flex:1;">
-        <!-- Breadcrumb con fondo azul -->
+        
         <div class="modulo-header">
             <?php
             $cursoIdLink   = (int)($subtema['curso_id'] ?? 0);

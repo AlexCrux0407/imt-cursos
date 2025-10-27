@@ -2,34 +2,28 @@
 declare(strict_types=1);
 
 /**
- * Escanea un directorio de curso importado usando convención:
- *  /tema/tema.css  (opcional)
- *  /contenido/modulo-XX/tema-YY/subtema-ZZ/leccion-NN.html
+ * Escanea un curso importado con convención de carpetas y retorna CSS opcional y lista de lecciones ordenadas.
  *
- * @param string $cursoDir Ruta física al curso (p.ej. /var/www/imt-cursos/public/uploads/cursos/induccion-imt)
- * @return array{css:string|null, lecciones:array} css: ruta relativa del CSS si existe; lecciones: lista con orden y paths
+ * @param string $cursoDir Ruta física al curso
+ * @return array{css:string|null, lecciones:array}
  */
 function scanImportedCourse(string $cursoDir): array {
     $result = [
         'css' => null,
-        'lecciones' => [] // cada item: [modulo_orden, tema_orden, subtema_orden, leccion_orden, titulo, path_relativo]
+        'lecciones' => []
     ];
 
-    // 1) Detectar CSS opcional
     $cssPath = $cursoDir . DIRECTORY_SEPARATOR . 'tema' . DIRECTORY_SEPARATOR . 'tema.css';
     if (is_file($cssPath)) {
         $result['css'] = 'tema/tema.css';
     }
 
-    // 2) Recorrer contenido
     $contenidoBase = $cursoDir . DIRECTORY_SEPARATOR . 'contenido';
     if (!is_dir($contenidoBase)) {
-        return $result; // sin contenido
+        return $result;
     }
 
-    // Helpers para extraer números de "modulo-01", "tema-03", etc.
     $numFrom = function (string $name, string $prefix): ?int {
-        // acepta modulo-01 o modulo_01 (guion o guion-bajo)
         if (preg_match('/^' . preg_quote($prefix, '/') . '[-_]?(\d+)/i', $name, $m)) {
             return (int)$m[1];
         }
@@ -65,20 +59,16 @@ function scanImportedCourse(string $cursoDir): array {
                     if (!is_file($filePath)) continue;
                     if (!preg_match('/\.html?$/i', $fileName)) continue;
 
-                    // leccion-XX.html -> XX
                     $lOrden = $numFrom($fileName, 'leccion');
                     if ($lOrden === null) $lOrden = 1;
 
-                    // Intentar leer <h1> como título (opcional)
                     $titulo = 'Lección ' . str_pad((string)$lOrden, 2, '0', STR_PAD_LEFT);
                     $html = @file_get_contents($filePath);
                     if ($html !== false && preg_match('/<h1[^>]*>(.*?)<\/h1>/is', $html, $m)) {
-                        // limpiar tags dentro del h1
                         $t = trim(strip_tags($m[1]));
                         if ($t !== '') $titulo = $t;
                     }
 
-                    // ruta relativa desde la raíz del curso
                     $relative = str_replace($cursoDir . DIRECTORY_SEPARATOR, '', $filePath);
                     $relative = str_replace('\\', '/', $relative);
 
@@ -95,7 +85,6 @@ function scanImportedCourse(string $cursoDir): array {
         }
     }
 
-    // Ordenar todas las lecciones por (m, t, s, l)
     usort($result['lecciones'], function($a, $b) {
         return [$a['modulo_orden'], $a['tema_orden'], $a['subtema_orden'], $a['leccion_orden']]
              <=> [$b['modulo_orden'], $b['tema_orden'], $b['subtema_orden'], $b['leccion_orden']];

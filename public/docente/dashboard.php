@@ -1,4 +1,5 @@
 <?php
+// Dashboard de Docente: estadísticas y accesos a administración y resumen
 require_once __DIR__ . '/../../app/auth.php';
 require_role('docente');
 require_once __DIR__ . '/../../config/database.php';
@@ -34,7 +35,6 @@ $estadisticas = $stmt->fetch();
             <p class="welcome-subtitle">Gestiona tus cursos y supervisa el progreso de tus estudiantes</p>
         </div>
 
-        <!-- Estadísticas principales -->
         <div class="stats-overview">
             <div class="stat-card">
                 <div class="stat-content">
@@ -65,7 +65,6 @@ $estadisticas = $stmt->fetch();
             </div>
         </div>
 
-        <!-- Tarjetas -->
         <div class="feature-grid">
             <div class="feature-card">
                 <div class="feature-icon">

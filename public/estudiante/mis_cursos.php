@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Mis Cursos: filtros, progreso y acciones por curso
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
@@ -93,7 +94,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Estadísticas generales -->
+    
     <div class="estadisticas-container">
         <div class="estadistica-card">
             <div class="estadistica-numero"><?= $estadisticas['total_cursos'] ?></div>
@@ -117,7 +118,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Filtros y búsqueda -->
+    
     <div class="filtros-container">
         <form method="GET" class="filtros-form">
             <div class="filtro-grupo">
@@ -151,12 +152,12 @@ require __DIR__ . '/../partials/nav.php';
         </form>
     </div>
 
-    <!-- Resultados -->
+    
     <div class="resultados-info">
         <p>Tienes <strong><?= count($cursos) ?></strong> curso<?= count($cursos) !== 1 ? 's' : '' ?> inscrito<?= count($cursos) !== 1 ? 's' : '' ?></p>
     </div>
 
-    <!-- Listado de cursos -->
+    
     <div class="cursos-grid">
         <?php if (empty($cursos)): ?>
             <div class="no-cursos">
@@ -190,7 +191,7 @@ require __DIR__ . '/../partials/nav.php';
                         </div>
                     <?php endif; ?>
                     
-                    <!-- Barra de progreso -->
+                    
                     <div class="progreso-container">
                         <div class="progreso-info">
                             <span class="progreso-texto">Progreso: <?= number_format($curso['progreso'], 1) ?>%</span>
@@ -203,7 +204,7 @@ require __DIR__ . '/../partials/nav.php';
                         </div>
                     </div>
                     
-                    <!-- Estadísticas del curso -->
+                    
                     <div class="curso-estadisticas">
                         <div class="estadistica-item">
                             <span class="estadistica-icono">📚</span>
@@ -240,7 +241,7 @@ require __DIR__ . '/../partials/nav.php';
         <?php endif; ?>
     </div>
 
-    <!-- Enlaces de navegación -->
+    
     <div class="navegacion-enlaces">
         <a href="<?= BASE_URL ?>/estudiante/dashboard.php" class="enlace-nav">
             <i class="icono-nav">←</i> Volver al Dashboard

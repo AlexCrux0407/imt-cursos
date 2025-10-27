@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Generar certificado PNG descargable
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';

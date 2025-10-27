@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Contenido del curso: módulos, temas y recursos
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../app/auth.php';
@@ -163,7 +164,7 @@ require __DIR__ . '/../partials/nav.php';
     ?>
 
     <div class="contenido-principal" style="flex:1;">
-        <!-- Header del curso -->
+        
         <div class="course-header-student">
             <div class="course-info">
                 <h1 class="course-title"><?= htmlspecialchars($curso['titulo']) ?></h1>
@@ -193,7 +194,7 @@ require __DIR__ . '/../partials/nav.php';
                     <p>El docente está preparando la información de este curso. Regresa pronto.</p>
                 </div>
             <?php else: ?>
-                <!-- Descripción -->
+                
                 <div class="collapsible-section sec-blue">
                     <div class="collapsible-header" onclick="toggleSection('descripcion')">
                         <h3>Descripción del curso</h3>
@@ -206,7 +207,7 @@ require __DIR__ . '/../partials/nav.php';
                     </div>
                 </div>
 
-                <!-- Categoría -->
+                
                 <?php if (!empty($curso['categoria'])): ?>
                 <div class="collapsible-section sec-purple">
                     <div class="collapsible-header" onclick="toggleSection('categoria')">
@@ -221,7 +222,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
                 <?php endif; ?>
 
-                <!-- Duración -->
+                
                 <?php if (!empty($curso['duracion'])): ?>
                 <div class="collapsible-section sec-orange">
                     <div class="collapsible-header" onclick="toggleSection('duracion')">
@@ -236,7 +237,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
                 <?php endif; ?>
 
-                <!-- Dirigido a -->
+                
                 <?php if (!empty($curso['dirigido_a'])): ?>
                 <div class="collapsible-section sec-teal">
                     <div class="collapsible-header" onclick="toggleSection('dirigido')">
@@ -251,7 +252,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
                 <?php endif; ?>
 
-                <!-- Objetivo General -->
+                
                 <?php if (!empty($curso['objetivo_general'])): ?>
                 <div class="collapsible-section sec-yellow">
                     <div class="collapsible-header" onclick="toggleSection('objetivo-general')">
@@ -266,7 +267,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
                 <?php endif; ?>
 
-                <!-- Objetivos Específicos -->
+                
                 <?php if (!empty($curso['objetivos_especificos'])): ?>
                 <div class="collapsible-section sec-red">
                     <div class="collapsible-header" onclick="toggleSection('objetivos-especificos')">
@@ -325,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php require __DIR__ . '/../partials/footer.php'; ?>
 
 <style>
-/* ====== Header del curso ====== */
+ 
 .course-header-student{
   background:linear-gradient(135deg,#3498db,#2980b9);
   color:#fff;
@@ -342,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .alert-success{ background:#d4edda;color:#155724;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #c3e6cb }
 .course-content-container{ background:#fff;border-radius:15px;padding:30px;box-shadow:0 5px 20px rgba(0,0,0,.08) }
 
-/* ====== Tarjeta colapsable (UNA sola caja) ====== */
+ 
 .collapsible-section{
   background:#fff;
   border:1px solid #e9ecef;
@@ -373,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
   padding:20px;
 }
 
-/* Modificadores de color (borde izquierdo) */
+ 
 .sec-blue   { border-left-color:#3498db; background-color: rgba(52, 152, 219, 0.05); }
 .sec-purple { border-left-color:#3498db; background-color: rgba(155, 89, 182, 0.05); }
 .sec-orange { border-left-color:#e67e22; background-color: rgba(230, 126, 34, 0.05); }
@@ -382,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .sec-red    { border-left-color:#e74c3c; background-color: rgba(231, 76, 60, 0.05); }
 .sec-slate  { border-left-color:#607d8b; background-color: rgba(96, 125, 139, 0.05); }
 
-/* Otros estilos existentes (mantenidos) */
+ 
 .modules-list{ display:grid; gap:20px }
 .module-card{ border:2px solid #e8ecef;border-radius:12px;padding:25px;transition:.3s }
 .module-card:hover{ border-color:#3498db; transform:translateY(-2px); box-shadow:0 8px 25px rgba(52,152,219,.15) }

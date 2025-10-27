@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Procesar intento de evaluación (organigrama y estándar)
 // Debug: Capturar toda la salida
 ob_start();
 

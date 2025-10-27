@@ -3,14 +3,23 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Cargar configuración centralizada de rutas
 require_once __DIR__ . '/../config/paths.php';
 
+/**
+ * Helpers de autenticación y sesión.
+ */
+
+/**
+ * Indica si hay sesión iniciada con rol.
+ */
 function is_logged_in(): bool
 {
     return isset($_SESSION['user_id'], $_SESSION['role']);
 }
 
+/**
+ * Redirige al login si no hay sesión.
+ */
 function require_login(): void
 {
     if (!is_logged_in()) {
@@ -19,7 +28,9 @@ function require_login(): void
     }
 }
 
-// Requiere que el usuario tenga uno de los roles especificados
+/**
+ * Exige un rol específico o redirige al login.
+ */
 function require_role($required_role)
 {
     if (!isset($_SESSION['role'])) {
@@ -38,6 +49,9 @@ function require_role($required_role)
     }
 }
 
+/**
+ * Cierra sesión y redirige al login.
+ */
 function logout_and_redirect(): void
 {
     $_SESSION = [];

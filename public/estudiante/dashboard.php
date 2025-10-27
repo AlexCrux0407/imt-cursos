@@ -1,4 +1,5 @@
 <?php
+// Dashboard de Estudiante: estadísticas, cursos en progreso/completados y actividad reciente
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
@@ -75,7 +76,6 @@ require __DIR__ . '/../partials/nav.php';
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
 
 <style>
-/* Animaciones de entrada */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -87,7 +87,6 @@ require __DIR__ . '/../partials/nav.php';
     }
 }
 
-/* Dashboard del estudiante */
 .student-dashboard {
     animation: fadeInUp 0.8s ease-out;
 }
@@ -112,7 +111,6 @@ require __DIR__ . '/../partials/nav.php';
     opacity: 0.9;
 }
 
-/* Estadísticas */
 .stats-overview {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -155,7 +153,6 @@ require __DIR__ . '/../partials/nav.php';
     font-weight: 500;
 }
 
-/* Secciones */
 .dashboard-section {
     background: white;
     border-radius: 15px;
@@ -188,7 +185,6 @@ require __DIR__ . '/../partials/nav.php';
     color: #2980b9;
 }
 
-/* Grid de cursos */
 .courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -231,7 +227,6 @@ require __DIR__ . '/../partials/nav.php';
     line-height: 1.5;
 }
 
-/* Estado vacío */
 .empty-state {
     text-align: center;
     padding: 60px 20px;

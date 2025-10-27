@@ -1,4 +1,5 @@
 <?php
+// Vista Docente – Resumen General: cursos, estudiantes y estadísticas agregadas
 require_once __DIR__ . '/../../app/auth.php';
 require_role('docente');
 require_once __DIR__ . '/../../config/database.php';
@@ -233,7 +234,6 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Estadísticas Generales -->
     <div class="summary-stats">
         <div class="summary-stat-card">
             <div class="summary-stat-value"><?= $estadisticas_generales['total_cursos'] ?: 0 ?></div>

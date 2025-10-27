@@ -1,4 +1,5 @@
 <?php
+// Vista Estudiante – Contenido del módulo: temas, subtemas y lecciones
 
 declare(strict_types=1);
 
