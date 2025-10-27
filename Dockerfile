@@ -32,6 +32,8 @@ COPY . .
 
 # Garantizar que los directorios de subida existan y sean escribibles por Apache
 RUN set -eux; \
+    chown -R www-data:www-data /var/www/html/public; \
+    chmod -R 775 /var/www/html/public; \
     mkdir -p /var/www/html/public/uploads/media; \
     mkdir -p /var/www/html/uploads; \
     chown -R www-data:www-data /var/www/html/public/uploads /var/www/html/uploads; \
