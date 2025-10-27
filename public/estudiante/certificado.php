@@ -72,19 +72,32 @@ require __DIR__ . '/../partials/nav.php';
       <div class="certificado-preview" style="position:relative;">
         <img src="<?= BASE_URL . '/' . ltrim($config['template_path'], '/') ?>" alt="Plantilla" style="width:100%; display:block;">
         <?php 
-          $font_size = (int)($config['font_size'] ?? 24);
-          $font_size_px = (int)round($font_size * 1.33);
-          $font_color = htmlspecialchars($config['font_color'] ?? '#000000');
-          $font_family = htmlspecialchars($config['font_family'] ?? 'helvetica');
+          $g_family = htmlspecialchars($config['font_family'] ?? 'Arial');
+          $g_size_pt = (int)($config['font_size'] ?? 24);
+          $g_color = htmlspecialchars($config['font_color'] ?? '#000000');
+          function resolveStyle($cfg, $prefix, $g_family, $g_size_pt, $g_color) {
+            $fam = htmlspecialchars($cfg[$prefix . '_font_family'] ?? $g_family);
+            $size_pt = (int)($cfg[$prefix . '_font_size'] ?? $g_size_pt);
+            $color = htmlspecialchars($cfg[$prefix . '_font_color'] ?? $g_color);
+            $size_px = (int)round($size_pt * 1.33);
+            return [$fam, $size_px, $color];
+          }
+          list($nombre_fam, $nombre_px, $nombre_col) = resolveStyle($config, 'nombre', $g_family, $g_size_pt, $g_color);
+          list($curso_fam, $curso_px, $curso_col) = resolveStyle($config, 'curso', $g_family, $g_size_pt, $g_color);
+          list($cal_fam, $cal_px, $cal_col) = resolveStyle($config, 'calificacion', $g_family, $g_size_pt, $g_color);
+          list($fecha_fam, $fecha_px, $fecha_col) = resolveStyle($config, 'fecha', $g_family, $g_size_pt, $g_color);
         ?>
         <?php if (!empty($config['nombre_x']) && !empty($config['nombre_y'])): ?>
-          <div style="position:absolute; left: <?= floatval($config['nombre_x']) ?>%; top: <?= floatval($config['nombre_y']) ?>%; transform: translate(-50%, -50%); color: <?= $font_color ?>; font-size: <?= $font_size_px ?>px; font-family: <?= $font_family ?>; font-weight: 600;"><?= htmlspecialchars($nombre_estudiante) ?></div>
+          <div style="position:absolute; left: <?= floatval($config['nombre_x']) ?>%; top: <?= floatval($config['nombre_y']) ?>%; transform: translate(-50%, -50%); color: <?= $nombre_col ?>; font-size: <?= $nombre_px ?>px; font-family: <?= $nombre_fam ?>; font-weight: 600;"><?= htmlspecialchars($nombre_estudiante) ?></div>
+        <?php endif; ?>
+        <?php if (!empty($config['curso_x']) && !empty($config['curso_y'])): ?>
+          <div style="position:absolute; left: <?= floatval($config['curso_x']) ?>%; top: <?= floatval($config['curso_y']) ?>%; transform: translate(-50%, -50%); color: <?= $curso_col ?>; font-size: <?= $curso_px ?>px; font-family: <?= $curso_fam ?>; font-weight: 600;"><?= htmlspecialchars($insc['titulo']) ?></div>
         <?php endif; ?>
         <?php if ((int)($config['mostrar_calificacion'] ?? 0) === 1 && !empty($config['calificacion_x']) && !empty($config['calificacion_y']) && $promedio !== null): ?>
-          <div style="position:absolute; left: <?= floatval($config['calificacion_x']) ?>%; top: <?= floatval($config['calificacion_y']) ?>%; transform: translate(-50%, -50%); color: <?= $font_color ?>; font-size: <?= $font_size_px ?>px; font-family: <?= $font_family ?>;">Calificación: <?= htmlspecialchars(number_format($promedio, 1)) ?></div>
+          <div style="position:absolute; left: <?= floatval($config['calificacion_x']) ?>%; top: <?= floatval($config['calificacion_y']) ?>%; transform: translate(-50%, -50%); color: <?= $cal_col ?>; font-size: <?= $cal_px ?>px; font-family: <?= $cal_fam ?>;">Calificación: <?= htmlspecialchars(number_format($promedio, 1)) ?></div>
         <?php endif; ?>
         <?php if (!empty($config['fecha_x']) && !empty($config['fecha_y']) && $fecha_completado): ?>
-          <div style="position:absolute; left: <?= floatval($config['fecha_x']) ?>%; top: <?= floatval($config['fecha_y']) ?>%; transform: translate(-50%, -50%); color: <?= $font_color ?>; font-size: <?= $font_size_px ?>px; font-family: <?= $font_family ?>;"><?= $fecha_completado->format('d/m/Y') ?></div>
+          <div style="position:absolute; left: <?= floatval($config['fecha_x']) ?>%; top: <?= floatval($config['fecha_y']) ?>%; transform: translate(-50%, -50%); color: <?= $fecha_col ?>; font-size: <?= $fecha_px ?>px; font-family: <?= $fecha_fam ?>;"><?= $fecha_completado->format('d/m/Y') ?></div>
         <?php endif; ?>
       </div>
 

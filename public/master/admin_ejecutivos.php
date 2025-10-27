@@ -197,13 +197,24 @@ require __DIR__ . '/../partials/nav.php';
                                         <?= date('d/m/Y', strtotime($ejecutivo['created_at'])) ?>
                                     </div>
                                 </td>
-                                <td style="padding: 15px; text-align: center; vertical-align: middle;">
-                                    <button onclick="toggleEjecutivo(<?= $ejecutivo['id'] ?>, '<?= $ejecutivo['estado'] ?>')" 
-                                            style="padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; font-weight: 500;
-                                                   background: <?= $ejecutivo['estado'] === 'activo' ? 'linear-gradient(135deg, #dc3545, #bd2130)' : 'linear-gradient(135deg, #28a745, #1e7e34)' ?>; 
-                                                   color: white;">
-                                        <?= $ejecutivo['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>
+                                <td style="padding: 12px; text-align: center; vertical-align: middle;">
+                                  <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                    <a href="<?= BASE_URL ?>/master/ver_ejecutivo.php?id=<?= $ejecutivo['id'] ?>"
+                                       style="background: #6c757d; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; text-decoration: none; cursor: pointer;"
+                                       title="Ver detalles">
+                                      Ver
+                                    </a>
+                                    <a href="<?= BASE_URL ?>/master/editar_ejecutivo.php?id=<?= $ejecutivo['id'] ?>"
+                                       style="background: #ffc107; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; text-decoration: none; cursor: pointer;"
+                                       title="Editar perfil">
+                                      Editar
+                                    </a>
+                                    <button onclick="toggleEjecutivo(<?= $ejecutivo['id'] ?>, '<?= $ejecutivo['estado'] ?>')"
+                                            style="background: <?= $ejecutivo['estado'] === 'activo' ? '#e74c3c' : '#27ae60' ?>; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;"
+                                            title="<?= $ejecutivo['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?> ejecutivo">
+                                      <?= $ejecutivo['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>
                                     </button>
+                                  </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

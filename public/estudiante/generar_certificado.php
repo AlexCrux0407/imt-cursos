@@ -118,20 +118,26 @@ function resolveFontPath($family) {
     return $win.'arial.ttf';
 }
 
-$font_family = $config['font_family'] ?? 'helvetica';
-$font_path = resolveFontPath($font_family);
-$font_size = (int)($config['font_size'] ?? 24);
+$g_family = $config['font_family'] ?? 'helvetica';
+$g_size_pt = (int)($config['font_size'] ?? 24);
+$g_hex = trim($config['font_color'] ?? '#000000');
 
-// Color
-$hex = trim($config['font_color'] ?? '#000000');
-if ($hex[0] === '#') $hex = substr($hex, 1);
-if (strlen($hex) === 3) {
-    $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+function resolveFieldStyle($cfg, $prefix, $fallbackFamily, $fallbackSizePt, $fallbackHex) {
+    $family = $cfg[$prefix . '_font_family'] ?? $fallbackFamily;
+    $size_pt = (int)($cfg[$prefix . '_font_size'] ?? $fallbackSizePt);
+    $hex = trim($cfg[$prefix . '_font_color'] ?? $fallbackHex);
+    return [$family, $size_pt, $hex];
 }
-$r = hexdec(substr($hex, 0, 2));
-$g = hexdec(substr($hex, 2, 2));
-$b = hexdec(substr($hex, 4, 2));
-$color = imagecolorallocate($img, $r, $g, $b);
+function allocColor($img, $hex) {
+    if ($hex[0] === '#') $hex = substr($hex, 1);
+    if (strlen($hex) === 3) {
+        $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+    }
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+    return imagecolorallocate($img, $r, $g, $b);
+}
 
 // Utilidad para dibujar texto centrado en porcentajes
 function drawTextPercentCentered($im, $text, $font, $size, $color, $xPerc, $yPerc, $imgW, $imgH) {
@@ -147,17 +153,35 @@ function drawTextPercentCentered($im, $text, $font, $size, $color, $xPerc, $yPer
     imagettftext($im, $size, 0, (int)$drawX, (int)$drawY, $color, $font, $text);
 }
 
+list($nombre_family, $nombre_size, $nombre_hex) = resolveFieldStyle($config, 'nombre', $g_family, $g_size_pt, $g_hex);
+list($curso_family, $curso_size, $curso_hex) = resolveFieldStyle($config, 'curso', $g_family, $g_size_pt, $g_hex);
+list($cal_family, $cal_size, $cal_hex) = resolveFieldStyle($config, 'calificacion', $g_family, $g_size_pt, $g_hex);
+list($fecha_family, $fecha_size, $fecha_hex) = resolveFieldStyle($config, 'fecha', $g_family, $g_size_pt, $g_hex);
+
+$nombre_font_path = resolveFontPath($nombre_family);
+$nombre_color = allocColor($img, $nombre_hex);
+$curso_font_path = resolveFontPath($curso_family);
+$curso_color = allocColor($img, $curso_hex);
+$cal_font_path = resolveFontPath($cal_family);
+$cal_color = allocColor($img, $cal_hex);
+$fecha_font_path = resolveFontPath($fecha_family);
+$fecha_color = allocColor($img, $fecha_hex);
+
 // Nombre
 if (!empty($config['nombre_x']) && !empty($config['nombre_y'])) {
-    drawTextPercentCentered($img, $nombre_estudiante, $font_path, $font_size, $color, $config['nombre_x'], $config['nombre_y'], $width, $height);
+    drawTextPercentCentered($img, $nombre_estudiante, $nombre_font_path, $nombre_size, $nombre_color, $config['nombre_x'], $config['nombre_y'], $width, $height);
+}
+// Curso
+if (!empty($config['curso_x']) && !empty($config['curso_y'])) {
+    drawTextPercentCentered($img, $insc['titulo'], $curso_font_path, $curso_size, $curso_color, $config['curso_x'], $config['curso_y'], $width, $height);
 }
 // Calificación
 if ((int)($config['mostrar_calificacion'] ?? 0) === 1 && $promedio !== null && !empty($config['calificacion_x']) && !empty($config['calificacion_y'])) {
-    drawTextPercentCentered($img, 'Calificación: ' . number_format($promedio, 1), $font_path, $font_size, $color, $config['calificacion_x'], $config['calificacion_y'], $width, $height);
+    drawTextPercentCentered($img, 'Calificación: ' . number_format($promedio, 1), $cal_font_path, $cal_size, $cal_color, $config['calificacion_x'], $config['calificacion_y'], $width, $height);
 }
 // Fecha
 if (!empty($config['fecha_x']) && !empty($config['fecha_y'])) {
-    drawTextPercentCentered($img, $fecha_texto, $font_path, $font_size, $color, $config['fecha_x'], $config['fecha_y'], $width, $height);
+    drawTextPercentCentered($img, $fecha_texto, $fecha_font_path, $fecha_size, $fecha_color, $config['fecha_x'], $config['fecha_y'], $width, $height);
 }
 
 // Salida PNG

@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'create') {
         $nombre = trim($_POST['nombre'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
+        // Teléfono eliminado (no requerido)
         $password = $_POST['password'] ?? '';
         
         // Validaciones
@@ -38,15 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Crear nuevo ejecutivo
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $conn->prepare("
-                    INSERT INTO usuarios (nombre, email, telefono, password, role, estado, created_at) 
-                    VALUES (:nombre, :email, :telefono, :password, 'ejecutivo', 'activo', NOW())
-                ");
+                $stmt = $conn->prepare("\n                    INSERT INTO usuarios (nombre, email, password, role, estado, created_at) \n                    VALUES (:nombre, :email, :password, 'ejecutivo', 'activo', NOW())\n                ");
                 
                 if ($stmt->execute([
                     ':nombre' => $nombre,
                     ':email' => $email,
-                    ':telefono' => $telefono,
                     ':password' => $hashed_password
                 ])) {
                     $message = 'Ejecutivo creado exitosamente.';
@@ -60,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = $_POST['id'] ?? null;
         $nombre = trim($_POST['nombre'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
+        // Teléfono eliminado (no requerido)
         $password = $_POST['password'] ?? '';
         $estado = $_POST['estado'] ?? 'activo';
         
@@ -83,34 +79,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $error = 'La contraseña debe tener al menos 6 caracteres.';
                     } else {
                         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                        $stmt = $conn->prepare("
-                            UPDATE usuarios 
-                            SET nombre = :nombre, email = :email, telefono = :telefono, 
-                                password = :password, estado = :estado, updated_at = NOW()
-                            WHERE id = :id AND role = 'ejecutivo'
-                        ");
+                        $stmt = $conn->prepare("\n                            UPDATE usuarios \n                            SET nombre = :nombre, email = :email, \n                                password = :password, estado = :estado, updated_at = NOW()\n                            WHERE id = :id AND role = 'ejecutivo'\n                        ");
                         
                         $result = $stmt->execute([
                             ':nombre' => $nombre,
                             ':email' => $email,
-                            ':telefono' => $telefono,
                             ':password' => $hashed_password,
                             ':estado' => $estado,
                             ':id' => $id
                         ]);
                     }
                 } else {
-                    $stmt = $conn->prepare("
-                        UPDATE usuarios 
-                        SET nombre = :nombre, email = :email, telefono = :telefono, 
-                            estado = :estado, updated_at = NOW()
-                        WHERE id = :id AND role = 'ejecutivo'
-                    ");
+                    $stmt = $conn->prepare("\n                        UPDATE usuarios \n                        SET nombre = :nombre, email = :email, \n                            estado = :estado, updated_at = NOW()\n                        WHERE id = :id AND role = 'ejecutivo'\n                    ");
                     
                     $result = $stmt->execute([
                         ':nombre' => $nombre,
                         ':email' => $email,
-                        ':telefono' => $telefono,
                         ':estado' => $estado,
                         ':id' => $id
                     ]);
@@ -179,7 +163,7 @@ if ($action === 'list') {
     $where_clause = implode(' AND ', $where_conditions);
     
     $stmt = $conn->prepare("
-        SELECT id, nombre, email, telefono, estado, created_at, updated_at
+        SELECT id, nombre, email, estado, created_at, updated_at
         FROM usuarios 
         WHERE $where_clause
         ORDER BY nombre ASC
@@ -253,7 +237,7 @@ require __DIR__ . '/../partials/nav.php';
                         <tr>
                             <th>Nombre</th>
                             <th>Email</th>
-                            <th>Teléfono</th>
+                            <!-- Teléfono eliminado -->
                             <th>Estado</th>
                             <th>Fecha Creación</th>
                             <th>Acciones</th>
@@ -264,7 +248,7 @@ require __DIR__ . '/../partials/nav.php';
                             <tr>
                                 <td><?= htmlspecialchars($ejecutivo['nombre']) ?></td>
                                 <td><?= htmlspecialchars($ejecutivo['email']) ?></td>
-                                <td><?= htmlspecialchars($ejecutivo['telefono'] ?? 'N/A') ?></td>
+                                <!-- Teléfono eliminado -->
                                 <td>
                                     <span class="status-badge status-<?= $ejecutivo['estado'] ?>">
                                         <?= ucfirst($ejecutivo['estado']) ?>
@@ -314,11 +298,7 @@ require __DIR__ . '/../partials/nav.php';
                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                 </div>
                 
-                <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="text" id="telefono" name="telefono" 
-                           value="<?= htmlspecialchars($_POST['telefono'] ?? '') ?>">
-                </div>
+                <!-- Campo Teléfono eliminado -->
                 
                 <div class="form-group">
                     <label for="password">Contraseña *</label>
@@ -357,11 +337,7 @@ require __DIR__ . '/../partials/nav.php';
                            value="<?= htmlspecialchars($_POST['email'] ?? $ejecutivo_data['email']) ?>">
                 </div>
                 
-                <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="text" id="telefono" name="telefono" 
-                           value="<?= htmlspecialchars($_POST['telefono'] ?? $ejecutivo_data['telefono']) ?>">
-                </div>
+                <!-- Campo Teléfono eliminado -->
                 
                 <div class="form-group">
                     <label for="estado">Estado</label>

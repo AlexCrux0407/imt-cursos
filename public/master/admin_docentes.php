@@ -230,12 +230,22 @@ require __DIR__ . '/../partials/nav.php';
                             </td>
                             <td style="padding: 15px; text-align: center; vertical-align: middle;">
                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                                    <a href="<?= BASE_URL ?>/master/ver_docente.php?id=<?= $docente['id'] ?>"
+                                       style="background: #6c757d; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; text-decoration: none; cursor: pointer;"
+                                       title="Ver detalles">
+                                        Ver
+                                    </a>
+                                    <a href="<?= BASE_URL ?>/master/editar_docente.php?id=<?= $docente['id'] ?>"
+                                       style="background: #ffc107; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; text-decoration: none; cursor: pointer;"
+                                       title="Editar perfil">
+                                        Editar
+                                    </a>
                                     <button onclick="asignarCurso(<?= $docente['id'] ?>, '<?= htmlspecialchars($docente['nombre']) ?>')"
                                             style="background: #3498db; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;"
                                             title="Asignar curso">
                                         Asignar
                                     </button>
-                                    <button onclick="toggleEstado(<?= $docente['id'] ?>, '<?= $docente['estado'] ?>')"
+                                    <button onclick="toggleEstadoDocente(<?= $docente['id'] ?>, '<?= $docente['estado'] ?>', '<?= htmlspecialchars($docente['nombre']) ?>')"
                                             style="background: <?= $docente['estado'] === 'activo' ? '#e74c3c' : '#27ae60' ?>; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;"
                                             title="<?= $docente['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?> docente">
                                         <?= $docente['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>
