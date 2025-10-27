@@ -19,6 +19,11 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot ${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf \
  && sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
+# Evitar el warning de ServerName en Apache
+ENV SERVER_NAME=localhost
+RUN echo "ServerName ${SERVER_NAME}" > /etc/apache2/conf-available/servername.conf \
+ && a2enconf servername
+
 WORKDIR /var/www/html
 COPY . .
 

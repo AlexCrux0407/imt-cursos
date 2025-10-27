@@ -4,15 +4,8 @@
  */
 
 if (!defined('BASE_URL')) {
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $project_path = '/imt-cursos/public';
-
-    if (strpos($host, 'localhost:') !== false || strpos($host, '127.0.0.1:') !== false) {
-        define('BASE_URL', '');
-    } else {
-        define('BASE_URL', $project_path);
-    }
+    $baseUrlEnv = getenv('BASE_URL');
+    define('BASE_URL', $baseUrlEnv !== false ? rtrim($baseUrlEnv, '/') : '/');
 }
 
 if (!defined('ROOT_PATH')) {

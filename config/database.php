@@ -4,14 +4,15 @@
  */
 if (!defined('BASE_URL')) {
     $baseUrlEnv = getenv('BASE_URL');
-    define('BASE_URL', $baseUrlEnv !== false ? rtrim($baseUrlEnv, '/') : '/imt-cursos/public');
+    define('BASE_URL', $baseUrlEnv !== false ? rtrim($baseUrlEnv, '/') : '/');
 }
 
-$host = getenv('DB_HOST') ?: '127.0.0.1';
-$port = getenv('DB_PORT') ?: '3306';
-$db   = getenv('DB_NAME') ?: 'imt_cursos';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASSWORD') ?: '1917248zzz';
+// Compatibilidad con variables de Railway MySQL
+$host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
+$port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
+$db   = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'imt_cursos';
+$user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
+$pass = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '1917248zzz';
 $charset = getenv('DB_CHARSET') ?: 'utf8mb4';
 
 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
