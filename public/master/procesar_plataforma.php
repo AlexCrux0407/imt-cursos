@@ -82,9 +82,17 @@ try {
     // Directorio de destino
     $upload_dir = __DIR__ . '/../styles/iconos/';
     // Directorio de destino para videos de bienvenida
-    $upload_dir_media = PUBLIC_PATH . '/uploads/media/';
+    $upload_dir_media = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'media';
     if (!is_dir($upload_dir_media)) {
-        @mkdir($upload_dir_media, 0775, true);
+        if (!mkdir($upload_dir_media, 0775, true)) {
+            throw new Exception("No se pudo crear el directorio de media en '" . $upload_dir_media . "'. Verifica permisos de escritura.");
+        }
+    }
+    if (!is_writable($upload_dir_media)) {
+        @chmod($upload_dir_media, 0775);
+        if (!is_writable($upload_dir_media)) {
+            throw new Exception("El directorio de media no es escribible: '" . $upload_dir_media . "'. Ajusta permisos/propietario.");
+        }
     }
     
     // Función para procesar upload de imagen
