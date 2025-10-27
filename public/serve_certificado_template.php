@@ -30,7 +30,8 @@ try {
     }
     $rel = $cfg['template_path'];
   }
-  $rel = ltrim(str_replace(['../', './'], '', $rel), '/');
+  // Normalizar ruta relativa
+  $rel = ltrim(str_replace(['\\', '../', './'], ['/', '', ''], $rel), '/');
 
   $candidates = [
     rtrim(PUBLIC_PATH, '/') . '/' . $rel,
@@ -52,16 +53,53 @@ try {
   }
 
   if (!$path) {
-    if (isset($_GET['debug'])) {
-      header('Content-Type: application/json');
-      $checks = [];
-      foreach ($candidates as $p) { $checks[] = ['path' => $p, 'exists' => file_exists($p)]; }
-      echo json_encode(['curso_id' => $curso_id, 'rel' => $rel, 'candidates' => $checks], JSON_PRETTY_PRINT);
+    // Fallback: buscar por patrón certificado_<curso_id>_* en ubicaciones conocidas
+    $patternDirs = [
+      rtrim(PUBLIC_PATH, '/') . '/uploads/certificados',
+      rtrim(ROOT_PATH, '/') . '/uploads/certificados',
+      '/tmp/imt-cursos/uploads/certificados',
+      '/tmp/uploads/certificados',
+      '/var/tmp/uploads/certificados',
+    ];
+    $found = [];
+    foreach ($patternDirs as $dir) {
+      if (!is_dir($dir)) continue;
+      foreach (['png','jpg','jpeg'] as $ext) {
+        $globPattern = $dir . '/certificado_' . $curso_id . '_*.' . $ext;
+        $matches = glob($globPattern);
+        if (is_array($matches)) {
+          foreach ($matches as $m) { $found[] = $m; }
+        }
+      }
+    }
+    if (!empty($found)) {
+      // Elegir el más reciente por mtime
+      usort($found, function($a, $b){ return filemtime($b) <=> filemtime($a); });
+      $path = $found[0];
+    }
+
+    if (!$path) {
+      if (isset($_GET['debug'])) {
+        header('Content-Type: application/json');
+        $checks = [];
+        foreach ($candidates as $p) { $checks[] = ['path' => $p, 'exists' => file_exists($p)]; }
+        $dirChecks = [];
+        foreach ($patternDirs as $d) {
+          $dirChecks[] = ['dir' => $d, 'is_dir' => is_dir($d)];
+        }
+        echo json_encode([
+          'curso_id' => $curso_id,
+          'rel' => $rel,
+          'candidates' => $checks,
+          'pattern_dirs' => $dirChecks,
+          'found_matches' => $found,
+        ], JSON_PRETTY_PRINT);
+        exit;
+      }
+      http_response_code(404);
+      echo 'Plantilla no encontrada';
       exit;
     }
-    http_response_code(404);
-    echo 'Plantilla no encontrada';
-    exit;
   }
 
   $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
