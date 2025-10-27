@@ -131,7 +131,34 @@ try {
             return null; // No se subió archivo
         }
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            throw new Exception("Error al subir el archivo de video de bienvenida");
+            $code = (int)$file['error'];
+            $uploadMax = ini_get('upload_max_filesize');
+            $postMax = ini_get('post_max_size');
+            $msg = "Error al subir el archivo de video de bienvenida.";
+            switch ($code) {
+                case UPLOAD_ERR_INI_SIZE:
+                    $msg = "El video excede upload_max_filesize (" . $uploadMax . ").";
+                    break;
+                case UPLOAD_ERR_FORM_SIZE:
+                    $msg = "El video excede MAX_FILE_SIZE definido en el formulario.";
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $msg = "El video se subió parcialmente. Verifica post_max_size (" . $postMax . ") y la conexión.";
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    $msg = "Falta carpeta temporal en el servidor.";
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    $msg = "No se pudo escribir el archivo en disco.";
+                    break;
+                case UPLOAD_ERR_EXTENSION:
+                    $msg = "Una extensión detuvo la subida del archivo.";
+                    break;
+            }
+            throw new Exception($msg . " Sube un MP4/WebM/Ogg menor a 50MB.");
+        }
+        if (!is_uploaded_file($file['tmp_name'])) {
+            throw new Exception("El archivo no fue subido correctamente (tmp inválido).");
         }
         // Validar tamaño (máximo 50MB)
         if ($file['size'] > 50 * 1024 * 1024) {
