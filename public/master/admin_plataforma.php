@@ -183,10 +183,16 @@ require __DIR__ . '/../partials/nav.php';
                     Video de Bienvenida (se muestra en la portada)
                 </label>
                 <?php if (!empty($config['video_bienvenida'])): ?>
+                    <?php
+                        $video_file = basename($config['video_bienvenida']);
+                        $video_proxy_url = BASE_URL . '/serve_media.php?file=' . rawurlencode($video_file);
+                        $video_static_url = BASE_URL . '/uploads/media/' . rawurlencode($video_file);
+                    ?>
                     <div style="margin-bottom: 10px; background: #f8f9fa; padding: 12px; border-radius: 8px; border: 2px solid #e9ecef;">
                         <div style="font-weight: 500; color: #495057; margin-bottom: 8px;">Video Actual:</div>
-                        <video src="<?= BASE_URL . '/' . htmlspecialchars($config['video_bienvenida']) ?>" controls style="width: 100%; max-width: 600px; border-radius: 8px; border: 1px solid #e9ecef; background: #000;"></video>
-                        <small style="color: #6c757d; display: block; margin-top: 6px;">Archivo: <?= htmlspecialchars(basename($config['video_bienvenida'])) ?></small>
+                        <video src="<?= htmlspecialchars($video_proxy_url) ?>" controls style="width: 100%; max-width: 600px; border-radius: 8px; border: 1px solid #e9ecef; background: #000;"></video>
+                        <small style="color: #6c757d; display: block; margin-top: 6px;">Archivo: <?= htmlspecialchars($video_file) ?></small>
+                        <small style="color: #6c757d; display: block;">URL estática: <a href="<?= htmlspecialchars($video_static_url) ?>" target="_blank"><?= htmlspecialchars($video_static_url) ?></a></small>
                     </div>
                 <?php else: ?>
                     <small style="color: #6c757d; display: block; margin-bottom: 8px;">Aún no se ha cargado un video de bienvenida</small>
