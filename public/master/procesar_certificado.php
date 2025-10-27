@@ -28,18 +28,25 @@ if (!empty($_FILES['template']['name'])) {
   $ext = $allowed[$mime];
   $nombre = 'certificado_' . $curso_id . '_' . time() . '.' . $ext;
 
-  // Usar PUBLIC_PATH para guardar archivos servibles
+  // Usar PUBLIC_PATH para guardar archivos servibles; si falla, caer a ROOT_PATH/uploads (no público)
   $uploads_base = rtrim(PUBLIC_PATH, '/') . '/uploads';
   $dest_dir = $uploads_base . '/certificados';
 
   // Crear directorios de forma segura (sin emitir warnings)
   if (!is_dir($uploads_base)) {
     if (!@mkdir($uploads_base, 0775, true) && !is_dir($uploads_base)) {
-      $err = error_get_last();
-      error_log('No se pudo crear uploads base: ' . $uploads_base . ' - ' . ($err['message'] ?? 'error desconocido'));
-      $qs = http_build_query(['id' => $curso_id, 'error' => 'permisos_upload', 'detalle' => 'no_se_pudo_crear_uploads_base']);
-      header('Location: ' . BASE_URL . '/master/configurar_certificado.php?' . $qs);
-      exit;
+      // Fallback a carpeta raíz (no pública)
+      $uploads_base = rtrim(ROOT_PATH, '/') . '/uploads';
+      $dest_dir = $uploads_base . '/certificados';
+      if (!is_dir($uploads_base)) {
+        if (!@mkdir($uploads_base, 0775, true) && !is_dir($uploads_base)) {
+          $err = error_get_last();
+          error_log('No se pudo crear uploads base (fallback): ' . $uploads_base . ' - ' . ($err['message'] ?? 'error desconocido'));
+          $qs = http_build_query(['id' => $curso_id, 'error' => 'permisos_upload', 'detalle' => 'no_se_pudo_crear_uploads_base']);
+          header('Location: ' . BASE_URL . '/master/configurar_certificado.php?' . $qs);
+          exit;
+        }
+      }
     }
   }
 
@@ -61,7 +68,7 @@ if (!empty($_FILES['template']['name'])) {
     header('Location: ' . BASE_URL . '/master/configurar_certificado.php?id=' . $curso_id . '&error=subida_fallida');
     exit;
   }
-  // Ruta relativa para servir
+  // Ruta relativa; si se guardó en raíz, aún funcionará para el generador y vista
   $template_path = 'uploads/certificados/' . $nombre;
   $template_mime = $mime;
 }
