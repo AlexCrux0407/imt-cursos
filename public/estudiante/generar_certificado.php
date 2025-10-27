@@ -94,28 +94,63 @@ $height = imagesy($img);
 
 // Resolver fuente
 function resolveFontPath($family) {
-    $candidates = [];
+    // 1) Permitir forzar la fuente vía variable de entorno
+    $envFont = getenv('CERT_TTF');
+    if ($envFont && file_exists($envFont)) {
+        return $envFont;
+    }
+
+    // 2) Candidatos según familia en Linux y en carpeta pública del proyecto
+    $publicFontsDir = __DIR__ . '/../fonts/'; // public/fonts
+    $linuxSans = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+    $linuxSerif = '/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf';
+    $linuxMono = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf';
+
     $win = 'C:\\Windows\\Fonts\\';
+    $candidates = [];
     switch (strtolower($family)) {
         case 'helvetica':
-            $candidates = [$win.'arial.ttf', $win.'ARIAL.TTF', $win.'calibri.ttf', $win.'tahoma.ttf', $win.'segoeui.ttf'];
+            $candidates = [
+                $publicFontsDir.'DejaVuSans.ttf',
+                $publicFontsDir.'arial.ttf',
+                $linuxSans,
+                $win.'arial.ttf', $win.'ARIAL.TTF', $win.'calibri.ttf', $win.'tahoma.ttf', $win.'segoeui.ttf'
+            ];
             break;
         case 'times':
-            $candidates = [$win.'times.ttf', $win.'TIMES.TTF', $win.'timesbd.ttf', $win.'timesi.ttf', $win.'timesbi.ttf', $win.'times new roman.ttf'];
+            $candidates = [
+                $publicFontsDir.'DejaVuSerif.ttf',
+                $linuxSerif,
+                $win.'times.ttf', $win.'TIMES.TTF', $win.'timesbd.ttf', $win.'timesi.ttf', $win.'timesbi.ttf', $win.'times new roman.ttf'
+            ];
             break;
         case 'courier':
-            $candidates = [$win.'cour.ttf', $win.'COUR.TTF', $win.'courbd.ttf'];
+            $candidates = [
+                $publicFontsDir.'DejaVuSansMono.ttf',
+                $linuxMono,
+                $win.'cour.ttf', $win.'COUR.TTF', $win.'courbd.ttf'
+            ];
             break;
         case 'dejavusans':
-            $candidates = [$win.'DejaVuSans.ttf', $win.'dejavusans.ttf'];
+            $candidates = [
+                $publicFontsDir.'DejaVuSans.ttf',
+                $linuxSans,
+                $win.'DejaVuSans.ttf', $win.'dejavusans.ttf'
+            ];
             break;
         default:
-            $candidates = [$win.'arial.ttf'];
+            $candidates = [
+                $publicFontsDir.'DejaVuSans.ttf',
+                $linuxSans,
+                $win.'arial.ttf'
+            ];
     }
     foreach ($candidates as $p) {
-        if (file_exists($p)) return $p;
+        if ($p && file_exists($p)) return $p;
     }
-    // Fallback
+    // 3) Fallback final: DejaVu en Linux, si existe
+    if (file_exists($linuxSans)) return $linuxSans;
+    // Último recurso: Arial en Windows
     return $win.'arial.ttf';
 }
 

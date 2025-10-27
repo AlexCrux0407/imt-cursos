@@ -4,9 +4,7 @@
  */
 session_start();
 
-if (!defined('BASE_URL')) {
-    define('BASE_URL', '/imt-cursos/public');
-}
+require_once __DIR__ . '/../config/paths.php';
 
 require_once __DIR__ . '/../config/database.php';
 

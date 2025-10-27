@@ -7,10 +7,7 @@ declare(strict_types=1);
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-if (!defined('BASE_URL')) {
-    // Ajusta este valor a tu entorno. Para Laragon típico:
-    define('BASE_URL', '/imt-cursos/public');
-}
+require_once __DIR__ . '/../../config/paths.php';
 
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');

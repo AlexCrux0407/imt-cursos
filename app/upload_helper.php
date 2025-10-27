@@ -4,6 +4,7 @@
  */
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/paths.php';
 
 class UploadHelper {
     
@@ -15,7 +16,8 @@ class UploadHelper {
      */
     public function __construct($database_connection) {
         $this->conn = $database_connection;
-        $this->base_upload_dir = __DIR__ . '/../uploads/cursos/';
+        // Guardar siempre en public/uploads/cursos para servir directo desde el DocumentRoot
+        $this->base_upload_dir = PUBLIC_PATH . '/uploads/cursos/';
     }
     
     /**
@@ -173,7 +175,8 @@ class UploadHelper {
             throw new Exception("Error al mover el archivo subido");
         }
         
-        return '/imt-cursos/uploads/cursos/' . $folder_path . '/' . $new_filename;
+        // URL pública basada en BASE_URL
+        return BASE_URL . '/uploads/cursos/' . $folder_path . '/' . $new_filename;
     }
     
     /**
@@ -183,13 +186,20 @@ class UploadHelper {
         if (empty($file_url) || strpos($file_url, '/uploads/cursos/') !== 0) {
             return false;
         }
-        
-        $file_path = __DIR__ . '/../..' . $file_url;
-        
-        if (file_exists($file_path)) {
-            return unlink($file_path);
+
+        // Intentar primero en public/uploads
+        $file_path_public = PUBLIC_PATH . $file_url; // BASE_URL no se incluye en la ruta física
+        if (file_exists($file_path_public)) {
+            return unlink($file_path_public);
         }
-        
+
+        // Fallback: ruta antigua en la raíz del proyecto (no-public)
+        $root_path = dirname(__DIR__); // ../
+        $file_path_root = $root_path . $file_url;
+        if (file_exists($file_path_root)) {
+            return unlink($file_path_root);
+        }
+
         return false;
     }
 }

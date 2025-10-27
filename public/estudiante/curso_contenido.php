@@ -2,14 +2,10 @@
 // Vista Estudiante – Contenido del curso: módulos, temas y recursos
 declare(strict_types=1);
 
+require_once __DIR__ . '/../../config/paths.php';
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
-
-// Definir BASE_URL si no está definido
-if (!defined('BASE_URL')) {
-    define('BASE_URL', '/imt-cursos/public');
-}
 
 $page_title = 'Estudiante – Contenido del Curso';
 
