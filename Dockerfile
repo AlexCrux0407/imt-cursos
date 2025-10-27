@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
  && a2enmod rewrite \
  && sed -ri 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
+# Ajustar límites de subida y tiempos de PHP (aplica a mod_php)
+RUN printf "upload_max_filesize=64M\npost_max_size=64M\nmax_execution_time=180\nmax_input_time=180\nmemory_limit=512M\n" > /usr/local/etc/php/conf.d/uploads.ini
+
 # Apuntar el DocumentRoot a /public para respetar tu estructura
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri 's!DocumentRoot /var/www/html!DocumentRoot ${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf \
