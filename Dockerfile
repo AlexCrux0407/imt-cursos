@@ -30,6 +30,13 @@ RUN echo "ServerName ${SERVER_NAME}" > /etc/apache2/conf-available/servername.co
 WORKDIR /var/www/html
 COPY . .
 
+# Garantizar que los directorios de subida existan y sean escribibles por Apache
+RUN set -eux; \
+    mkdir -p /var/www/html/public/uploads/media; \
+    mkdir -p /var/www/html/uploads; \
+    chown -R www-data:www-data /var/www/html/public/uploads /var/www/html/uploads; \
+    chmod -R 775 /var/www/html/public/uploads /var/www/html/uploads
+
 # Exponer el puerto estándar de Apache
 EXPOSE 80
 

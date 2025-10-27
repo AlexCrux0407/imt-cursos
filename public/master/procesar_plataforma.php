@@ -84,7 +84,7 @@ try {
     // Directorio de destino para videos de bienvenida
     $upload_dir_media = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'media';
     if (!is_dir($upload_dir_media)) {
-        if (!mkdir($upload_dir_media, 0775, true)) {
+        if (!@mkdir($upload_dir_media, 0775, true)) {
             throw new Exception("No se pudo crear el directorio de media en '" . $upload_dir_media . "'. Verifica permisos de escritura.");
         }
     }
@@ -185,7 +185,7 @@ try {
         $filename = 'video_bienvenida_' . time() . '.' . $extension;
         $filepath = rtrim($upload_dir_media, '/\\') . DIRECTORY_SEPARATOR . $filename;
         // Mover archivo
-        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+        if (!@move_uploaded_file($file['tmp_name'], $filepath)) {
             throw new Exception("Error al guardar el archivo de video de bienvenida");
         }
         // Devolver ruta relativa desde public
