@@ -36,7 +36,15 @@ try {
     rtrim(PUBLIC_PATH, '/') . '/' . $rel,
     rtrim(ROOT_PATH, '/') . '/' . $rel,
     '/tmp/imt-cursos/' . $rel,
+    '/tmp/' . $rel,
   ];
+
+  // Variantes adicionales para rutas de certificados en /tmp
+  if (preg_match('#^uploads/certificados/[^/]+\.(png|jpg|jpeg)$#i', $rel)) {
+    $basename = basename($rel);
+    $candidates[] = '/tmp/uploads/certificados/' . $basename;
+    $candidates[] = '/var/tmp/uploads/certificados/' . $basename;
+  }
 
   $path = null;
   foreach ($candidates as $p) {
@@ -44,6 +52,13 @@ try {
   }
 
   if (!$path) {
+    if (isset($_GET['debug'])) {
+      header('Content-Type: application/json');
+      $checks = [];
+      foreach ($candidates as $p) { $checks[] = ['path' => $p, 'exists' => file_exists($p)]; }
+      echo json_encode(['curso_id' => $curso_id, 'rel' => $rel, 'candidates' => $checks], JSON_PRETTY_PRINT);
+      exit;
+    }
     http_response_code(404);
     echo 'Plantilla no encontrada';
     exit;
