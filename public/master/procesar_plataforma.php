@@ -84,8 +84,11 @@ try {
     // Directorio de destino para videos de bienvenida
     $upload_dir_media = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'media';
     if (!is_dir($upload_dir_media)) {
-        if (!@mkdir($upload_dir_media, 0775, true)) {
-            throw new Exception("No se pudo crear el directorio de media en '" . $upload_dir_media . "'. Verifica permisos de escritura.");
+        // Si existe como symlink hacia un directorio válido, considerar OK
+        if (!(is_link($upload_dir_media) && is_dir($upload_dir_media))) {
+            if (!@mkdir($upload_dir_media, 0775, true)) {
+                throw new Exception("No se pudo crear el directorio de media en '" . $upload_dir_media . "'. Verifica permisos de escritura.");
+            }
         }
     }
     if (!is_writable($upload_dir_media)) {

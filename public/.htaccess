@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Asegurar que Apache siga symlinks (necesario si usamos enlaces en uploads)
+Options +FollowSymLinks
+
 # Aumentar límites de subida de PHP (si mod_php está activo)
 <IfModule mod_php7.c>
     php_value upload_max_filesize 64M
