@@ -71,7 +71,7 @@ require __DIR__ . '/../partials/nav.php';
   <?php else: ?>
     <div class="certificado-panel" style="background:#fff; border:1px solid #e1e5e9; border-radius:10px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow:hidden;">
       <div class="certificado-preview" style="position:relative;">
-        <img src="<?= BASE_URL . '/' . ltrim($config['template_path'], '/') ?>" alt="Plantilla" style="width:100%; display:block;">
+        <img src="<?= BASE_URL ?>/serve_certificado_template.php?curso_id=<?= (int)$curso_id ?>" alt="Plantilla" style="width:100%; display:block;">
         <?php 
           $g_family = htmlspecialchars($config['font_family'] ?? 'Arial');
           $g_size_pt = (int)($config['font_size'] ?? 24);
