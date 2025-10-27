@@ -24,6 +24,7 @@ class EstudianteController extends Controller
     {
         try {
             require_once __DIR__ . '/../../config/database.php';
+            global $pdo;
             
             $user_id = $_SESSION['user_id'];
             
@@ -67,6 +68,7 @@ class EstudianteController extends Controller
     {
         try {
             require_once __DIR__ . '/../../config/database.php';
+            global $pdo;
             
             $user_id = $_SESSION['user_id'];
             
@@ -102,6 +104,7 @@ class EstudianteController extends Controller
     {
         try {
             require_once __DIR__ . '/../../config/database.php';
+            global $pdo;
             
             $user_id = $_SESSION['user_id'];
             
@@ -142,6 +145,7 @@ class EstudianteController extends Controller
 
         try {
             require_once __DIR__ . '/../../config/database.php';
+            global $pdo;
             
             $user_id = $_SESSION['user_id'];
             
