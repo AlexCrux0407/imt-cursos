@@ -666,10 +666,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Cerrar modal al hacer clic fuera
-document.getElementById('modalNuevoCurso').addEventListener('click', function(e) {
-    if (e.target === this) {
-        cerrarModal();
+// Cerrar modal al hacer clic fuera (protegido y tras cargar DOM)
+document.addEventListener('DOMContentLoaded', function() {
+    const modalNuevoCurso = document.getElementById('modalNuevoCurso');
+    if (modalNuevoCurso) {
+        modalNuevoCurso.addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
     }
 });
 </script>
