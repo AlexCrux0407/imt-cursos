@@ -7,7 +7,7 @@ FROM php:8.2-apache
 # - zip: soporte para ZIP si lo requieren librerías
 # - fonts-dejavu-core: fuentes TTF presentes en Linux
 RUN apt-get update && apt-get install -y \
-    libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libonig-dev pkg-config \
     fonts-dejavu-core \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install pdo_mysql gd mbstring zip \
