@@ -176,6 +176,29 @@ require __DIR__ . '/../partials/nav.php';
                 <small style="color: #6c757d; font-size: 0.85rem;">Formatos permitidos: PNG, JPG, JPEG, GIF, SVG. Máximo 2MB</small>
             </div>
 
+            <!-- Video de Bienvenida -->
+            <div style="margin-bottom: 25px;">
+                <label for="video_bienvenida" style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">
+                    <img src="<?= BASE_URL ?>/styles/iconos/detalles.png" alt="Video" style="width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;">
+                    Video de Bienvenida (se muestra en la portada)
+                </label>
+                <?php if (!empty($config['video_bienvenida'])): ?>
+                    <div style="margin-bottom: 10px; background: #f8f9fa; padding: 12px; border-radius: 8px; border: 2px solid #e9ecef;">
+                        <div style="font-weight: 500; color: #495057; margin-bottom: 8px;">Video Actual:</div>
+                        <video src="<?= BASE_URL . '/' . htmlspecialchars($config['video_bienvenida']) ?>" controls style="width: 100%; max-width: 600px; border-radius: 8px; border: 1px solid #e9ecef; background: #000;"></video>
+                        <small style="color: #6c757d; display: block; margin-top: 6px;">Archivo: <?= htmlspecialchars(basename($config['video_bienvenida'])) ?></small>
+                    </div>
+                <?php else: ?>
+                    <small style="color: #6c757d; display: block; margin-bottom: 8px;">Aún no se ha cargado un video de bienvenida</small>
+                <?php endif; ?>
+                <input type="file" 
+                       id="video_bienvenida" 
+                       name="video_bienvenida" 
+                       accept="video/mp4,video/webm,video/ogg"
+                       style="width: 100%; padding: 12px; border: 2px dashed #e9ecef; border-radius: 8px; background: #f8f9fa;">
+                <small style="color: #6c757d; font-size: 0.85rem;">Formatos permitidos: MP4, WEBM u OGG. Máximo 50MB</small>
+            </div>
+
             <!-- Botones de Acción -->
             <div style="display: flex; gap: 15px; margin-top: 30px;">
                 <button type="submit" 

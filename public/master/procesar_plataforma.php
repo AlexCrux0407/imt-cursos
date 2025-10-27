@@ -33,6 +33,7 @@ try {
                 nombre_plataforma VARCHAR(255) NOT NULL DEFAULT 'IMT Cursos',
                 logo_header VARCHAR(255) NOT NULL DEFAULT 'Logo_IMT.png',
                 logo_footer VARCHAR(255) NOT NULL DEFAULT 'Logo_blanco.png',
+                video_bienvenida VARCHAR(255) DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
@@ -41,8 +42,8 @@ try {
         
         // Insertar configuración por defecto
         $stmt = $conn->prepare("
-            INSERT INTO configuracion_plataforma (id, nombre_plataforma, logo_header, logo_footer, created_at) 
-            VALUES (1, 'IMT Cursos', 'Logo_IMT.png', 'Logo_blanco.png', NOW())
+            INSERT INTO configuracion_plataforma (id, nombre_plataforma, logo_header, logo_footer, video_bienvenida, created_at) 
+            VALUES (1, 'IMT Cursos', 'Logo_IMT.png', 'Logo_blanco.png', NULL, NOW())
         ");
         $stmt->execute();
         
@@ -52,6 +53,18 @@ try {
         $config_actual = $stmt->fetch();
     }
     
+    // Asegurar que la columna video_bienvenida exista si la tabla ya estaba creada
+    $colCheck = $conn->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'configuracion_plataforma' AND COLUMN_NAME = 'video_bienvenida'");
+    $colCheck->execute();
+    $hasVideoCol = (int)$colCheck->fetchColumn() > 0;
+    if (!$hasVideoCol) {
+        $conn->exec("ALTER TABLE configuracion_plataforma ADD COLUMN video_bienvenida VARCHAR(255) DEFAULT NULL AFTER logo_footer");
+        // Recargar configuración
+        $stmt = $conn->prepare("SELECT * FROM configuracion_plataforma WHERE id = 1");
+        $stmt->execute();
+        $config_actual = $stmt->fetch();
+    }
+
     // Validar y sanitizar nombre de plataforma
     $nombre_plataforma = trim($_POST['nombre_plataforma'] ?? '');
     if (empty($nombre_plataforma)) {
@@ -68,6 +81,11 @@ try {
     
     // Directorio de destino
     $upload_dir = __DIR__ . '/../styles/iconos/';
+    // Directorio de destino para videos de bienvenida
+    $upload_dir_media = PUBLIC_PATH . '/uploads/media/';
+    if (!is_dir($upload_dir_media)) {
+        @mkdir($upload_dir_media, 0775, true);
+    }
     
     // Función para procesar upload de imagen
     function procesarUploadLogo($file, $upload_dir, $tipo) {
@@ -107,6 +125,38 @@ try {
         return $filename;
     }
     
+    // Función para procesar upload de video de bienvenida
+    function procesarUploadVideo($file, $upload_dir_media) {
+        if ($file['error'] === UPLOAD_ERR_NO_FILE) {
+            return null; // No se subió archivo
+        }
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception("Error al subir el archivo de video de bienvenida");
+        }
+        // Validar tamaño (máximo 50MB)
+        if ($file['size'] > 50 * 1024 * 1024) {
+            throw new Exception("El video de bienvenida es demasiado grande (máximo 50MB)");
+        }
+        // Validar tipo de archivo
+        $allowed_types = ['video/mp4', 'video/webm', 'video/ogg'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        if (!in_array($mime_type, $allowed_types)) {
+            throw new Exception("Tipo de archivo no permitido para video de bienvenida. Use MP4, WEBM u OGG");
+        }
+        // Generar nombre único
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'video_bienvenida_' . time() . '.' . $extension;
+        $filepath = rtrim($upload_dir_media, '/\\') . DIRECTORY_SEPARATOR . $filename;
+        // Mover archivo
+        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+            throw new Exception("Error al guardar el archivo de video de bienvenida");
+        }
+        // Devolver ruta relativa desde public
+        return 'uploads/media/' . $filename;
+    }
+    
     // Procesar logo del header
     if (isset($_FILES['logo_header']) && $_FILES['logo_header']['error'] !== UPLOAD_ERR_NO_FILE) {
         $nuevo_logo_header = procesarUploadLogo($_FILES['logo_header'], $upload_dir, 'header');
@@ -135,12 +185,22 @@ try {
         }
     }
     
+    // Valor actual y procesamiento del video de bienvenida
+    $video_bienvenida = $config_actual['video_bienvenida'] ?? null;
+    if (isset($_FILES['video_bienvenida']) && $_FILES['video_bienvenida']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $nuevo_video = procesarUploadVideo($_FILES['video_bienvenida'], $upload_dir_media);
+        if ($nuevo_video) {
+            $video_bienvenida = $nuevo_video;
+        }
+    }
+
     // Actualizar configuración en la base de datos
     $stmt = $conn->prepare("
         UPDATE configuracion_plataforma 
         SET nombre_plataforma = :nombre_plataforma,
             logo_header = :logo_header,
             logo_footer = :logo_footer,
+            video_bienvenida = :video_bienvenida,
             updated_at = NOW()
         WHERE id = 1
     ");
@@ -148,7 +208,8 @@ try {
     $stmt->execute([
         ':nombre_plataforma' => $nombre_plataforma,
         ':logo_header' => $logo_header,
-        ':logo_footer' => $logo_footer
+        ':logo_footer' => $logo_footer,
+        ':video_bienvenida' => $video_bienvenida
     ]);
     
     // Confirmar transacción

@@ -1015,12 +1015,8 @@ function soltarPieza(e) {
     // Permitir colocar cualquier pieza en cualquier espacio
     // Remover pieza anterior si existe
     if (respuestasUsuario[espacioId]) {
-        // Encontrar el ID de la pieza por su texto para devolverla al banco
-        const piezaAnteriorTexto = respuestasUsuario[espacioId];
-        const piezaAnteriorId = organigramaConfig.piezas.find(p => p.texto === piezaAnteriorTexto)?.id;
-        if (piezaAnteriorId) {
-            devolverPiezaAlBanco(piezaAnteriorId);
-        }
+        const piezaAnteriorId = respuestasUsuario[espacioId];
+        devolverPiezaAlBanco(piezaAnteriorId);
     }
 
     // Colocar nueva pieza
@@ -1036,9 +1032,8 @@ function soltarPieza(e) {
     // Ocultar pieza original
     pieza.style.display = 'none';
 
-    // Guardar respuesta (usar el texto de la pieza, no el ID)
-    const piezaTexto = organigramaConfig.piezas.find(p => p.id === pieceId)?.texto || pieceId;
-    respuestasUsuario[espacioId] = piezaTexto;
+    // Guardar respuesta usando el ID de la pieza para evaluar correctamente
+    respuestasUsuario[espacioId] = pieceId;
 
     actualizarProgreso();
     actualizarCampoRespuesta();
@@ -1049,10 +1044,9 @@ function devolverPiezaAlBanco(pieceId) {
     const piezaOriginal = document.querySelector(`[data-piece-id="${pieceId}"]`);
     piezaOriginal.style.display = 'block';
 
-    // Remover de espacios ocupados (buscar por texto de pieza)
-    const piezaTexto = organigramaConfig.piezas.find(p => p.id === pieceId)?.texto || pieceId;
+    // Remover de espacios ocupados (buscar por ID de pieza)
     Object.keys(respuestasUsuario).forEach(espacioId => {
-        if (respuestasUsuario[espacioId] === piezaTexto) {
+        if (respuestasUsuario[espacioId] === pieceId) {
             const espacio = document.querySelector(`[data-espacio-id="${espacioId}"]`);
             espacio.innerHTML = 'Colocar aquí';
             espacio.classList.remove('filled');
