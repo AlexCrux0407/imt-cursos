@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    // Iniciar transacción
-    $conn->beginTransaction();
+    // Preparación: DDL (CREATE/ALTER) hace commit implícito en MySQL.
+    // Iniciaremos la transacción justo antes del bloque de UPDATE (DML).
     
     // Obtener configuración actual
     $stmt = $conn->prepare("SELECT * FROM configuracion_plataforma WHERE id = 1");
@@ -194,6 +194,8 @@ try {
         }
     }
 
+    // Iniciar transacción para actualizar configuración (DML)
+    $conn->beginTransaction();
     // Actualizar configuración en la base de datos
     $stmt = $conn->prepare("
         UPDATE configuracion_plataforma 
@@ -224,8 +226,10 @@ try {
     exit();
     
 } catch (Exception $e) {
-    // Revertir transacción en caso de error
-    $conn->rollBack();
+    // Revertir transacción en caso de error (si hay una activa)
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
     
     // Registrar error
     error_log("Error al actualizar configuración de plataforma: " . $e->getMessage());
