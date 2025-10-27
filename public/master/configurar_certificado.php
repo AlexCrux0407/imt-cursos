@@ -156,9 +156,9 @@ require __DIR__ . '/../partials/nav.php';
 
       <div style="margin-bottom: 20px;">
         <label style="display:block; margin-bottom:8px; font-weight:500; color:#333;">Campos y posiciones (arrastrables)</label>
-        <div id="templatePreview" style="position:relative; border:1px solid #e1e5e9; border-radius:8px; overflow:hidden;">
+        <div id="templatePreview" style="position:relative; border:1px solid #e1e5e9; border-radius:8px; overflow:hidden; min-height:300px;">
           <?php if (!empty($config['template_path'])): ?>
-            <img id="previewImage" src="<?= BASE_URL ?>/serve_certificado_template.php?curso_id=<?= (int)$curso['id'] ?>" alt="Plantilla" style="width:100%; display:block;">
+            <img id="previewImage" src="<?= BASE_URL ?>/serve_certificado_template.php?curso_id=<?= (int)$curso['id'] ?>&path=<?= urlencode($config['template_path'] ?? '') ?>" alt="Plantilla" style="width:100%; display:block;">
             <div class="drag-field" id="field-nombre">Nombre del Estudiante</div>
             <div class="drag-field" id="field-curso">Nombre del Curso</div>
             <?php if ((int)($config['mostrar_calificacion'] ?? 0) === 1): ?>

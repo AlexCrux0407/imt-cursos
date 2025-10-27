@@ -6,6 +6,7 @@ require_once __DIR__ . '/../config/paths.php';
 header('Cache-Control: public, max-age=3600');
 
 $curso_id = (int)($_GET['curso_id'] ?? 0);
+$pathParam = isset($_GET['path']) ? (string)$_GET['path'] : null;
 if ($curso_id === 0) {
   http_response_code(400);
   echo 'curso_id requerido';
@@ -13,16 +14,22 @@ if ($curso_id === 0) {
 }
 
 try {
-  $stmt = $conn->prepare('SELECT template_path, template_mime FROM certificados_config WHERE curso_id = :cid LIMIT 1');
-  $stmt->execute([':cid' => $curso_id]);
-  $cfg = $stmt->fetch(PDO::FETCH_ASSOC);
-  if (!$cfg || empty($cfg['template_path'])) {
-    http_response_code(404);
-    echo 'Plantilla no configurada';
-    exit;
+  // Preferir ruta pasada por query si viene del editor y está saneada
+  $rel = null;
+  if ($pathParam) {
+    $rel = ltrim(str_replace(['../', './'], '', $pathParam), '/');
   }
-
-  $rel = $cfg['template_path'];
+  if (!$rel) {
+    $stmt = $conn->prepare('SELECT template_path, template_mime FROM certificados_config WHERE curso_id = :cid LIMIT 1');
+    $stmt->execute([':cid' => $curso_id]);
+    $cfg = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$cfg || empty($cfg['template_path'])) {
+      http_response_code(404);
+      echo 'Plantilla no configurada';
+      exit;
+    }
+    $rel = $cfg['template_path'];
+  }
   $rel = ltrim(str_replace(['../', './'], '', $rel), '/');
 
   $candidates = [
@@ -46,7 +53,6 @@ try {
   $mime = 'image/jpeg';
   if ($ext === 'png') $mime = 'image/png';
   elseif ($ext === 'jpg' || $ext === 'jpeg') $mime = 'image/jpeg';
-  elseif (!empty($cfg['template_mime'])) $mime = $cfg['template_mime'];
 
   header('Content-Type: ' . $mime);
   header('Content-Length: ' . filesize($path));
