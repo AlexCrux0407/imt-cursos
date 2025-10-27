@@ -16,17 +16,8 @@ error_log("SESSION data: " . print_r($_SESSION, true));
 $is_ajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 
-// También detectar por el contenido - si hay respuesta_organigrama es del organigrama
-$is_organigrama = false;
-foreach ($_POST as $key => $value) {
-    if (strpos($key, 'respuesta_') === 0 && !empty($value)) {
-        $decoded = json_decode($value, true);
-        if ($decoded !== null && is_array($decoded)) {
-            $is_organigrama = true;
-            break;
-        }
-    }
-}
+// Flag explícito del formulario de organigrama
+$is_organigrama = !empty($_POST['es_organigrama']);
 
 error_log("Es AJAX: " . ($is_ajax ? 'SI' : 'NO'));
 error_log("Es organigrama: " . ($is_organigrama ? 'SI' : 'NO'));

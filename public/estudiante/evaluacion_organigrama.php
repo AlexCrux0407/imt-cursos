@@ -299,6 +299,7 @@ require __DIR__ . '/../partials/header.php';
             <!-- Formulario oculto para enviar respuestas -->
             <form id="evaluation-form" method="POST" action="procesar_intento_evaluacion.php" style="display: none;">
                 <input type="hidden" name="evaluacion_id" value="<?= $evaluacion_id ?>">
+                <input type="hidden" name="es_organigrama" value="1">
                 <input type="hidden" name="respuesta_<?= $pregunta_organigrama['id'] ?>" id="respuesta_organigrama" value="">
                 <!-- Debug: mostrar el ID de la pregunta -->
                 <input type="hidden" name="debug_pregunta_id" value="<?= $pregunta_organigrama['id'] ?>">
