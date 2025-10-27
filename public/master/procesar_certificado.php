@@ -96,21 +96,30 @@ $mostrar_calificacion = isset($_POST['mostrar_calificacion']) ? 1 : 0;
 $valid_days = (int)($_POST['valid_days'] ?? 15);
 
 // Estilos por campo (opcionales; si se dejan vacíos, se usa el global)
-$nombre_font_family = $_POST['nombre_font_family'] ?? null;
-$nombre_font_size = $_POST['nombre_font_size'] ?? null;
-$nombre_font_color = $_POST['nombre_font_color'] ?? null;
+$nombre_font_family = isset($_POST['nombre_font_family']) && $_POST['nombre_font_family'] !== '' ? $_POST['nombre_font_family'] : null;
+// Normalizar enteros opcionales: '' -> null
+function norm_int_opt($v) {
+  if ($v === null) return null;
+  $s = trim((string)$v);
+  if ($s === '') return null;
+  if (!is_numeric($s)) return null;
+  return intval($s);
+}
+$nombre_font_size = norm_int_opt($_POST['nombre_font_size'] ?? null);
+// Colores opcionales: '' -> null
+$nombre_font_color = isset($_POST['nombre_font_color']) && $_POST['nombre_font_color'] !== '' ? $_POST['nombre_font_color'] : null;
 
-$curso_font_family = $_POST['curso_font_family'] ?? null;
-$curso_font_size = $_POST['curso_font_size'] ?? null;
-$curso_font_color = $_POST['curso_font_color'] ?? null;
+$curso_font_family = isset($_POST['curso_font_family']) && $_POST['curso_font_family'] !== '' ? $_POST['curso_font_family'] : null;
+$curso_font_size = norm_int_opt($_POST['curso_font_size'] ?? null);
+$curso_font_color = isset($_POST['curso_font_color']) && $_POST['curso_font_color'] !== '' ? $_POST['curso_font_color'] : null;
 
-$calificacion_font_family = $_POST['calificacion_font_family'] ?? null;
-$calificacion_font_size = $_POST['calificacion_font_size'] ?? null;
-$calificacion_font_color = $_POST['calificacion_font_color'] ?? null;
+$calificacion_font_family = isset($_POST['calificacion_font_family']) && $_POST['calificacion_font_family'] !== '' ? $_POST['calificacion_font_family'] : null;
+$calificacion_font_size = norm_int_opt($_POST['calificacion_font_size'] ?? null);
+$calificacion_font_color = isset($_POST['calificacion_font_color']) && $_POST['calificacion_font_color'] !== '' ? $_POST['calificacion_font_color'] : null;
 
-$fecha_font_family = $_POST['fecha_font_family'] ?? null;
-$fecha_font_size = $_POST['fecha_font_size'] ?? null;
-$fecha_font_color = $_POST['fecha_font_color'] ?? null;
+$fecha_font_family = isset($_POST['fecha_font_family']) && $_POST['fecha_font_family'] !== '' ? $_POST['fecha_font_family'] : null;
+$fecha_font_size = norm_int_opt($_POST['fecha_font_size'] ?? null);
+$fecha_font_color = isset($_POST['fecha_font_color']) && $_POST['fecha_font_color'] !== '' ? $_POST['fecha_font_color'] : null;
 
 // Posiciones
 $nombre_x = $_POST['nombre_x'] ?? null;
