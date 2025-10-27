@@ -69,6 +69,10 @@ if (!file_exists($template_abs)) {
     $template_abs = dirname(__DIR__, 2) . '/' . ltrim($template_rel, '/');
 }
 if (!file_exists($template_abs)) {
+    // Fallback adicional para PaaS: /tmp
+    $template_abs = '/tmp/imt-cursos/' . ltrim($template_rel, '/');
+}
+if (!file_exists($template_abs)) {
     http_response_code(500);
     echo 'Plantilla no encontrada';
     exit;

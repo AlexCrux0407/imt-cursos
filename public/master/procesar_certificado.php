@@ -34,12 +34,12 @@ if (!empty($_FILES['template']['name'])) {
 
   // Crear directorios de forma segura (sin emitir warnings)
   if (!is_dir($uploads_base)) {
-    if (!@mkdir($uploads_base, 0775, true) && !is_dir($uploads_base)) {
+    if (!@mkdir($uploads_base, 0777, true) && !is_dir($uploads_base)) {
       // Fallback a carpeta raíz (no pública)
       $uploads_base = rtrim(ROOT_PATH, '/') . '/uploads';
       $dest_dir = $uploads_base . '/certificados';
       if (!is_dir($uploads_base)) {
-        if (!@mkdir($uploads_base, 0775, true) && !is_dir($uploads_base)) {
+        if (!@mkdir($uploads_base, 0777, true) && !is_dir($uploads_base)) {
           $err = error_get_last();
           error_log('No se pudo crear uploads base (fallback): ' . $uploads_base . ' - ' . ($err['message'] ?? 'error desconocido'));
           $qs = http_build_query(['id' => $curso_id, 'error' => 'permisos_upload', 'detalle' => 'no_se_pudo_crear_uploads_base']);
@@ -51,12 +51,27 @@ if (!empty($_FILES['template']['name'])) {
   }
 
   if (!is_dir($dest_dir)) {
-    if (!@mkdir($dest_dir, 0775, true) && !is_dir($dest_dir)) {
-      $err = error_get_last();
-      error_log('No se pudo crear directorio de certificados: ' . $dest_dir . ' - ' . ($err['message'] ?? 'error desconocido'));
-      $qs = http_build_query(['id' => $curso_id, 'error' => 'permisos_upload', 'detalle' => 'no_se_pudo_crear_certificados']);
-      header('Location: ' . BASE_URL . '/master/configurar_certificado.php?' . $qs);
-      exit;
+    if (!@mkdir($dest_dir, 0777, true) && !is_dir($dest_dir)) {
+      // Segundo fallback: usar /tmp (comúnmente escribible en PaaS) 
+      $tmp_base = '/tmp/imt-cursos/uploads';
+      $tmp_dest = $tmp_base . '/certificados';
+      if (!is_dir($tmp_base)) {
+        @mkdir($tmp_base, 0777, true);
+      }
+      if (!is_dir($tmp_dest)) {
+        @mkdir($tmp_dest, 0777, true);
+      }
+      if (is_dir($tmp_dest)) {
+        // Cambiar destino a /tmp
+        $uploads_base = $tmp_base;
+        $dest_dir = $tmp_dest;
+      } else {
+        $err = error_get_last();
+        error_log('No se pudo crear directorio de certificados: ' . $dest_dir . ' - ' . ($err['message'] ?? 'error desconocido'));
+        $qs = http_build_query(['id' => $curso_id, 'error' => 'permisos_upload', 'detalle' => 'no_se_pudo_crear_certificados']);
+        header('Location: ' . BASE_URL . '/master/configurar_certificado.php?' . $qs);
+        exit;
+      }
     }
   }
 
