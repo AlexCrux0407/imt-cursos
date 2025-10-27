@@ -34,10 +34,12 @@ COPY . .
 RUN set -eux; \
     chown -R www-data:www-data /var/www/html/public; \
     chmod -R 775 /var/www/html/public; \
-    mkdir -p /var/www/html/public/uploads/media; \
-    mkdir -p /var/www/html/uploads; \
+    mkdir -p /var/www/html/public/uploads; \
+    mkdir -p /var/www/html/uploads/media; \
     chown -R www-data:www-data /var/www/html/public/uploads /var/www/html/uploads; \
-    chmod -R 775 /var/www/html/public/uploads /var/www/html/uploads
+    chmod -R 775 /var/www/html/public/uploads /var/www/html/uploads; \
+    rm -rf /var/www/html/public/uploads/media; \
+    ln -s /var/www/html/uploads/media /var/www/html/public/uploads/media
 
 # Exponer el puerto estándar de Apache
 EXPOSE 80
