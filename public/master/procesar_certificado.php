@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../app/auth.php';
 require_role('master');
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../config/paths.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   header('Location: ' . BASE_URL . '/master/admin_cursos.php');
@@ -26,12 +27,37 @@ if (!empty($_FILES['template']['name'])) {
   }
   $ext = $allowed[$mime];
   $nombre = 'certificado_' . $curso_id . '_' . time() . '.' . $ext;
-  $dest_dir = __DIR__ . '/../uploads/certificados';
-  if (!is_dir($dest_dir)) {
-    mkdir($dest_dir, 0777, true);
+
+  // Usar PUBLIC_PATH para guardar archivos servibles
+  $uploads_base = rtrim(PUBLIC_PATH, '/') . '/uploads';
+  $dest_dir = $uploads_base . '/certificados';
+
+  // Crear directorios de forma segura (sin emitir warnings)
+  if (!is_dir($uploads_base)) {
+    if (!@mkdir($uploads_base, 0775, true) && !is_dir($uploads_base)) {
+      $err = error_get_last();
+      error_log('No se pudo crear uploads base: ' . $uploads_base . ' - ' . ($err['message'] ?? 'error desconocido'));
+      $qs = http_build_query(['id' => $curso_id, 'error' => 'permisos_upload', 'detalle' => 'no_se_pudo_crear_uploads_base']);
+      header('Location: ' . BASE_URL . '/master/configurar_certificado.php?' . $qs);
+      exit;
+    }
   }
+
+  if (!is_dir($dest_dir)) {
+    if (!@mkdir($dest_dir, 0775, true) && !is_dir($dest_dir)) {
+      $err = error_get_last();
+      error_log('No se pudo crear directorio de certificados: ' . $dest_dir . ' - ' . ($err['message'] ?? 'error desconocido'));
+      $qs = http_build_query(['id' => $curso_id, 'error' => 'permisos_upload', 'detalle' => 'no_se_pudo_crear_certificados']);
+      header('Location: ' . BASE_URL . '/master/configurar_certificado.php?' . $qs);
+      exit;
+    }
+  }
+
   $dest = $dest_dir . '/' . $nombre;
-  if (!move_uploaded_file($_FILES['template']['tmp_name'], $dest)) {
+  $tmp = $_FILES['template']['tmp_name'] ?? '';
+  if (!is_uploaded_file($tmp) || !@move_uploaded_file($tmp, $dest)) {
+    $err = error_get_last();
+    error_log('Fallo al mover archivo de certificado a: ' . $dest . ' - ' . ($err['message'] ?? 'move_uploaded_file falló'));
     header('Location: ' . BASE_URL . '/master/configurar_certificado.php?id=' . $curso_id . '&error=subida_fallida');
     exit;
   }

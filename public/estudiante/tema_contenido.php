@@ -341,24 +341,39 @@ function toggleRecursoViewer(url, titulo, extension) {
     
     // Determinar el tipo de contenido y crear el elemento apropiado
     const ext = extension.toLowerCase();
+    // Normalizar URL relativa a absoluta basada en BASE_URL
+    const BASE = '<?= rtrim(BASE_URL, '/') ?>';
+    let normalizedUrl = url;
+    try {
+        const isAbsolute = /^https?:\/\//i.test(url);
+        if (!isAbsolute) {
+            if (url.startsWith('/')) {
+                normalizedUrl = BASE + url;
+            } else {
+                normalizedUrl = BASE + '/' + url;
+            }
+        }
+    } catch (e) { normalizedUrl = url; }
     
     if (ext === 'pdf') {
         contentElement.innerHTML = `
-            <iframe src="${url}#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
+            <iframe src="${normalizedUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
                     style="width: 100%; height: 100%; border: none;"
                     title="Visualizador de PDF">
             </iframe>
         `;
     } else if (['mp4', 'avi', 'mov', 'webm'].includes(ext)) {
+        const mimeMap = { mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', avi: 'video/x-msvideo' };
+        const mime = mimeMap[ext] || 'video/mp4';
         contentElement.innerHTML = `
             <video controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain;">
-                <source src="${url}" type="video/${ext}">
+                <source src="${normalizedUrl}" type="${mime}">
                 Tu navegador no soporta la reproducción de video.
             </video>
         `;
     } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
         contentElement.innerHTML = `
-            <img src="${url}" alt="${titulo}" 
+            <img src="${normalizedUrl}" alt="${titulo}" 
                  style="max-width: 100%; max-height: 100%; object-fit: contain; margin: auto; display: block;">
         `;
     } else {
@@ -366,8 +381,8 @@ function toggleRecursoViewer(url, titulo, extension) {
             <div class="recurso-message">
                 <h3>Vista previa no disponible</h3>
                 <p>Este tipo de archivo no se puede visualizar en línea.</p>
-                <p>Archivo: ${url.split('/').pop()}</p>
-                <a href="${url}" download class="btn-download-inline">
+                <p>Archivo: ${normalizedUrl.split('/').pop()}</p>
+                <a href="${normalizedUrl}" download class="btn-download-inline">
                     📥 Descargar Archivo
                 </a>
             </div>

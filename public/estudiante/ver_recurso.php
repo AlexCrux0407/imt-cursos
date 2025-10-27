@@ -39,8 +39,25 @@ if ($leccion_id) {
     $titulo = $leccion['titulo'];
 }
 
-$extension = pathinfo($recurso_url, PATHINFO_EXTENSION);
-$es_archivo_local = strpos($recurso_url, '/imt-cursos/uploads/') === 0;
+$extension = strtolower(pathinfo($recurso_url, PATHINFO_EXTENSION));
+
+// Normalizar URL del recurso a absoluta basada en BASE_URL cuando sea relativa
+$recurso_url_public = $recurso_url;
+if (!empty($recurso_url) && !filter_var($recurso_url, FILTER_VALIDATE_URL)) {
+    if (strpos($recurso_url, '/') === 0) {
+        // Ruta absoluta relativa al dominio
+        $recurso_url_public = rtrim(BASE_URL, '/') . $recurso_url;
+    } else {
+        // Ruta relativa (ej: uploads/cursos/...)
+        $recurso_url_public = rtrim(BASE_URL, '/') . '/' . $recurso_url;
+    }
+}
+
+// Detectar si es un archivo local en /uploads
+$path_en_url = parse_url($recurso_url_public, PHP_URL_PATH) ?: '';
+$host_en_url = parse_url($recurso_url_public, PHP_URL_HOST) ?: '';
+$host_base = parse_url(BASE_URL, PHP_URL_HOST) ?: '';
+$es_archivo_local = ($host_en_url === $host_base) && (strpos($path_en_url, '/uploads/') === 0);
 
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
@@ -57,7 +74,7 @@ require __DIR__ . '/../partials/nav.php';
         </div>
         <div class="resource-controls">
             <?php if ($es_archivo_local): ?>
-                <a href="<?= htmlspecialchars($recurso_url) ?>" download class="btn-download">
+                <a href="<?= htmlspecialchars($recurso_url_public) ?>" download class="btn-download">
                     📥 Descargar
                 </a>
             <?php endif; ?>
@@ -68,28 +85,38 @@ require __DIR__ . '/../partials/nav.php';
     </div>
     
     <div class="resource-content">
-        <?php if (in_array(strtolower($extension), ['pdf'])): ?>
+        <?php if (in_array($extension, ['pdf'])): ?>
             <iframe class="resource-frame" 
-                    src="<?= htmlspecialchars($recurso_url) ?>#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
+                    src="<?= htmlspecialchars($recurso_url_public) ?>#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
                     title="Visualizador de PDF">
             </iframe>
             
-        <?php elseif (in_array(strtolower($extension), ['mp4', 'avi', 'mov', 'webm'])): ?>
+        <?php elseif (in_array($extension, ['mp4', 'avi', 'mov', 'webm', 'mkv'])): ?>
+            <?php 
+            $mime_map = [
+                'mp4' => 'video/mp4',
+                'webm' => 'video/webm',
+                'mov' => 'video/quicktime',
+                'avi' => 'video/x-msvideo',
+                'mkv' => 'video/x-matroska',
+            ];
+            $video_mime = $mime_map[$extension] ?? 'video/mp4';
+            ?>
             <video class="resource-frame" controls preload="metadata" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                <source src="<?= htmlspecialchars($recurso_url) ?>" type="video/<?= $extension ?>">
+                <source src="<?= htmlspecialchars($recurso_url_public) ?>" type="<?= $video_mime ?>">
                 Tu navegador no soporta la reproducción de video.
             </video>
             
-        <?php elseif (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+        <?php elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
             <img class="resource-frame" 
-                 src="<?= htmlspecialchars($recurso_url) ?>" 
+                 src="<?= htmlspecialchars($recurso_url_public) ?>" 
                  alt="<?= htmlspecialchars($titulo) ?>"
                  style="max-width: 100%; max-height: 100%; object-fit: contain;">
             
-        <?php elseif (filter_var($recurso_url, FILTER_VALIDATE_URL)): ?>
+        <?php elseif (filter_var($recurso_url_public, FILTER_VALIDATE_URL)): ?>
             <div class="loading-spinner"></div>
             <iframe class="resource-frame" 
-                    src="<?= htmlspecialchars($recurso_url) ?>" 
+                    src="<?= htmlspecialchars($recurso_url_public) ?>" 
                     title="<?= htmlspecialchars($titulo) ?>"
                     allowfullscreen="allowfullscreen" 
                     webkitallowfullscreen="webkitallowfullscreen" 
@@ -101,10 +128,10 @@ require __DIR__ . '/../partials/nav.php';
             <div class="resource-message">
                 <h2>Vista previa no disponible</h2>
                 <p>Este tipo de archivo no se puede visualizar en línea.</p>
-                <p>Archivo: <?= htmlspecialchars(basename($recurso_url)) ?></p>
+                <p>Archivo: <?= htmlspecialchars(basename($path_en_url)) ?></p>
                 <?php if ($es_archivo_local): ?>
                     <br>
-                    <a href="<?= htmlspecialchars($recurso_url) ?>" download class="btn-download" style="display: inline-block; margin-top: 20px;">
+                    <a href="<?= htmlspecialchars($recurso_url_public) ?>" download class="btn-download" style="display: inline-block; margin-top: 20px;">
                         📥 Descargar Archivo
                     </a>
                 <?php endif; ?>

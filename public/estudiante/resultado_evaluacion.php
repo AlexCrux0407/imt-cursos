@@ -340,7 +340,7 @@ require __DIR__ . '/../partials/nav.php';
                     <div class="card-header-custom">
                         <h5 class="mb-0">
                             <img src="../styles/iconos/detalles_bl.png" alt="Detalle" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
-                            Detalle de Respuestas
+                            Respuestas Correctas
                         </h5>
                     </div>
                     <div class="p-3">
@@ -351,6 +351,10 @@ require __DIR__ . '/../partials/nav.php';
                             if ($respuesta['tipo'] === 'relacionar_pares' && strpos($respuesta['pregunta_id'], '_par_') !== false) {
                                 // Es un par individual
                                 $pregunta_base_id = explode('_par_', $respuesta['pregunta_id'])[0];
+                                // Solo incluir pares correctos
+                                if ($respuesta['es_correcta'] !== true) {
+                                    continue;
+                                }
                                 if (!isset($respuestas_agrupadas[$pregunta_base_id])) {
                                     $respuestas_agrupadas[$pregunta_base_id] = [
                                         'pregunta' => $respuesta['pregunta'],
@@ -363,8 +367,16 @@ require __DIR__ . '/../partials/nav.php';
                                 $respuestas_agrupadas[$pregunta_base_id]['pares'][] = $respuesta;
                             } else {
                                 // Respuesta normal
-                                $respuestas_agrupadas[$respuesta['pregunta_id']] = $respuesta;
+                                // Solo incluir respuestas correctas
+                                if ($respuesta['es_correcta'] === true) {
+                                    $respuestas_agrupadas[$respuesta['pregunta_id']] = $respuesta;
+                                }
                             }
+                        }
+                        
+                        // Si no hay correctas, mostrar mensaje y saltar
+                        if (empty($respuestas_agrupadas)) {
+                            echo '<div class="alert alert-info">No hay respuestas correctas para mostrar.</div>';
                         }
                         
                         $index = 0;
@@ -374,19 +386,10 @@ require __DIR__ . '/../partials/nav.php';
                                 foreach ($respuesta_data['pares'] as $par_index => $par_respuesta):
                                     $par_data = json_decode($par_respuesta['respuesta'], true);
                         ?>
-                            <div class="pregunta-item <?= $par_respuesta['es_correcta'] === null ? 'pregunta-pendiente' : ($par_respuesta['es_correcta'] ? 'pregunta-correcta' : 'pregunta-incorrecta') ?>">
+                            <div class="pregunta-item pregunta-correcta">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <h6 class="mb-0">Par <?= $par_index + 1 ?> - <?= htmlspecialchars($respuesta_data['pregunta']) ?></h6>
-                                    <span class="badge <?= $par_respuesta['es_correcta'] === null ? 'text-dark' : '' ?>" 
-                                          <?php if ($par_respuesta['es_correcta'] === null): ?>
-                                              style="background: #ffc107 !important; color: #212529 !important;"
-                                          <?php elseif ($par_respuesta['es_correcta']): ?>
-                                              style="background: #28a745 !important; color: white !important;"
-                                          <?php else: ?>
-                                              style="background: #dc3545 !important; color: white !important;"
-                                          <?php endif; ?>>
-                                        <?= $par_respuesta['es_correcta'] === null ? 'Pendiente' : ($par_respuesta['es_correcta'] ? 'Correcta' : 'Incorrecta') ?>
-                                    </span>
+                                    <span class="badge" style="background: #28a745 !important; color: white !important;">Correcta</span>
                                 </div>
                                 
                                 <div class="row">
@@ -410,19 +413,10 @@ require __DIR__ . '/../partials/nav.php';
                                 // Respuesta normal
                                 $respuesta = $respuesta_data;
                         ?>
-                            <div class="pregunta-item <?= $respuesta['es_correcta'] === null ? 'pregunta-pendiente' : ($respuesta['es_correcta'] ? 'pregunta-correcta' : 'pregunta-incorrecta') ?>">
+                            <div class="pregunta-item pregunta-correcta">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <h6 class="mb-0">Pregunta <?= $index + 1 ?></h6>
-                                    <span class="badge <?= $respuesta['es_correcta'] === null ? 'text-dark' : '' ?>" 
-                                          <?php if ($respuesta['es_correcta'] === null): ?>
-                                              style="background: #ffc107 !important; color: #212529 !important;"
-                                          <?php elseif ($respuesta['es_correcta']): ?>
-                                              style="background: #28a745 !important; color: white !important;"
-                                          <?php else: ?>
-                                              style="background: #dc3545 !important; color: white !important;"
-                                          <?php endif; ?>>
-                                        <?= $respuesta['es_correcta'] === null ? 'Pendiente' : ($respuesta['es_correcta'] ? 'Correcta' : 'Incorrecta') ?>
-                                    </span>
+                                    <span class="badge" style="background: #28a745 !important; color: white !important;">Correcta</span>
                                 </div>
                                 
                                 <p class="mb-3"><?= htmlspecialchars($respuesta['pregunta']) ?></p>
@@ -430,7 +424,7 @@ require __DIR__ . '/../partials/nav.php';
                                 <div class="row">
                                     <div class="col-md-6">
                                         <strong>Tu respuesta:</strong>
-                                        <div class="respuesta-<?= $respuesta['es_correcta'] === null ? 'pendiente' : ($respuesta['es_correcta'] ? 'correcta' : 'incorrecta') ?>">
+                                        <div class="respuesta-correcta">
                                             <?php
                                             $tipo = $respuesta['tipo'];
                                             $resp = $respuesta['respuesta'];
