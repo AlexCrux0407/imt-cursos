@@ -1,5 +1,19 @@
 RewriteEngine On
 
+# Aumentar límites de subida de PHP (si mod_php está activo)
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value max_execution_time 180
+    php_value max_input_time 180
+</IfModule>
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value max_execution_time 180
+    php_value max_input_time 180
+</IfModule>
+
 # Redirigir todas las peticiones que no sean archivos o directorios existentes al index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
