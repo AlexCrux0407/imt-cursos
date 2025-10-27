@@ -81,22 +81,44 @@ try {
     
     // Directorio de destino
     $upload_dir = __DIR__ . '/../styles/iconos/';
-    // Directorio de destino para videos de bienvenida
-    $upload_dir_media = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'media';
-    if (!is_dir($upload_dir_media)) {
-        // Si existe como symlink hacia un directorio válido, considerar OK
-        if (!(is_link($upload_dir_media) && is_dir($upload_dir_media))) {
-            if (!@mkdir($upload_dir_media, 0775, true)) {
-                throw new Exception("No se pudo crear el directorio de media en '" . $upload_dir_media . "'. Verifica permisos de escritura.");
+    // Directorios de destino para videos de bienvenida (preferencia: PUBLIC, fallback: ROOT uploads)
+    $upload_dir_media_public = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'media';
+    $upload_dir_media_root = rtrim(UPLOADS_PATH, '/\\') . DIRECTORY_SEPARATOR . 'media';
+
+    $media_store_dir = null;
+    // 1) Intentar usar el directorio bajo PUBLIC (sirve directo desde DocumentRoot)
+    if (is_dir($upload_dir_media_public) || (is_link($upload_dir_media_public) && is_dir($upload_dir_media_public))) {
+        $media_store_dir = $upload_dir_media_public;
+    } else {
+        if (@mkdir($upload_dir_media_public, 0775, true)) {
+            $media_store_dir = $upload_dir_media_public;
+        }
+    }
+
+    // 2) Fallback: usar ROOT uploads si PUBLIC no es posible
+    if ($media_store_dir === null) {
+        if (!is_dir($upload_dir_media_root)) {
+            if (!@mkdir($upload_dir_media_root, 0775, true)) {
+                throw new Exception("No se pudo crear el directorio de media en '" . $upload_dir_media_public . "' ni en '" . $upload_dir_media_root . "'. Verifica permisos de escritura.");
             }
         }
-    }
-    if (!is_writable($upload_dir_media)) {
-        @chmod($upload_dir_media, 0775);
-        if (!is_writable($upload_dir_media)) {
-            throw new Exception("El directorio de media no es escribible: '" . $upload_dir_media . "'. Ajusta permisos/propietario.");
+        $media_store_dir = $upload_dir_media_root;
+        // Intentar crear symlink desde PUBLIC hacia ROOT para servir estático
+        if (!is_dir($upload_dir_media_public) && !is_link($upload_dir_media_public)) {
+            @symlink($upload_dir_media_root, $upload_dir_media_public);
         }
     }
+
+    // 3) Validar permisos de escritura en el directorio elegido
+    if (!is_writable($media_store_dir)) {
+        @chmod($media_store_dir, 0775);
+        if (!is_writable($media_store_dir)) {
+            throw new Exception("El directorio de media no es escribible: '" . $media_store_dir . "'. Ajusta permisos/propietario.");
+        }
+    }
+
+    // Directorio final a utilizar en la función de subida
+    $upload_dir_media = $media_store_dir;
     
     // Función para procesar upload de imagen
     function procesarUploadLogo($file, $upload_dir, $tipo) {
