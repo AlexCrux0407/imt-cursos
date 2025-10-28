@@ -378,7 +378,10 @@ require __DIR__ . '/../partials/nav.php';
     <div class="catalogo-header">
         <div class="header-content">
             <h1 class="catalogo-title">Cursos Completados</h1>
-            <p class="catalogo-subtitle">¡Felicitaciones por tu dedicación y logros académicos!</p>
+            <?php $totalCompletados = count($cursos_completados); ?>
+            <p class="catalogo-subtitle">
+                Has completado <strong><?= $totalCompletados ?></strong> curso<?= $totalCompletados !== 1 ? 's' : '' ?>
+            </p>
         </div>
     </div>
 

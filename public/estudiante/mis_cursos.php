@@ -27,6 +27,11 @@ if (!empty($estado_filtro)) {
     }
 }
 
+// Excluir cursos completados por defecto, salvo cuando se filtra explícitamente por 'completado'
+if ($estado_filtro !== 'completado') {
+    $where_conditions[] = "i.progreso < 100";
+}
+
 if (!empty($buscar)) {
     $where_conditions[] = "(c.titulo LIKE :buscar OR c.descripcion LIKE :buscar OR c.categoria LIKE :buscar)";
     $params[':buscar'] = "%$buscar%";
