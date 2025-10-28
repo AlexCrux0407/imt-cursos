@@ -241,7 +241,7 @@ require __DIR__ . '/../partials/nav.php';
                                     <i class="icon-eye"></i> Ver recurso
                                 </button>
                                 <?php if ($es_archivo_local): ?>
-                                    <a href="<?= htmlspecialchars($subtema['recurso_url']) ?>" download class="btn-recurso-download">
+                                    <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($subtema['recurso_url']) ?>&titulo=<?= urlencode($subtema['titulo']) ?>" target="_blank" class="btn-recurso-download">
                                         <i class="icon-download"></i> Descargar
                                     </a>
                                 <?php endif; ?>
@@ -346,6 +346,22 @@ try {
         }
     }
 } catch (e) { normalizedUrl = url; }
+// Si es recurso local bajo /uploads, redirigir al proxy para evitar 404 en despliegues con subcarpetas
+try {
+    const baseUrl = new URL(BASE, window.location.origin);
+    const absUrl = new URL(normalizedUrl, window.location.origin);
+    if (absUrl.host === window.location.host) {
+        const path = absUrl.pathname;
+        const idx = path.indexOf('/uploads/');
+        if (idx >= 0) {
+            const rel = path.substring(idx + '/uploads/'.length);
+            if (rel.startsWith('cursos/')) {
+                const basePath = baseUrl.pathname === '/' ? '' : baseUrl.pathname;
+                normalizedUrl = baseUrl.origin + basePath + '/serve_uploads.php?path=' + encodeURIComponent(rel);
+            }
+        }
+    }
+} catch (e) {}
     
     if (ext === 'pdf') {
         contentElement.innerHTML = `

@@ -57,7 +57,17 @@ if (!empty($recurso_url) && !filter_var($recurso_url, FILTER_VALIDATE_URL)) {
 $path_en_url = parse_url($recurso_url_public, PHP_URL_PATH) ?: '';
 $host_en_url = parse_url($recurso_url_public, PHP_URL_HOST) ?: '';
 $host_base = parse_url(BASE_URL, PHP_URL_HOST) ?: '';
-$es_archivo_local = ($host_en_url === $host_base) && (strpos($path_en_url, '/uploads/') === 0);
+// Considerar recursos locales aunque BASE_URL tenga prefijo de subcarpeta (ej: /imt-cursos)
+$es_archivo_local = ($host_en_url === $host_base) && (strpos($path_en_url, '/uploads/') !== false);
+
+// Si es un archivo local bajo /uploads, usar el proxy seguro para servirlo
+if ($es_archivo_local) {
+    $pos = strpos($path_en_url, '/uploads/');
+    $rel = substr($path_en_url, $pos + strlen('/uploads/'));
+    if (strpos($rel, 'cursos/') === 0) {
+        $recurso_url_public = rtrim(BASE_URL, '/') . '/serve_uploads.php?path=' . rawurlencode($rel);
+    }
+}
 
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
@@ -85,11 +95,11 @@ require __DIR__ . '/../partials/nav.php';
     </div>
     
     <div class="resource-content">
-        <?php if (in_array($extension, ['pdf'])): ?>
-            <iframe class="resource-frame" 
+            <?php if (in_array($extension, ['pdf'])): ?>
+                <iframe class="resource-frame" 
                     src="<?= htmlspecialchars($recurso_url_public) ?>#toolbar=1&navpanes=1&scrollbar=1&view=FitH" 
                     title="Visualizador de PDF">
-            </iframe>
+                </iframe>
             
         <?php elseif (in_array($extension, ['mp4', 'avi', 'mov', 'webm', 'mkv'])): ?>
             <?php 

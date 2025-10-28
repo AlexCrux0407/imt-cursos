@@ -373,10 +373,7 @@ require __DIR__ . '/../partials/nav.php';
         <div class="hero-left">
           <h1 class="hero-title">¡Hola, <?= htmlspecialchars($_SESSION['nombre']) ?>!</h1>
           <p class="hero-subtitle">Impulsa tu aprendizaje: retoma tu último curso y explora nuevas rutas.</p>
-          <div class="hero-actions">
-            <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="hero-btn">Continuar aprendizaje</a>
-            <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="hero-btn">Explorar cursos</a>
-          </div>
+          
         </div>
 
         <?php if ($has_welcome_video): ?>
@@ -398,36 +395,7 @@ require __DIR__ . '/../partials/nav.php';
     <?php if ($has_welcome_video): ?>
     <?php endif; ?>
 
-    <!-- Estadísticas principales -->
-    <div class="stats-overview">
-        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/catalogo.php">
-            <div class="stat-content">
-                <h3 class="stat-value"><?= $cursos_disponibles ?: 0 ?></h3>
-                <p class="stat-label">Cursos Disponibles</p>
-            </div>
-        </a>
-
-        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/mis_cursos.php">
-            <div class="stat-content">
-                <h3 class="stat-value"><?= $estadisticas['cursos_inscritos'] ?: 0 ?></h3>
-                <p class="stat-label">Cursos Inscritos</p>
-            </div>
-        </a>
-
-        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/cursos_completados.php">
-            <div class="stat-content">
-                <h3 class="stat-value"><?= $estadisticas['cursos_completados'] ?: 0 ?></h3>
-                <p class="stat-label">Cursos Completados</p>
-            </div>
-        </a>
-
-        <a class="stat-card" href="<?= BASE_URL ?>/estudiante/cursos_completados.php">
-            <div class="stat-content">
-                <h3 class="stat-value"><?= $estadisticas['certificados_obtenidos'] ?: 0 ?></h3>
-                <p class="stat-label">Certificados</p>
-            </div>
-        </a>
-    </div>
+    
 
     <!-- Recomendaciones o actividad reciente -->
     <div class="dashboard-section">

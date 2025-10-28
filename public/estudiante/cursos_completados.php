@@ -382,18 +382,6 @@ require __DIR__ . '/../partials/nav.php';
         </div>
     </div>
 
-    <!-- Estadísticas generales -->
-    <div class="estadisticas-container">
-        <div class="estadistica-card">
-            <div class="estadistica-numero"><?= $estadisticas['total_completados'] ?: 0 ?></div>
-            <div class="estadistica-label">Cursos Completados</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-numero"><?= $estadisticas['promedio_dias_completar'] ? round($estadisticas['promedio_dias_completar']) : 0 ?></div>
-            <div class="estadistica-label">Días Promedio para Completar</div>
-        </div>
-    </div>
-
     <!-- Grid de cursos completados -->
     <div class="cursos-grid">
         <?php if (empty($cursos_completados)): ?>
@@ -405,13 +393,12 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         <?php else: ?>
             <?php foreach ($cursos_completados as $curso): ?>
-                <div class="curso-card">
+                <div class="curso-card mis-cursos">
                     <div class="curso-header">
-                        <div class="curso-info">
-                            <div class="curso-estado">Completado</div>
-                        </div>
+                        <div class="curso-categoria"><?= htmlspecialchars($curso['categoria'] ?? 'General') ?></div>
+                        <div class="curso-estado completado">✓ Completado</div>
                     </div>
-                    
+
                     <h3 class="curso-titulo"><?= htmlspecialchars($curso['titulo']) ?></h3>
                     <p class="curso-descripcion">
                         <?php 
@@ -420,32 +407,34 @@ require __DIR__ . '/../partials/nav.php';
                         echo htmlspecialchars($descripcion_corta);
                         ?>
                     </p>
-                    
+
                     <?php if (!empty($curso['docente_nombre'])): ?>
                         <div class="curso-instructor">
                             <strong>Instructor:</strong> <?= htmlspecialchars($curso['docente_nombre']) ?>
                         </div>
                     <?php endif; ?>
-                    
-                    <!-- Información de completado -->
-                    <div class="curso-completado-info">
-                        <div class="info-item">
-                            <span class="info-icono">📚</span>
-                            <span class="info-valor"><?= $curso['total_modulos'] ?></span>
-                            <span class="info-label">Módulos</span>
+
+                    <div class="progreso-container">
+                        <div class="progreso-info">
+                            <span class="progreso-texto">Progreso: 100%</span>
+                            <span class="progreso-detalles"><?= $curso['total_modulos'] ?> módulos</span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-icono">⭐</span>
-                            <span class="info-valor"><?= $curso['promedio_evaluaciones'] ? number_format($curso['promedio_evaluaciones'], 1) : 'N/A' ?></span>
-                            <span class="info-label">Promedio</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-icono">📅</span>
-                            <span class="info-valor"><?= date('d/m/Y', strtotime($curso['fecha_completado'])) ?></span>
-                            <span class="info-label">Completado</span>
+                        <div class="progreso-barra">
+                            <div class="progreso-fill" style="width: 100%"></div>
                         </div>
                     </div>
-                    
+
+                    <div class="curso-estadisticas">
+                        <div class="estadistica-item">
+                            <span class="estadistica-icono">📚</span>
+                            <span class="estadistica-valor"><?= $curso['total_modulos'] ?> módulos</span>
+                        </div>
+                        <div class="estadistica-item">
+                            <span class="estadistica-icono">📅</span>
+                            <span class="estadistica-valor">Completado: <?= date('d/m/Y', strtotime($curso['fecha_completado'])) ?></span>
+                        </div>
+                    </div>
+
                     <div class="curso-acciones">
                         <a href="<?= BASE_URL ?>/estudiante/certificado.php?curso_id=<?= $curso['id'] ?>" class="btn-certificado">
                             Ver Certificado

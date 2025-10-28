@@ -234,7 +234,7 @@ require __DIR__ . '/../partials/nav.php';
                                     <i class="icon-eye"></i> Ver recurso
                                 </button>
                                 <?php if ($es_archivo_local): ?>
-                                    <a href="<?= htmlspecialchars($tema['recurso_url']) ?>" download class="btn-recurso-download">
+                                    <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($tema['recurso_url']) ?>&titulo=<?= urlencode($tema['titulo']) ?>" target="_blank" class="btn-recurso-download">
                                         <i class="icon-download"></i> Descargar
                                     </a>
                                 <?php endif; ?>
@@ -354,6 +354,22 @@ function toggleRecursoViewer(url, titulo, extension) {
             }
         }
     } catch (e) { normalizedUrl = url; }
+    // Si apunta a un recurso local bajo /uploads, redirigir al proxy para evitar 404
+    try {
+        const baseUrl = new URL(BASE, window.location.origin);
+        const absUrl = new URL(normalizedUrl, window.location.origin);
+        if (absUrl.host === window.location.host) {
+            const path = absUrl.pathname; // puede incluir prefijo de subcarpeta
+            const idx = path.indexOf('/uploads/');
+            if (idx >= 0) {
+                const rel = path.substring(idx + '/uploads/'.length);
+                if (rel.startsWith('cursos/')) {
+                    const basePath = baseUrl.pathname === '/' ? '' : baseUrl.pathname; // ej: '' o '/imt-cursos'
+                    normalizedUrl = baseUrl.origin + basePath + '/serve_uploads.php?path=' + encodeURIComponent(rel);
+                }
+            }
+        }
+    } catch (e) {}
     
     if (ext === 'pdf') {
         contentElement.innerHTML = `

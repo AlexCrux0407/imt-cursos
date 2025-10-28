@@ -22,6 +22,11 @@ RewriteCond %{REQUEST_URI} ^/uploads/media/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^uploads/media/(.*)$ serve_media.php?file=$1 [QSA,L]
 
+# Si piden /uploads/cursos/* y el archivo no existe en public, usar proxy PHP
+RewriteCond %{REQUEST_URI} ^/uploads/cursos/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^uploads/cursos/(.*)$ serve_uploads.php?path=cursos/$1 [QSA,L]
+
 # Redirigir todas las peticiones que no sean archivos o directorios existentes al index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
