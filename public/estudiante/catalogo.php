@@ -28,7 +28,8 @@ if (!empty($buscar)) {
 }
 
 // Excluir cursos donde el estudiante ya está inscrito (incluye completados)
-$where_conditions[] = "NOT EXISTS (SELECT 1 FROM inscripciones i2 WHERE i2.curso_id = c.id AND i2.usuario_id = :estudiante_id)";
+// Usamos el LEFT JOIN sobre 'ie' y verificamos que no exista inscripción del estudiante
+$where_conditions[] = "ie.usuario_id IS NULL";
 
 $where_clause = implode(' AND ', $where_conditions);
 

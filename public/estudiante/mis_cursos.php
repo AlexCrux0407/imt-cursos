@@ -93,35 +93,64 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="contenido">
     <div class="catalogo-header">
+        <style>
+            .header-content { 
+                display: grid; 
+                grid-template-columns: 1fr auto; 
+                gap: 24px; 
+                align-items: center; 
+            }
+            .header-right { 
+                display: flex; 
+                align-items: center; 
+                gap: 16px; 
+            }
+            .header-circle { 
+                width: 120px; 
+                height: 120px; 
+                border-radius: 50%; 
+                border: 6px solid rgba(255, 255, 255, 0.6); 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                backdrop-filter: blur(6px); 
+                background: rgba(255, 255, 255, 0.15); 
+                box-shadow: 0 8px 24px rgba(0,0,0,0.18), inset 0 0 12px rgba(255,255,255,0.2);
+            }
+            .circle-value { 
+                font-size: 36px; 
+                font-weight: 700; 
+                color: #fff; 
+                letter-spacing: 0.5px; 
+            }
+            .header-circle-label { 
+                color: #fff; 
+                font-weight: 600; 
+                opacity: 0.9; 
+            }
+            @media (max-width: 640px) { 
+                .header-circle { width: 96px; height: 96px; border-width: 5px; } 
+                .circle-value { font-size: 28px; } 
+            }
+        </style>
         <div class="header-content">
-            <h1 class="catalogo-title">Mis Cursos</h1>
-            <p class="catalogo-subtitle">Gestiona tu progreso de aprendizaje</p>
+            <div>
+                <h1 class="catalogo-title">Mis Cursos</h1>
+                <p class="catalogo-subtitle">Gestiona tu progreso de aprendizaje</p>
+            </div>
+            <div class="header-right">
+                <div class="header-circle">
+                    <div class="circle-value"><?= (int)($estadisticas['total_cursos'] ?? 0) ?></div>
+                </div>
+                <div class="header-circle-info">
+                    <div class="header-circle-label">Cursos Inscritos</div>
+                </div>
+            </div>
         </div>
     </div>
 
     
-    <div class="estadisticas-container">
-        <div class="estadistica-card">
-            <div class="estadistica-numero"><?= $estadisticas['total_cursos'] ?></div>
-            <div class="estadistica-label">Total de Cursos</div>
-        </div>
-        <div class="estadistica-card completados">
-            <div class="estadistica-numero"><?= $estadisticas['cursos_completados'] ?></div>
-            <div class="estadistica-label">Completados</div>
-        </div>
-        <div class="estadistica-card en-progreso">
-            <div class="estadistica-numero"><?= $estadisticas['cursos_en_progreso'] ?></div>
-            <div class="estadistica-label">Sin Completar</div>
-        </div>
-        <div class="estadistica-card sin-iniciar">
-            <div class="estadistica-numero"><?= $estadisticas['cursos_sin_iniciar'] ?></div>
-            <div class="estadistica-label">Sin Iniciar</div>
-        </div>
-        <div class="estadistica-card promedio">
-            <div class="estadistica-numero"><?= number_format($estadisticas['progreso_promedio'], 1) ?>%</div>
-            <div class="estadistica-label">Progreso Promedio</div>
-        </div>
-    </div>
+    
 
     
     <div class="filtros-container">
@@ -158,9 +187,7 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     
-    <div class="resultados-info">
-        <p>Tienes <strong><?= count($cursos) ?></strong> curso<?= count($cursos) !== 1 ? 's' : '' ?> inscrito<?= count($cursos) !== 1 ? 's' : '' ?></p>
-    </div>
+    
 
     
     <div class="cursos-grid">
