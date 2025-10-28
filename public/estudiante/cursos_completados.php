@@ -112,14 +112,8 @@ require __DIR__ . '/../partials/nav.php';
     align-items: center;
     justify-content: center;
 }
-.header-circle .circle-text { 
-    color: #ffffff; 
-    font-size: 0.95rem; 
-    font-weight: 600; 
-    text-align: center; 
-    line-height: 1.1; 
-    padding: 6px; 
-}
+.header-circle .circle-value { color: #ffffff; font-size: 1.6rem; font-weight: 700; }
+.header-circle-label { color: rgba(255,255,255,0.95); margin-top: 8px; font-size: 0.95rem; font-weight: 600; }
 
 .estadisticas-container {
     display: grid;
@@ -423,8 +417,9 @@ require __DIR__ . '/../partials/nav.php';
             </div>
             <div class="header-right">
                 <div class="header-circle">
-                    <div class="circle-text">Cursos<br>Completados</div>
+                    <div class="circle-value"><?= $total_completados ?></div>
                 </div>
+                <div class="header-circle-label">Cursos Completados</div>
             </div>
         </div>
     </div>
