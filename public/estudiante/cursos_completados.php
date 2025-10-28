@@ -121,12 +121,12 @@ require __DIR__ . '/../partials/nav.php';
 
 .cursos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* más estrecho para cursos completados */
     gap: 25px;
     margin-bottom: 30px;
 }
 
-.curso-card {
+.curso-card:not(.mis-cursos) {
     background: white;
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -138,7 +138,7 @@ require __DIR__ . '/../partials/nav.php';
     overflow: hidden;
 }
 
-.curso-card::before {
+.curso-card:not(.mis-cursos)::before {
     content: '';
     position: absolute;
     top: 0;
@@ -148,26 +148,26 @@ require __DIR__ . '/../partials/nav.php';
     background: linear-gradient(90deg, #3498db, #2980b9);
 }
 
-.curso-card:hover {
+.curso-card:not(.mis-cursos):hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 30px rgba(0,0,0,0.15);
 }
 
 /* Escalonar la entrada de las tarjetas */
-.curso-card:nth-child(2) { animation-delay: 0.05s; }
-.curso-card:nth-child(3) { animation-delay: 0.1s; }
-.curso-card:nth-child(4) { animation-delay: 0.15s; }
-.curso-card:nth-child(5) { animation-delay: 0.2s; }
-.curso-card:nth-child(6) { animation-delay: 0.25s; }
+.curso-card:not(.mis-cursos):nth-child(2) { animation-delay: 0.05s; }
+.curso-card:not(.mis-cursos):nth-child(3) { animation-delay: 0.1s; }
+.curso-card:not(.mis-cursos):nth-child(4) { animation-delay: 0.15s; }
+.curso-card:not(.mis-cursos):nth-child(5) { animation-delay: 0.2s; }
+.curso-card:not(.mis-cursos):nth-child(6) { animation-delay: 0.25s; }
 
-.curso-header {
+.curso-card:not(.mis-cursos) .curso-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 15px;
 }
 
-.curso-estado {
+.curso-card:not(.mis-cursos) .curso-estado {
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 0.8rem;
@@ -178,7 +178,7 @@ require __DIR__ . '/../partials/nav.php';
     color: #155724;
 }
 
-.curso-titulo {
+.curso-card:not(.mis-cursos) .curso-titulo {
     font-size: 1.3rem;
     font-weight: 600;
     color: #2c3e50;
@@ -186,14 +186,14 @@ require __DIR__ . '/../partials/nav.php';
     line-height: 1.3;
 }
 
-.curso-descripcion {
+.curso-card:not(.mis-cursos) .curso-descripcion {
     color: #5a5c69;
     margin-bottom: 15px;
     line-height: 1.5;
     font-size: 0.95rem;
 }
 
-.curso-instructor {
+.curso-card:not(.mis-cursos) .curso-instructor {
     margin: 15px 0;
     padding: 10px;
     background: #f8f9fa;
@@ -202,7 +202,7 @@ require __DIR__ . '/../partials/nav.php';
     color: #495057;
 }
 
-.curso-completado-info {
+.curso-card:not(.mis-cursos) .curso-completado-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 15px;
@@ -212,7 +212,7 @@ require __DIR__ . '/../partials/nav.php';
     border-radius: 10px;
 }
 
-.info-item {
+.curso-card:not(.mis-cursos) .info-item {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -220,28 +220,28 @@ require __DIR__ . '/../partials/nav.php';
     gap: 5px;
 }
 
-.info-icono {
+.curso-card:not(.mis-cursos) .info-icono {
     font-size: 1.2rem;
 }
 
-.info-valor {
+.curso-card:not(.mis-cursos) .info-valor {
     font-weight: 600;
     color: #2c3e50;
     font-size: 0.9rem;
 }
 
-.info-label {
+.curso-card:not(.mis-cursos) .info-label {
     font-size: 0.8rem;
     color: #7f8c8d;
 }
 
-.curso-acciones {
+.curso-card:not(.mis-cursos) .curso-acciones {
     display: flex;
     gap: 10px;
     margin-top: 20px;
 }
 
-.btn-continuar, .btn-certificado {
+.curso-card:not(.mis-cursos) .btn-continuar, .curso-card:not(.mis-cursos) .btn-certificado {
     flex: 1;
     padding: 12px 20px;
     border-radius: 8px;
@@ -252,22 +252,22 @@ require __DIR__ . '/../partials/nav.php';
     font-size: 0.9rem;
 }
 
-.btn-continuar {
+.curso-card:not(.mis-cursos) .btn-continuar {
     background: #27ae60;
     color: white;
 }
 
-.btn-continuar:hover {
+.curso-card:not(.mis-cursos) .btn-continuar:hover {
     background: #229954;
     transform: translateY(-1px);
 }
 
-.btn-certificado {
+.curso-card:not(.mis-cursos) .btn-certificado {
     background: #3498db;
     color: white;
 }
 
-.btn-certificado:hover {
+.curso-card:not(.mis-cursos) .btn-certificado:hover {
     background: #2980b9;
     transform: translateY(-1px);
 }
