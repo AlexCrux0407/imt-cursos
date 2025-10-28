@@ -94,6 +94,7 @@ require __DIR__ . '/../partials/nav.php';
 <div class="contenido">
     <div class="catalogo-header">
         <style>
+            .catalogo-header { text-align: left; }
             .header-content { 
                 display: grid; 
                 grid-template-columns: 1fr auto; 
@@ -102,8 +103,9 @@ require __DIR__ . '/../partials/nav.php';
             }
             .header-right { 
                 display: flex; 
+                flex-direction: column;
                 align-items: center; 
-                gap: 16px; 
+                gap: 8px; 
             }
             .header-circle { 
                 width: 120px; 
