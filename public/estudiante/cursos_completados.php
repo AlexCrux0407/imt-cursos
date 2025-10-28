@@ -157,7 +157,7 @@ require __DIR__ . '/../partials/nav.php';
 
 .cursos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* más delgado para mostrar más columnas */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* ligeramente más ancho */
     gap: 25px;
     margin-bottom: 30px;
 }
@@ -477,6 +477,15 @@ require __DIR__ . '/../partials/nav.php';
                         <div class="estadistica-item">
                             <span class="estadistica-icono">📅</span>
                             <span class="estadistica-valor">Completado: <?= date('d/m/Y', strtotime($curso['fecha_completado'])) ?></span>
+                        </div>
+                        <div class="estadistica-item">
+                            <span class="estadistica-icono">⭐</span>
+                            <span class="estadistica-valor">
+                                <?php 
+                                $promedio = isset($curso['promedio_evaluaciones']) ? (float)$curso['promedio_evaluaciones'] : null;
+                                echo ($promedio !== null) ? (number_format($promedio / 10, 1) . '/10') : '—';
+                                ?>
+                            </span>
                         </div>
                     </div>
 
