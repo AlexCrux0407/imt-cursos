@@ -67,7 +67,7 @@ require __DIR__ . '/../partials/nav.php';
     padding: 40px 30px;
     border-radius: 15px;
     margin-bottom: 30px;
-    text-align: center;
+    text-align: left; /* ajustar para layout con estadística a la derecha */
 }
 
 .catalogo-title {
@@ -79,6 +79,42 @@ require __DIR__ . '/../partials/nav.php';
 .catalogo-subtitle {
     font-size: 1.1rem;
     opacity: 0.9;
+}
+
+/* Layout del header con estadística a la derecha */
+.catalogo-header .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-left { flex: 1; }
+
+.header-right { flex-shrink: 0; }
+
+.header-stat-card {
+    background: rgba(255,255,255,0.95);
+    color: #2c3e50;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    min-width: 200px;
+    text-align: center;
+    border-left: 4px solid #27ae60;
+}
+
+.header-stat-card .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #27ae60;
+}
+
+.header-stat-card .stat-label {
+    font-size: 0.95rem;
+    color: #7f8c8d;
+    font-weight: 600;
 }
 
 .estadisticas-container {
@@ -121,7 +157,7 @@ require __DIR__ . '/../partials/nav.php';
 
 .cursos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* más estrecho para cursos completados */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* más delgado para mostrar más columnas */
     gap: 25px;
     margin-bottom: 30px;
 }
@@ -377,11 +413,17 @@ require __DIR__ . '/../partials/nav.php';
 <div class="contenido">
     <div class="catalogo-header">
         <div class="header-content">
-            <h1 class="catalogo-title">Cursos Completados</h1>
-            <?php $totalCompletados = count($cursos_completados); ?>
-            <p class="catalogo-subtitle">
-                Has completado <strong><?= $totalCompletados ?></strong> curso<?= $totalCompletados !== 1 ? 's' : '' ?>
-            </p>
+            <div class="header-left">
+                <h1 class="catalogo-title">Cursos Completados</h1>
+                <p class="catalogo-subtitle">¡Felicitaciones por tu dedicación y logros académicos!</p>
+            </div>
+            <div class="header-right">
+                <?php $totalCompletados = count($cursos_completados); ?>
+                <div class="header-stat-card">
+                    <div class="stat-number"><?= $totalCompletados ?></div>
+                    <div class="stat-label">Completados</div>
+                </div>
+            </div>
         </div>
     </div>
 
