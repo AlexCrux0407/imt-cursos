@@ -103,8 +103,8 @@ require __DIR__ . '/../partials/nav.php';
 /* Círculo informativo inmerso en el header */
 .header-right { display: flex; flex-direction: column; align-items: center; }
 .header-circle {
-    width: 90px;
-    height: 90px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     border: 4px solid rgba(255,255,255,0.6);
     background: rgba(255,255,255,0.12);
@@ -112,8 +112,14 @@ require __DIR__ . '/../partials/nav.php';
     align-items: center;
     justify-content: center;
 }
-.header-circle .circle-value { color: #ffffff; font-size: 1.3rem; font-weight: 700; }
-.header-circle-label { color: rgba(255,255,255,0.9); margin-top: 8px; font-size: 0.95rem; font-weight: 600; }
+.header-circle .circle-text { 
+    color: #ffffff; 
+    font-size: 0.95rem; 
+    font-weight: 600; 
+    text-align: center; 
+    line-height: 1.1; 
+    padding: 6px; 
+}
 
 .estadisticas-container {
     display: grid;
@@ -417,9 +423,8 @@ require __DIR__ . '/../partials/nav.php';
             </div>
             <div class="header-right">
                 <div class="header-circle">
-                    <div class="circle-value"><?= number_format($porcentaje_completados, 1) ?>%</div>
+                    <div class="circle-text">Cursos<br>Completados</div>
                 </div>
-                <div class="header-circle-label">Completado</div>
             </div>
         </div>
     </div>
