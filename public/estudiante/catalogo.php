@@ -27,6 +27,9 @@ if (!empty($buscar)) {
     $params[':buscar'] = "%$buscar%";
 }
 
+// Excluir cursos donde el estudiante ya está inscrito (incluye completados)
+$where_conditions[] = "NOT EXISTS (SELECT 1 FROM inscripciones i2 WHERE i2.curso_id = c.id AND i2.usuario_id = :estudiante_id)";
+
 $where_clause = implode(' AND ', $where_conditions);
 
 // Determinar ordenamiento (compatibilidad PHP < 8)
@@ -76,11 +79,30 @@ require __DIR__ . '/../partials/nav.php';
 
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/catalogo.css">
 
+<style>
+/* Ajuste del header para integrar el círculo como en Cursos Completados */
+.catalogo-header { text-align: left; }
+.catalogo-header .header-content { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.header-left { flex: 1; }
+.header-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+.header-circle { width: 110px; height: 110px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; }
+.header-circle .circle-value { color: #ffffff; font-size: 1.6rem; font-weight: 700; }
+.header-circle-label { color: rgba(255,255,255,0.95); margin-top: 8px; font-size: 0.95rem; font-weight: 600; }
+</style>
+
 <div class="contenido">
     <div class="catalogo-header">
         <div class="header-content">
-            <h1 class="catalogo-title">Catálogo de Cursos</h1>
-            <p class="catalogo-subtitle">Descubre nuevas oportunidades de aprendizaje</p>
+            <div class="header-left">
+                <h1 class="catalogo-title">Catálogo de Cursos</h1>
+                <p class="catalogo-subtitle">Descubre nuevas oportunidades de aprendizaje</p>
+            </div>
+            <div class="header-right">
+                <div class="header-circle">
+                    <div class="circle-value"><?= count($cursos) ?></div>
+                </div>
+                <div class="header-circle-label">Cursos Encontrados</div>
+            </div>
         </div>
     </div>
 
@@ -124,11 +146,6 @@ require __DIR__ . '/../partials/nav.php';
 
     
     <div class="resultados-container">
-        <div class="resultados-header">
-            <h2 class="resultados-titulo">
-                <?= count($cursos) ?> curso<?= count($cursos) !== 1 ? 's' : '' ?> encontrado<?= count($cursos) !== 1 ? 's' : '' ?>
-            </h2>
-        </div>
 
         <?php if (empty($cursos)): ?>
             <div class="sin-resultados">
