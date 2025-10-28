@@ -38,6 +38,13 @@ $stmt = $conn->prepare("
 $stmt->execute([':estudiante_id' => $estudiante_id]);
 $estadisticas = $stmt->fetch();
 
+// Total de cursos inscritos para calcular porcentaje completado
+$stmt = $conn->prepare("SELECT COUNT(*) as total_inscritos FROM inscripciones WHERE usuario_id = :estudiante_id");
+$stmt->execute([':estudiante_id' => $estudiante_id]);
+$total_inscritos = (int)($stmt->fetch()['total_inscritos'] ?? 0);
+$total_completados = (int)($estadisticas['total_completados'] ?? 0);
+$porcentaje_completados = $total_inscritos > 0 ? round(($total_completados / $total_inscritos) * 100, 1) : 0;
+
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
@@ -93,29 +100,20 @@ require __DIR__ . '/../partials/nav.php';
 
 .header-right { flex-shrink: 0; }
 
-.header-stat-card {
-    background: rgba(255,255,255,0.95);
-    color: #2c3e50;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    min-width: 200px;
-    text-align: center;
-    border-left: 4px solid #27ae60;
+/* Círculo informativo inmerso en el header */
+.header-right { display: flex; flex-direction: column; align-items: center; }
+.header-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-
-.header-stat-card .stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-    color: #27ae60;
-}
-
-.header-stat-card .stat-label {
-    font-size: 0.95rem;
-    color: #7f8c8d;
-    font-weight: 600;
-}
+.header-circle .circle-value { color: #ffffff; font-size: 1.3rem; font-weight: 700; }
+.header-circle-label { color: rgba(255,255,255,0.9); margin-top: 8px; font-size: 0.95rem; font-weight: 600; }
 
 .estadisticas-container {
     display: grid;
@@ -418,11 +416,10 @@ require __DIR__ . '/../partials/nav.php';
                 <p class="catalogo-subtitle">¡Felicitaciones por tu dedicación y logros académicos!</p>
             </div>
             <div class="header-right">
-                <?php $totalCompletados = count($cursos_completados); ?>
-                <div class="header-stat-card">
-                    <div class="stat-number"><?= $totalCompletados ?></div>
-                    <div class="stat-label">Completados</div>
+                <div class="header-circle">
+                    <div class="circle-value"><?= number_format($porcentaje_completados, 1) ?>%</div>
                 </div>
+                <div class="header-circle-label">Completado</div>
             </div>
         </div>
     </div>
