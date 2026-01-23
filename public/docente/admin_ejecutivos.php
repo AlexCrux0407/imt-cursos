@@ -246,7 +246,7 @@ require __DIR__ . '/../partials/nav.php';
                     <tbody>
                         <?php foreach ($ejecutivos as $ejecutivo): ?>
                             <tr>
-                                <td><?= htmlspecialchars($ejecutivo['nombre']) ?></td>
+                                <td><?= htmlspecialchars(format_nombre($ejecutivo['nombre'])) ?></td>
                                 <td><?= htmlspecialchars($ejecutivo['email']) ?></td>
                                 <!-- Teléfono eliminado -->
                                 <td>
@@ -280,7 +280,7 @@ require __DIR__ . '/../partials/nav.php';
         <div class="form-container">
             <div class="form-header">
                 <h2>Crear Nuevo Ejecutivo</h2>
-                <a href="?action=list" class="btn-secondary">Volver a la Lista</a>
+                <a href="?action=list" class="btn-volver">← Volver a la Lista</a>
             </div>
             
             <form method="POST" class="executive-form">
@@ -318,7 +318,7 @@ require __DIR__ . '/../partials/nav.php';
         <div class="form-container">
             <div class="form-header">
                 <h2>Editar Ejecutivo</h2>
-                <a href="?action=list" class="btn-secondary">Volver a la Lista</a>
+                <a href="?action=list" class="btn-volver">← Volver a la Lista</a>
             </div>
             
             <form method="POST" class="executive-form">

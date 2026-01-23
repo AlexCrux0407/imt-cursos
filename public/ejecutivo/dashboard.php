@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('ejecutivo');
 require_once __DIR__ . '/../../config/database.php';
 
-$page_title = 'Ejecutivo – Dashboard de Reportes';
+$page_title = 'Ejecutivo – Tablero de Reportes';
 
 // Obtener estadísticas generales
 $stmt = $conn->prepare("
@@ -27,7 +27,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="exec-dashboard">
     <div class="exec-header">
-        <h1 class="exec-title">Dashboard Ejecutivo</h1>
+        <h1 class="exec-title">Tablero Ejecutivo</h1>
         <p class="exec-subtitle">Centro de reportes y análisis - Visualización de datos del sistema educativo</p>
     </div>
 

@@ -63,10 +63,7 @@ require __DIR__ . '/../partials/nav.php';
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Visualización de Curso</h1>
                 <p style="opacity: 0.9;"><?= htmlspecialchars($curso['titulo']) ?></p>
             </div>
-            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="btn" 
-               style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; text-decoration: none;">
-                ← Volver
-            </a>
+            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="btn-volver">← Volver</a>
         </div>
     </div>
 
@@ -121,7 +118,7 @@ require __DIR__ . '/../partials/nav.php';
                             <tr>
                                 <td>
                                     <div class="student-info">
-                                        <div class="student-name"><?= htmlspecialchars($estudiante['nombre']) ?></div>
+                                        <div class="student-name"><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></div>
                                         <div class="student-email"><?= htmlspecialchars($estudiante['email']) ?></div>
                                     </div>
                                 </td>

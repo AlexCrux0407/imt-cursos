@@ -7,6 +7,10 @@
 }
 
 /* Animaciones específicas para admin */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 @keyframes slideInDown {
     from {
         opacity: 0;
@@ -30,6 +34,12 @@
 }
 
 /* Layout administrativo */
+.admin-container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 50px;
+}
+
 .admin-dashboard {
     background: var(--master-bg);
     min-height: 100vh;
@@ -132,6 +142,16 @@
     transform: translateX(5px);
 }
 
+/* Accesibilidad: estados de foco visibles */
+.admin-container a:focus,
+.admin-container button:focus,
+.admin-container input:focus,
+.admin-container select:focus,
+.admin-container textarea:focus {
+    outline: 3px solid var(--master-secondary);
+    outline-offset: 2px;
+}
+
 /* Stats Dashboard */
 .stats-overview {
     display: grid;
@@ -205,6 +225,7 @@
 
 /* Responsive para admin */
 @media (max-width: 768px) {
+    .admin-container { padding: 15px; }
     .admin-dashboard {
         padding: 15px 20px;
     }

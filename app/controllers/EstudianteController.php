@@ -4,8 +4,10 @@ require_once __DIR__ . '/../Controller.php';
 
 /*
  Controlador Estudiante
- Maneja dashboard, catálogo y contenidos de cursos para estudiantes.
-*/
+ - Exige rol estudiante en todas las acciones.
+ - Muestra dashboard y cursos inscritos con progreso.
+ - Lista catálogo y permite ver contenido si está inscrito.
+ */
 
 class EstudianteController extends Controller
 {

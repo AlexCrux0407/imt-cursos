@@ -4,7 +4,8 @@
  Controlador Master
  - Administra dashboard, cursos y asignaciones.
  - Procesa creación/edición de cursos y asignación a estudiantes.
-*/
+ - Gestiona métricas e informes de inscripción a nivel global.
+ */
 
 require_once __DIR__ . '/../Controller.php';
 

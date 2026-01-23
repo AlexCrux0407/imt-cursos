@@ -4,8 +4,10 @@ require_once __DIR__ . '/../Controller.php';
 
 /*
  Controlador Ejecutivo
- Analiza y reporta métricas generales del sistema.
-*/
+ - Presenta métricas globales y cursos populares.
+ - Genera reportes filtrados por período y tipo.
+ - Visualiza tendencias y exporta reportes.
+ */
 
 class EjecutivoController extends Controller
 {

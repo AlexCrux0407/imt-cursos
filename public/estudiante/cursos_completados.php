@@ -71,7 +71,7 @@ require __DIR__ . '/../partials/nav.php';
 .catalogo-header {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
-    padding: 40px 30px;
+    padding: 40 30px;
     border-radius: 15px;
     margin-bottom: 30px;
     text-align: left; /* ajustar para layout con estadística a la derecha */
@@ -499,15 +499,6 @@ require __DIR__ . '/../partials/nav.php';
         <?php endif; ?>
     </div>
 
-    <!-- Enlaces de navegación -->
-    <div class="navegacion-enlaces">
-        <a href="<?= BASE_URL ?>/estudiante/dashboard.php" class="enlace-nav">
-            <i class="icono-nav">←</i> Volver al Dashboard
-        </a>
-        <a href="<?= BASE_URL ?>/estudiante/mis_cursos.php" class="enlace-nav">
-            Ver Mis Cursos <i class="icono-nav">→</i>
-        </a>
-    </div>
-</div>
+
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

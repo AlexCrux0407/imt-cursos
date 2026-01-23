@@ -60,7 +60,6 @@ require __DIR__ . '/../partials/nav.php';
     <!-- Header Principal -->
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px; font-weight: 600;">
-            <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="Config" style="width: 40px; height: 40px; margin-right: 15px; vertical-align: middle; filter: brightness(0) invert(1);">
             Administración de Plataforma
         </h1>
         <p style="font-size: 1.1rem; opacity: 0.9;">Gestión de identidad visual y configuración general</p>
@@ -217,7 +216,7 @@ require __DIR__ . '/../partials/nav.php';
                         onclick="window.location.href='<?= BASE_URL ?>/master/dashboard.php'"
                         style="flex: 0 0 auto; background: transparent; color: var(--master-primary); border: 2px solid var(--master-primary); padding: 15px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                     <img src="<?= BASE_URL ?>/styles/iconos/back_bl.png" alt="Volver" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;">
-                    Volver al Dashboard
+                    Volver al Tablero
                 </button>
             </div>
         </form>

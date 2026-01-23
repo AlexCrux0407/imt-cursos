@@ -1,7 +1,7 @@
 <?php
 // Parcial de navegación: cabecera y enlaces según rol, con activo por ruta
 $role = $_SESSION['role'] ?? null;
-$nombre = $_SESSION['nombre'] ?? 'Usuario';
+$nombre = format_nombre($_SESSION['nombre'] ?? 'Usuario');
 
 $current_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
 
@@ -33,7 +33,7 @@ function nav_active_class(string $href, string $current_path): string {
     </div>
 </header>
 
-<nav style="margin-top: 80px; background: #ffffff; border-bottom: 1px solid #ddd; padding: 10px 0;">
+<nav style="margin-top: 60px; background: #ffffff; border-bottom: 1px solid #ddd; padding: 10px 0;">
     <div class="contenido" style="padding: 10px 50px; margin-top: 0;">
         <div class="div-fila-alt-start" style="flex-wrap: wrap;">
             <?php if ($role === 'estudiante'): ?>
@@ -60,7 +60,7 @@ function nav_active_class(string $href, string $current_path): string {
             <?php elseif ($role === 'docente'): ?>
                 <a href="<?= BASE_URL ?>/docente/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
-                    Dashboard
+                    Tablero
                 </a>
                 <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/docente/admin_cursos.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="" class="nav-icon">
@@ -69,7 +69,7 @@ function nav_active_class(string $href, string $current_path): string {
             <?php elseif ($role === 'ejecutivo'): ?>
                 <a href="<?= BASE_URL ?>/ejecutivo/dashboard.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/dashboard.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/home.png" alt="" class="nav-icon">
-                    Dashboard
+                    Tablero
                 </a>
                 <a href="<?= BASE_URL ?>/ejecutivo/detalles_estudiantes.php" class="nav-link-custom<?= nav_active_class(BASE_URL . '/ejecutivo/detalles_estudiantes.php', $current_path) ?>">
                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="" class="nav-icon">

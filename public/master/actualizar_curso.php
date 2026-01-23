@@ -8,6 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $curso_id = (int)($_POST['curso_id'] ?? 0);
     $titulo = trim($_POST['titulo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
+    $objetivo_general = trim($_POST['objetivo_general'] ?? '');
+    $objetivos_especificos = trim($_POST['objetivos_especificos'] ?? '');
+    $duracion = trim($_POST['duracion'] ?? '');
     $categoria = trim($_POST['categoria'] ?? '');
     $dirigido_a = trim($_POST['dirigido_a'] ?? '');
     $estado = $_POST['estado'] ?? 'borrador';
@@ -86,6 +89,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':dirigido_a' => $dirigido_a ?: null,
             ':estado' => $estado
         ];
+
+        $stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'objetivo_general'");
+        $stmt->execute();
+        $tiene_objetivo_general = (bool)$stmt->fetch();
+
+        $stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'objetivos_especificos'");
+        $stmt->execute();
+        $tiene_objetivos_especificos = (bool)$stmt->fetch();
+
+        $stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'duracion'");
+        $stmt->execute();
+        $tiene_duracion = (bool)$stmt->fetch();
+
+        if ($tiene_objetivo_general) {
+            $campos_actualizacion[] = 'objetivo_general = :objetivo_general';
+            $parametros[':objetivo_general'] = $objetivo_general ?: null;
+        }
+        if ($tiene_objetivos_especificos) {
+            $campos_actualizacion[] = 'objetivos_especificos = :objetivos_especificos';
+            $parametros[':objetivos_especificos'] = $objetivos_especificos ?: null;
+        }
+        if ($tiene_duracion) {
+            $campos_actualizacion[] = 'duracion = :duracion';
+            $parametros[':duracion'] = $duracion ?: null;
+        }
         
         // Si hay cambio en la asignación, actualizar campos relacionados
         if ($curso_actual['asignado_a'] != $asignado_a) {

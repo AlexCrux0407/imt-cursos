@@ -216,10 +216,7 @@ require __DIR__ . '/../partials/nav.php';
                 <p style="opacity: 0.9;"><?= htmlspecialchars($pregunta['evaluacion_titulo']) ?> - <?= htmlspecialchars($pregunta['modulo_titulo']) ?></p>
             </div>
             <div style="display: flex; gap: 12px;">
-                <button onclick="window.location.href='<?= BASE_URL ?>/docente/preguntas_evaluacion.php?id=<?= $evaluacion_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>'" 
-                        style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                    ← Volver a Preguntas
-                </button>
+                <button onclick="window.location.href='<?= BASE_URL ?>/docente/preguntas_evaluacion.php?id=<?= $evaluacion_id ?>&modulo_id=<?= $modulo_id ?>&curso_id=<?= $curso_id ?>'" class="btn-volver">← Volver a Preguntas</button>
             </div>
         </div>
     </div>

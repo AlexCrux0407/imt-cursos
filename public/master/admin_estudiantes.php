@@ -14,6 +14,10 @@ $filtro_fecha = $_GET['fecha'] ?? '';
 $where_conditions = ["u.role = 'estudiante'"];
 $params = [];
 
+$stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'tipo_estudiante'");
+$stmt->execute();
+$tiene_tipo_estudiante = (bool)$stmt->fetch();
+
 if ($filtro_estado) {
     $where_conditions[] = "u.estado = :estado";
     $params[':estado'] = $filtro_estado;
@@ -32,6 +36,12 @@ if ($filtro_fecha) {
 $where_clause = implode(' AND ', $where_conditions);
 
 // Obtener estudiantes con estadísticas
+$select_tipo_estudiante = $tiene_tipo_estudiante ? "u.tipo_estudiante" : "'interno' as tipo_estudiante";
+$group_by = "u.id, u.nombre, u.email, u.usuario, u.estado, u.created_at";
+if ($tiene_tipo_estudiante) {
+    $group_by .= ", u.tipo_estudiante";
+}
+
 $stmt = $conn->prepare("
     SELECT 
         u.id,
@@ -40,6 +50,7 @@ $stmt = $conn->prepare("
         u.usuario,
         u.estado,
         u.created_at,
+        $select_tipo_estudiante,
         COUNT(DISTINCT i.curso_id) as cursos_inscritos,
         COUNT(DISTINCT CASE WHEN i.estado = 'completado' THEN i.curso_id END) as cursos_completados,
         AVG(COALESCE(i.progreso, 0)) as progreso_promedio,
@@ -47,7 +58,7 @@ $stmt = $conn->prepare("
     FROM usuarios u
     LEFT JOIN inscripciones i ON u.id = i.usuario_id
     WHERE $where_clause
-    GROUP BY u.id, u.nombre, u.email, u.usuario, u.estado, u.created_at
+    GROUP BY $group_by
     ORDER BY u.created_at DESC
 ");
 $stmt->execute($params);
@@ -291,18 +302,14 @@ require __DIR__ . '/../partials/nav.php';
 }
 </style>
 
-<div class="students-container">
+<div class="admin-container">
     <!-- Header -->
-    <div class="form-container-head" style="background: linear-gradient(#3498db, #3498db); color: white;">
-        <div class="div-fila-alt-start">
+    <div class="form-container-head" style="background: linear-gradient(#3498db, #3498db); color: white; text-align: center;">
+        <div class="div-fila-alt-start" style="display: flex; justify-content: center; align-items: center;">
             <div>
-                <h1 style="font-size: 2rem; margin-bottom: 10px;">Administración de estudiantes</h1>
-                <p style="opacity: 0.9;">Gestión completa de estudiantes registrados en la plataforma</p>
+                <h1 style="font-size: 2rem; margin-bottom: 10px;text-align: center">Administración de estudiantes</h1>
+                <p style="opacity: 0.9; text-align: center;">Gestión completa de estudiantes registrados en la plataforma</p>
             </div>
-            <a href="<?= BASE_URL ?>/master/dashboard.php" class="btn" 
-               style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; text-decoration: none;">
-                ← Dashboard
-            </a>
         </div>
     </div>
 
@@ -358,7 +365,6 @@ require __DIR__ . '/../partials/nav.php';
     <div class="students-table">
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
             <h3 style="color: var(--master-primary); margin: 0; font-size: 1.3rem;">
-                <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
                 Lista de Estudiantes (<?= count($estudiantes) ?>)
             </h3>
             <button onclick="mostrarFormularioCrearEstudiante()" 
@@ -373,6 +379,7 @@ require __DIR__ . '/../partials/nav.php';
                     <th>Estudiante</th>
                     <th>Email</th>
                     <th>Estado</th>
+                    <th>Tipo</th>
                     <th>Cursos</th>
                     <th>Progreso</th>
                     <th>Registro</th>
@@ -383,7 +390,7 @@ require __DIR__ . '/../partials/nav.php';
             <tbody>
                 <?php if (empty($estudiantes)): ?>
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #7f8c8d;">
                             No se encontraron estudiantes con los filtros aplicados
                         </td>
                     </tr>
@@ -392,7 +399,7 @@ require __DIR__ . '/../partials/nav.php';
                         <tr>
                             <td>
                                 <div>
-                                    <strong><?= htmlspecialchars($estudiante['nombre']) ?></strong><br>
+                                    <strong><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></strong><br>
                                     <small style="color: #7f8c8d;">@<?= htmlspecialchars($estudiante['usuario']) ?></small>
                                 </div>
                             </td>
@@ -402,6 +409,7 @@ require __DIR__ . '/../partials/nav.php';
                                     <?= ucfirst($estudiante['estado']) ?>
                                 </span>
                             </td>
+                            <td><?= ucfirst($estudiante['tipo_estudiante'] ?? 'interno') ?></td>
                             <td>
                                 <div>
                                     <strong><?= $estudiante['cursos_inscritos'] ?></strong> inscritos<br>
@@ -452,7 +460,7 @@ require __DIR__ . '/../partials/nav.php';
         <?php foreach ($estudiantes_activos as $index => $estudiante): ?>
             <div class="student-item">
                 <div class="student-info">
-                    <strong><?= htmlspecialchars($estudiante['nombre']) ?></strong><br>
+                    <strong><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></strong><br>
                     <small style="color: #7f8c8d;"><?= htmlspecialchars($estudiante['email']) ?></small>
                 </div>
                 <div class="student-stats">
@@ -516,6 +524,14 @@ function mostrarFormularioCrearEstudiante() {
                         <option value="inactivo">Inactivo</option>
                     </select>
                 </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Tipo de Estudiante</label>
+                    <select name="tipo_estudiante" style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                        <option value="interno" selected>Interno</option>
+                        <option value="externo">Externo</option>
+                    </select>
+                </div>
                 
                 <div style="display: flex; gap: 15px; justify-content: flex-end;">
                     <button type="button" onclick="cerrarModalEstudiante()" 
@@ -551,6 +567,7 @@ function crearEstudiante(event) {
         usuario: formData.get('usuario'),
         password: formData.get('password'),
         estado: formData.get('estado'),
+        tipo_estudiante: formData.get('tipo_estudiante'),
         role: 'estudiante'
     };
     

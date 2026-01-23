@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
 require_once __DIR__ . '/../../config/database.php';
 
-$page_title = 'Estudiante – Dashboard';
+$page_title = 'Estudiante – Tablero';
 
 $estudiante_id = $_SESSION['user_id'];
 
@@ -361,17 +361,49 @@ require __DIR__ . '/../partials/nav.php';
 
 <div class="student-dashboard">
     <?php
-    // Video de bienvenida: detecta y arma URL
-    $welcome_video_filename = 'bienvenida.mp4';
-    $welcome_video_path = PUBLIC_PATH . '/uploads/media/' . $welcome_video_filename;
-    $welcome_video_url  = BASE_URL . '/uploads/media/' . $welcome_video_filename;
-    $has_welcome_video  = file_exists($welcome_video_path);
+    // Video de bienvenida: usa configuración de plataforma si existe, con fallback
+    $welcome_video_url = null;
+    $welcome_video_mime = 'video/mp4';
+    $has_welcome_video = false;
+
+    try {
+        $stmt_cfg = $conn->prepare("SELECT video_bienvenida FROM configuracion_plataforma WHERE id = 1");
+        $stmt_cfg->execute();
+        $cfg = $stmt_cfg->fetch();
+
+        if (!empty($cfg) && !empty($cfg['video_bienvenida'])) {
+            $video_file = basename($cfg['video_bienvenida']);
+            $ext = strtolower(pathinfo($video_file, PATHINFO_EXTENSION));
+            $mime_map = ['mp4' => 'video/mp4', 'webm' => 'video/webm', 'ogg' => 'video/ogg'];
+            $welcome_video_mime = $mime_map[$ext] ?? 'video/mp4';
+
+            $publicPath = rtrim(PUBLIC_PATH, '/\\') . '/uploads/media/' . $video_file;
+            $rootPath   = rtrim(UPLOADS_PATH, '/\\') . '/media/' . $video_file;
+            if (is_readable($publicPath) || is_readable($rootPath)) {
+                $welcome_video_url = rtrim(BASE_URL, '/') . '/serve_media.php?file=' . rawurlencode($video_file);
+                $has_welcome_video = true;
+            }
+        }
+    } catch (Exception $e) {
+        // Ignorar errores de configuración
+    }
+
+    // Fallback: archivo estático bienvenida.mp4 si existe en public/uploads/media
+    if (!$has_welcome_video) {
+        $fallback = 'bienvenida.mp4';
+        $fallbackPath = rtrim(PUBLIC_PATH, '/\\') . '/uploads/media/' . $fallback;
+        if (is_readable($fallbackPath)) {
+            $welcome_video_url = rtrim(BASE_URL, '/') . '/uploads/media/' . $fallback;
+            $welcome_video_mime = 'video/mp4';
+            $has_welcome_video = true;
+        }
+    }
     ?>
 
     <div class="welcome-hero">
       <div class="hero-grid">
         <div class="hero-left">
-          <h1 class="hero-title">¡Hola, <?= htmlspecialchars($_SESSION['nombre']) ?>!</h1>
+          <h1 class="hero-title">¡Hola, <?= htmlspecialchars(format_nombre($_SESSION['nombre'])) ?>!</h1>
           <p class="hero-subtitle">Impulsa tu aprendizaje: retoma tu último curso y explora nuevas rutas.</p>
           
         </div>
@@ -379,7 +411,7 @@ require __DIR__ . '/../partials/nav.php';
         <?php if ($has_welcome_video): ?>
         <div class="hero-card" id="heroCard">
           <video id="heroVideo" controls autoplay muted playsinline preload="metadata">
-            <source src="<?= htmlspecialchars($welcome_video_url) ?>" type="video/mp4">
+            <source src="<?= htmlspecialchars($welcome_video_url) ?>" type="<?= htmlspecialchars($welcome_video_mime) ?>">
           </video>
           <div class="card-overlay"></div>
 

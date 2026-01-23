@@ -102,6 +102,7 @@ require __DIR__ . '/../partials/nav.php';
 ?>
 
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/ejecutivo.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/ejecutivo-detalles-cursos.css">
 
 <div class="exec-dashboard">
     <div class="exec-header">
@@ -158,7 +159,7 @@ require __DIR__ . '/../partials/nav.php';
                     <option value="">Todos los docentes</option>
                     <?php foreach ($docentes as $docente): ?>
                         <option value="<?= $docente['id'] ?>" <?= $docente_filter == $docente['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($docente['nombre']) ?>
+                            <?= htmlspecialchars(format_nombre($docente['nombre'])) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -190,7 +191,10 @@ require __DIR__ . '/../partials/nav.php';
                     <div class="course-header">
                         <div class="course-info">
                             <h3 class="course-title"><?= htmlspecialchars($curso['titulo']) ?></h3>
-                            <p class="course-description"><?= htmlspecialchars(substr($curso['descripcion'], 0, 150)) ?>...</p>
+                            <p class="course-description">
+                                <?= htmlspecialchars(substr((string)$curso['descripcion'], 0, 150)) ?>
+                                <?= strlen((string)$curso['descripcion']) > 150 ? '...' : '' ?>
+                            </p>
                             <div class="course-meta">
                                 <span class="course-docente">
                                     <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Docente">

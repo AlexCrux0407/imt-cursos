@@ -108,10 +108,16 @@ require __DIR__ . '/../partials/nav.php';
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Módulos del Curso</h1>
                 <p style="opacity: 0.9;"><?= htmlspecialchars($curso['titulo']) ?></p>
             </div>
-            <button onclick="mostrarFormularioNuevoModulo()" 
-                    style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                + Nuevo Módulo
-            </button>
+            <div class="div-fila-alt" style="gap: 10px;">
+                <button onclick="mostrarFormularioNuevoModulo()" 
+                        style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                    + Nuevo Módulo
+                </button>
+                <a href="<?= BASE_URL ?>/docente/editar_curso.php?id=<?= $curso['id'] ?>"
+                   style="background: transparent; color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none;">
+                    Editar Curso
+                </a>
+            </div>
         </div>
     </div>
 
@@ -129,10 +135,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
             </div>
             <div>
-                <a href="admin_cursos.php" 
-                   style="background: #e8ecef; color: #5a5c69; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block;">
-                    ← Volver
-                </a>
+                <a href="admin_cursos.php" class="btn-volver">← Volver</a>
             </div>
         </div>
     </div>

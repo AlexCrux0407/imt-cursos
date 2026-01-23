@@ -44,6 +44,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: ' . BASE_URL . '/docente/evaluaciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=puntaje_invalido');
         exit;
     }
+    // Asegurar columnas de fechas permiten NULL y sanear valores cero
+    try {
+        $infoInicio = $conn->prepare("SELECT IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'evaluaciones_modulo' AND COLUMN_NAME = 'fecha_inicio'");
+        $infoInicio->execute();
+        $colInicio = $infoInicio->fetch();
+        if ($colInicio && strtoupper($colInicio['IS_NULLABLE']) !== 'YES') {
+            $conn->exec("ALTER TABLE evaluaciones_modulo MODIFY COLUMN fecha_inicio DATETIME NULL DEFAULT NULL");
+        }
+
+        $infoFin = $conn->prepare("SELECT IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'evaluaciones_modulo' AND COLUMN_NAME = 'fecha_fin'");
+        $infoFin->execute();
+        $colFin = $infoFin->fetch();
+        if ($colFin && strtoupper($colFin['IS_NULLABLE']) !== 'YES') {
+            $conn->exec("ALTER TABLE evaluaciones_modulo MODIFY COLUMN fecha_fin DATETIME NULL DEFAULT NULL");
+        }
+
+        $stmtSanear = $conn->prepare("UPDATE evaluaciones_modulo SET fecha_inicio = CASE WHEN fecha_inicio = '0000-00-00 00:00:00' THEN NULL ELSE fecha_inicio END, fecha_fin = CASE WHEN fecha_fin = '0000-00-00 00:00:00' THEN NULL ELSE fecha_fin END WHERE modulo_id = :modulo_id");
+        $stmtSanear->execute([':modulo_id' => $modulo_id]);
+    } catch (Exception $e) {
+        // No interrumpir creación por fallos de migración/saneamiento
+    }
     
     try {
         $stmt = $conn->prepare("
@@ -73,6 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         $evaluacion_id = $conn->lastInsertId();
+
+        // Establecer explícitamente NULL en fechas para evitar defaults de fecha cero
+        try {
+            $stmtFechas = $conn->prepare("UPDATE evaluaciones_modulo SET fecha_inicio = NULL, fecha_fin = NULL WHERE id = :id");
+            $stmtFechas->execute([':id' => $evaluacion_id]);
+        } catch (Exception $e) {
+            // Continuar incluso si no se pueden actualizar fechas
+        }
         
         header('Location: ' . BASE_URL . '/docente/preguntas_evaluacion.php?id=' . $evaluacion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=evaluacion_creada');
         exit;

@@ -71,6 +71,20 @@ require __DIR__ . '/../partials/nav.php';
                 <label class="form-label">Orden</label>
                 <input type="number" name="orden" value="<?= $subtema['orden'] ?>" min="1" required class="form-input">
             </div>
+
+            <div class="form-group">
+                <label class="form-label">URL del Recurso (opcional)</label>
+                <input type="text" name="recurso_url" value="<?= htmlspecialchars($subtema['recurso_url'] ?? '') ?>" class="form-input" placeholder="https://... (opcional)">
+                <?php if (!empty($subtema['recurso_url'])): ?>
+                    <small style="color: #3498db; display:block; margin-top:6px;">Recurso actual: <a href="<?= htmlspecialchars($subtema['recurso_url']) ?>" target="_blank">Ver recurso</a></small>
+                <?php endif; ?>
+            </div>
+
+            <div class="form-group" style="padding: 16px; border: 2px dashed #e8ecef; border-radius: 8px; background: #fafbfc;">
+                <label class="form-label">Subir Archivos (opcional)</label>
+                <input type="file" name="archivos[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.avi,.mov,.jpg,.jpeg,.png" class="form-input">
+                <small style="color: #7f8c8d; display:block; margin-top:8px;">Puedes seleccionar varios archivos. Formatos permitidos: PDF, DOC, DOCX, PPT, PPTX, MP4, AVI, MOV, JPG, PNG (Max: 50MB por archivo)</small>
+            </div>
             
             <div class="modal-actions">
                 <button type="button" onclick="window.history.back()" class="btn-cancelar">Cancelar</button>

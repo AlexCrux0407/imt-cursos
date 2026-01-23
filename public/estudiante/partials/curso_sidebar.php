@@ -1,6 +1,5 @@
 <?php
 // Parcial Estudiante – Sidebar del curso
-// Seguridad de variables (por si la vista llamante no las definió)
 $curso_estructura   = $curso_estructura   ?? [];
 $cursoTituloSidebar = $cursoTituloSidebar ?? 'Curso';
 $moduloActualId     = isset($moduloActualId) ? (int)$moduloActualId : 0;
@@ -192,5 +191,138 @@ IMT.toggleModulo = function(moduloId) {
 document.addEventListener('DOMContentLoaded', function() {
   IMT.toggleModulo(<?= (int)$moduloActualId ?>);
 });
+<?php endif; ?>
+
+// ===== Modo Debug opcional para la sidebar =====
+<?php $debugSidebar = isset($_GET['debug_sidebar']) && $_GET['debug_sidebar'] !== '0'; ?>
+<?php if ($debugSidebar): ?>
+  (function(){
+    const pageName = '<?= basename($_SERVER['PHP_SELF']) ?>';
+    function cssFiles(){
+      return Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map(l => l.href.split('/').slice(-2).join('/'));
+    }
+    function metricsFor(sel){
+      const el = document.querySelector(sel);
+      if(!el) return { selector: sel, exists: false };
+      const cs = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      return {
+        selector: sel,
+        exists: true,
+        width: rect.width,
+        height: rect.height,
+        bg: cs.backgroundColor,
+        color: cs.color,
+        fontSize: cs.fontSize,
+        lineHeight: cs.lineHeight,
+        position: cs.position,
+        top: cs.top,
+        overflowY: cs.overflowY,
+        borderRadius: cs.borderRadius,
+        boxShadow: cs.boxShadow,
+        borderColor: cs.borderColor,
+        padding: cs.padding,
+        margin: cs.margin
+      };
+    }
+    function collect(){
+      const sels = [
+        '.sidebar-navegacion',
+        '.sidebar-header',
+        '.sidebar-titulo',
+        '.sidebar-contenido',
+        '.sidebar-modulo',
+        '.sidebar-modulo .modulo-header',
+        '.sidebar-modulo .modulo-titulo',
+        '.sidebar-tema',
+        '.sidebar-subtema',
+        '.sidebar-leccion'
+      ];
+      return {
+        page: pageName,
+        cssFiles: cssFiles(),
+        metrics: sels.map(metricsFor)
+      };
+    }
+    function saveBaseline(){
+      const data = collect();
+      localStorage.setItem('IMT_sidebarBaseline', JSON.stringify(data));
+      render(data, 'Baseline guardado');
+    }
+    function compare(){
+      const baseStr = localStorage.getItem('IMT_sidebarBaseline');
+      const curr = collect();
+      if(!baseStr){ render(curr, 'No hay baseline. Guarda uno desde Curso.'); return; }
+      const base = JSON.parse(baseStr);
+      const diffs = [];
+      curr.metrics.forEach(cm => {
+        const bm = base.metrics.find(m => m.selector === cm.selector);
+        if(!bm) return;
+        Object.keys(cm).forEach(k => {
+          if(['selector','exists'].includes(k)) return;
+          const cv = cm[k];
+          const bv = bm[k];
+          if(String(cv) !== String(bv)){
+            diffs.push({ selector: cm.selector, prop: k, baseline: String(bv), current: String(cv) });
+          }
+        });
+      });
+      render(curr, 'Comparación con baseline', diffs);
+      // Señalar visualmente si hay diffs críticos
+      if(diffs.some(d => d.selector === '.sidebar-navegacion' && (d.prop === 'bg' || d.prop === 'borderColor' || d.prop === 'boxShadow'))){
+        const sn = document.querySelector('.sidebar-navegacion');
+        if(sn){ sn.style.outline = '2px solid #e74c3c'; sn.style.outlineOffset = '2px'; }
+      }
+    }
+    function render(data, title, diffs){
+      let panel = document.getElementById('sidebar-debug-panel');
+      if(!panel){
+        panel = document.createElement('div');
+        panel.id = 'sidebar-debug-panel';
+        panel.style.position = 'fixed';
+        panel.style.bottom = '10px';
+        panel.style.right = '10px';
+        panel.style.zIndex = '99999';
+        panel.style.background = '#111827';
+        panel.style.color = '#e5e7eb';
+        panel.style.border = '1px solid #374151';
+        panel.style.borderRadius = '8px';
+        panel.style.padding = '10px';
+        panel.style.fontSize = '12px';
+        panel.style.maxWidth = '360px';
+        panel.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
+        document.body.appendChild(panel);
+      }
+      panel.innerHTML = '';
+      const h = document.createElement('div'); h.textContent = `Sidebar Debug – ${title}`; h.style.fontWeight = '700'; h.style.marginBottom = '6px'; panel.appendChild(h);
+      const info = document.createElement('div'); info.textContent = `Page: ${data.page}`; panel.appendChild(info);
+      const css = document.createElement('div'); css.textContent = `CSS: ${data.cssFiles.join(', ')}`; css.style.margin = '6px 0'; panel.appendChild(css);
+      const btns = document.createElement('div'); btns.style.display='flex'; btns.style.gap='6px'; btns.style.marginBottom='8px';
+      const b1 = document.createElement('button'); b1.textContent = 'Guardar baseline'; b1.onclick = saveBaseline; stylizeBtn(b1);
+      const b2 = document.createElement('button'); b2.textContent = 'Comparar baseline'; b2.onclick = compare; stylizeBtn(b2);
+      const b3 = document.createElement('button'); b3.textContent = 'Ocultar'; b3.onclick = () => panel.style.display='none'; stylizeBtn(b3);
+      btns.appendChild(b1); btns.appendChild(b2); btns.appendChild(b3); panel.appendChild(btns);
+      if(diffs && diffs.length){
+        const list = document.createElement('div');
+        list.style.maxHeight = '200px'; list.style.overflow='auto'; list.style.borderTop='1px solid #374151'; list.style.paddingTop='6px';
+        diffs.forEach(d => {
+          const row = document.createElement('div');
+          row.textContent = `${d.selector} – ${d.prop}: base=${d.baseline} vs curr=${d.current}`;
+          list.appendChild(row);
+        });
+        panel.appendChild(list);
+      }
+      // dump en consola para inspección avanzada
+      try{ console.group('IMT Sidebar Debug'); console.log('data', data); if(diffs) console.table(diffs); console.groupEnd(); }catch(e){}
+    }
+    function stylizeBtn(b){
+      b.style.background = '#1f2937'; b.style.color='#e5e7eb'; b.style.border='1px solid #374151'; b.style.borderRadius='6px'; b.style.padding='6px 8px'; b.style.cursor='pointer';
+      b.onmouseenter = () => { b.style.background = '#111827'; };
+      b.onmouseleave = () => { b.style.background = '#1f2937'; };
+    }
+    // inicial
+    document.addEventListener('DOMContentLoaded', function(){ render(collect(), 'Cargado'); });
+  })();
 <?php endif; ?>
 </script>

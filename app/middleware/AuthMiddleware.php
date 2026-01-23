@@ -1,5 +1,11 @@
 <?php
 
+/*
+ Middleware de Autenticación y Rol
+ - AuthMiddleware: exige sesión iniciada.
+ - RoleMiddleware: valida rol requerido y redirige.
+ */
+
 /**
  * Middleware de autenticación: exige sesión iniciada.
  */
@@ -11,7 +17,7 @@ class AuthMiddleware
     public function handle(): void
     {
         if (!is_logged_in()) {
-            header('Location: /login.php');
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
     }
@@ -38,12 +44,12 @@ class RoleMiddleware
     public function handle(): void
     {
         if (!is_logged_in()) {
-            header('Location: /login.php');
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
 
-        if ($this->requiredRole && (!isset($_SESSION['role']) || $_SESSION['role'] !== $this->requiredRole)) {
-            header('Location: /login.php');
+        if ($this->requiredRole && (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== strtolower($this->requiredRole))) {
+            header('Location: ' . BASE_URL . '/login.php');
             exit;
         }
     }

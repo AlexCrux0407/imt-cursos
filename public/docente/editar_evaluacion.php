@@ -52,10 +52,7 @@ require __DIR__ . '/../partials/nav.php';
                 <p style="opacity: 0.9;">Módulo: <?= htmlspecialchars($evaluacion['modulo_titulo']) ?> · Curso: <?= htmlspecialchars($evaluacion['curso_titulo']) ?></p>
             </div>
             <div style="display: flex; gap: 12px;">
-                <button onclick="window.location.href='<?= BASE_URL ?>/docente/evaluaciones_modulo.php?id=<?= $evaluacion['modulo_id'] ?>&curso_id=<?= $curso_id ?>'" 
-                        style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                    ← Volver a Evaluaciones
-                </button>
+                <button onclick="window.location.href='<?= BASE_URL ?>/docente/evaluaciones_modulo.php?id=<?= $evaluacion['modulo_id'] ?>&curso_id=<?= $curso_id ?>'" class="btn-volver">← Volver a Evaluaciones</button>
             </div>
         </div>
 

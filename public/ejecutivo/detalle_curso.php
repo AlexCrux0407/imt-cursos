@@ -218,7 +218,7 @@ require __DIR__ . '/../partials/nav.php';
                             <tr>
                                 <td>
                                     <div class="student-info">
-                                        <strong><?= htmlspecialchars($estudiante['nombre']) ?></strong>
+                                        <strong><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></strong>
                                     </div>
                                 </td>
                                 <td>

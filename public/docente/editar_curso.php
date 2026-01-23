@@ -47,10 +47,10 @@ require __DIR__ . '/../partials/nav.php';
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Editar Curso</h1>
                 <p style="opacity: 0.9;">Modifica la información de tu curso</p>
             </div>
-            <button onclick="window.history.back()" 
-                    style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+            <a href="<?= BASE_URL ?>/docente/visualizar_curso.php?id=<?= $curso['id'] ?>" 
+               style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-block;">
                 ← Volver
-            </button>
+            </a>
         </div>
     </div>
 
@@ -113,10 +113,10 @@ require __DIR__ . '/../partials/nav.php';
             </div>
             
             <div class="div-fila-alt" style="gap: 15px;">
-                <button type="button" onclick="window.history.back()" 
-                        style="background: #e8ecef; color: #5a5c69; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                <a href="<?= BASE_URL ?>/docente/visualizar_curso.php?id=<?= $curso['id'] ?>" 
+                   style="background: #e8ecef; color: #5a5c69; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none; display: inline-block;">
                     Cancelar
-                </button>
+                </a>
                 <button type="submit" 
                         style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 500;">
                     Actualizar Curso

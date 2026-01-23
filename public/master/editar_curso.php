@@ -143,7 +143,6 @@ require __DIR__ . '/../partials/nav.php';
                             style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;">
                         <option value="borrador" <?= $curso['estado'] === 'borrador' ? 'selected' : '' ?>>Borrador</option>
                         <option value="activo" <?= $curso['estado'] === 'activo' ? 'selected' : '' ?>>Activo</option>
-                        <option value="revision" <?= $curso['estado'] === 'revision' ? 'selected' : '' ?>>En Revisión</option>
                         <option value="inactivo" <?= $curso['estado'] === 'inactivo' ? 'selected' : '' ?>>Inactivo</option>
                     </select>
                 </div>
@@ -158,6 +157,36 @@ require __DIR__ . '/../partials/nav.php';
                           placeholder="Describe el contenido y objetivos del curso"><?= htmlspecialchars($curso['descripcion'] ?? '') ?></textarea>
             </div>
 
+            <div style="margin-bottom: 20px;">
+                <label for="objetivo_general" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                    Objetivo General
+                </label>
+                <textarea id="objetivo_general" name="objetivo_general" rows="3"
+                          style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem; resize: vertical;"
+                          placeholder="Objetivo principal del curso"><?= htmlspecialchars($curso['objetivo_general'] ?? '') ?></textarea>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="objetivos_especificos" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                    Objetivos Específicos
+                </label>
+                <textarea id="objetivos_especificos" name="objetivos_especificos" rows="4"
+                          style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem; resize: vertical;"
+                          placeholder="Lista los objetivos específicos del curso"><?= htmlspecialchars($curso['objetivos_especificos'] ?? '') ?></textarea>
+            </div>
+
+            <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label for="duracion" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                        Duración
+                    </label>
+                    <input type="text" id="duracion" name="duracion"
+                           value="<?= htmlspecialchars($curso['duracion'] ?? '') ?>"
+                           style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;"
+                           placeholder="Ej: 10 horas, 4 semanas, etc.">
+                </div>
+            </div>
+
             <!-- Asignación de docente -->
             <div style="margin-bottom: 20px;">
                 <label for="asignado_a" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
@@ -168,13 +197,13 @@ require __DIR__ . '/../partials/nav.php';
                     <option value="">Sin asignar</option>
                     <?php foreach ($docentes as $docente): ?>
                         <option value="<?= $docente['id'] ?>" <?= $curso['asignado_a'] == $docente['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($docente['nombre']) ?> (<?= htmlspecialchars($docente['email']) ?>)
+                            <?= htmlspecialchars(format_nombre($docente['nombre'])) ?> (<?= htmlspecialchars($docente['email']) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
                 <?php if ($curso['docente_asignado']): ?>
                     <p style="margin: 5px 0 0 0; color: #28a745; font-size: 0.9rem;">
-                        Actualmente asignado a: <strong><?= htmlspecialchars($curso['docente_asignado']) ?></strong>
+                        Actualmente asignado a: <strong><?= htmlspecialchars(format_nombre($curso['docente_asignado'])) ?></strong>
                     </p>
                 <?php endif; ?>
             </div>

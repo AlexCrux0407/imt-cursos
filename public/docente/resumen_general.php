@@ -76,36 +76,6 @@ require __DIR__ . '/../partials/nav.php';
     padding: 20px;
 }
 
-.summary-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.summary-stat-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    text-align: center;
-    border-left: 4px solid #3498db;
-}
-
-.summary-stat-value {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 8px;
-}
-
-.summary-stat-label {
-    color: #7f8c8d;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
 .courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -229,31 +199,8 @@ require __DIR__ . '/../partials/nav.php';
             </div>
             <a href="<?= BASE_URL ?>/docente/dashboard.php" class="btn" 
                style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; text-decoration: none;">
-                ← Dashboard
+                ← Tablero
             </a>
-        </div>
-    </div>
-
-    <div class="summary-stats">
-        <div class="summary-stat-card">
-            <div class="summary-stat-value"><?= $estadisticas_generales['total_cursos'] ?: 0 ?></div>
-            <div class="summary-stat-label">Total Cursos</div>
-        </div>
-        <div class="summary-stat-card">
-            <div class="summary-stat-value"><?= $estadisticas_generales['total_estudiantes_unicos'] ?: 0 ?></div>
-            <div class="summary-stat-label"></div>
-        </div>
-        <div class="summary-stat-card">
-            <div class="summary-stat-value"><?= $estadisticas_generales['total_inscripciones'] ?: 0 ?></div>
-            <div class="summary-stat-label">Total Inscripciones</div>
-        </div>
-        <div class="summary-stat-card">
-            <div class="summary-stat-value"><?= $estadisticas_generales['total_completados'] ?: 0 ?></div>
-            <div class="summary-stat-label">Cursos Completados</div>
-        </div>
-        <div class="summary-stat-card">
-            <div class="summary-stat-value"><?= number_format($estadisticas_generales['progreso_general'] ?: 0, 1) ?>%</div>
-            <div class="summary-stat-label">Progreso General</div>
         </div>
     </div>
 
@@ -334,7 +281,7 @@ require __DIR__ . '/../partials/nav.php';
                     <tr>
                         <td>
                             <div>
-                                <div style="font-weight: 500; color: #2c3e50;"><?= htmlspecialchars($estudiante['nombre']) ?></div>
+                                <div style="font-weight: 500; color: #2c3e50;"><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></div>
                                 <div style="font-size: 0.85rem; color: #7f8c8d;"><?= htmlspecialchars($estudiante['email']) ?></div>
                             </div>
                         </td>

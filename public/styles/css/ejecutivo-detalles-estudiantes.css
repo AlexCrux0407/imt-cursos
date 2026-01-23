@@ -1,0 +1,84 @@
+/* Estilos específicos para Ejecutivo – Detalles por Estudiante */
+/* Scope: sólo se carga en detalles_estudiantes.php para no afectar otras vistas */
+
+/* Ajustes del bloque "Rendimiento por Curso" */
+.course-performance {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.course-performance-item {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) max-content max-content max-content;
+    column-gap: 15px;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-sizing: border-box;
+}
+
+.course-name {
+    font-weight: 500;
+    color: var(--exec-primary);
+    /* Evita desbordes de títulos muy largos */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.course-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.course-progress span,
+.course-modules,
+.course-grade {
+    white-space: nowrap; /* Evita saltos raros de línea en datos cortos */
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.progress-bar-small {
+    width: 100%;
+    max-width: 140px;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-right: 10px;
+}
+
+.progress-bar-small .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #3498db);
+}
+
+/* Responsivo: reacomoda columnas para mantener todo dentro de la tarjeta */
+@media (max-width: 900px) {
+    .course-performance-item {
+        grid-template-columns: minmax(0, 1.6fr) max-content max-content;
+    }
+    .course-grade {
+        justify-self: start;
+    }
+}
+
+@media (max-width: 640px) {
+    .course-performance-item {
+        grid-template-columns: 1fr; /* Una columna, todo apilado */
+        gap: 10px;
+        text-align: left;
+    }
+    .course-progress {
+        justify-content: space-between;
+    }
+    .course-grade {
+        justify-self: start;
+    }
+}

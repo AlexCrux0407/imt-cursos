@@ -22,7 +22,7 @@ require __DIR__ . '/../partials/nav.php';
 <div class="student-dashboard">
     <div class="student-welcome">
         <h1 class="welcome-title">Perfil del Estudiante</h1>
-        <p class="welcome-subtitle">Hola, <?= htmlspecialchars($usuario['nombre'] ?? ($_SESSION['nombre'] ?? 'Estudiante')) ?>. Aquí puedes ver tu información y progreso.</p>
+        <p class="welcome-subtitle">Hola, <?= htmlspecialchars(format_nombre($usuario['nombre'] ?? ($_SESSION['nombre'] ?? 'Estudiante'))) ?>. Aquí puedes ver tu información y progreso.</p>
     </div>
 
     
@@ -35,7 +35,7 @@ require __DIR__ . '/../partials/nav.php';
                     <div class="info-label">Nombre</div>
                 </div>
                 <div class="info-value">
-                    <?= htmlspecialchars($usuario['nombre'] ?? ($_SESSION['nombre'] ?? '—')) ?>
+                    <?= htmlspecialchars(format_nombre($usuario['nombre'] ?? ($_SESSION['nombre'] ?? '—'))) ?>
                 </div>
             </div>
             <div class="profile-info-card">

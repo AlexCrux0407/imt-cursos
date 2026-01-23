@@ -1,0 +1,4 @@
+/* Estilos del curso de ejemplo */
+:root { --color-primario:#0a66c2; --color-secundario:#444; }
+.leccion h1 { color: var(--color-primario); margin: 0 0 .5rem; }
+.leccion p { line-height: 1.6; }

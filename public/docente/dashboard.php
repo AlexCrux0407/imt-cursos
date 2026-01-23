@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('docente');
 require_once __DIR__ . '/../../config/database.php';
 
-$page_title = 'Docente – Dashboard';
+$page_title = 'Docente – Tablero';
 
 $docente_id = $_SESSION['user_id'];
 
@@ -29,11 +29,10 @@ $estadisticas = $stmt->fetch();
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/docente.css">
 
 <div class="dashboard-container">
+    <div class="dashboard-head">
+        <h3 class="dashboard-welcome">¡Bienvenido, <?= htmlspecialchars(format_nombre($_SESSION['nombre'])) ?>!</h3>
+    </div>
     <div class="teacher-dashboard">
-        <div class="teacher-welcome">
-            <h1 class="welcome-title">¡Bienvenido, <?= htmlspecialchars($_SESSION['nombre']) ?>!</h1>
-            <p class="welcome-subtitle">Gestiona tus cursos y supervisa el progreso de tus estudiantes</p>
-        </div>
 
         <div class="stats-overview">
             <div class="stat-card">

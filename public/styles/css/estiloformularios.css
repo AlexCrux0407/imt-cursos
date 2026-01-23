@@ -113,8 +113,39 @@
 /* {{-- Encabezazdo --}} */
 
 /* {{-- Formularios --}} */
+
+/* ===== Ajustes por rol ===== */
+/* Estudiante: margen superior consistente y sin solaparse con header fijo */
+.role-estudiante .contenido,
+.role-estudiante .contenido-con-sidebar {
+  margin-top: 16px; /* unifica margen superior en páginas de Estudiante */
+}
+
+/* Master: aplicar mismo margen superior consistente */
+.role-master .contenido,
+.role-master .contenido-con-sidebar,
+.role-master .admin-dashboard {
+  margin-top: -30px;
+}
+
+/* Master: contenedor unificado de administración */
+.role-master .admin-container {
+  margin-top: 10px;
+}
+
+/* Docente: aplicar margen superior en páginas con .contenido; el dashboard usa padding-top */
+
+.role-docente .contenido {
+  margin-top: -14px;
+}
+
+.role-docente .contenido-con-sidebar {
+  margin-top: 10px;
+}
+
+
     * {
-      margin: 0;
+      margin: 0px;
       padding: 0;
       box-sizing: border-box;
     }
@@ -129,7 +160,7 @@
       justify-content: center;
       align-items: center;
       padding: 50px;
-      margin-top: 30px;
+      margin-top: -15px;
     }
 
     .contenido-table {
@@ -162,7 +193,8 @@
 
     /* Contenedor del formulario */
     .form-container-head {
-      margin: 0 auto;
+      margin-top: 10px;
+      margin: -1px;
       padding: 20px;
       color: #5a5c69;
       border: 1px solid #ddd;
@@ -181,6 +213,36 @@
       border-end-start-radius: 10px;
       box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
       background: #FFFFFF;
+    }
+
+    /* Botón de volver, estilo compacto con borde blanco */
+    .btn-volver {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-volver:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    /* Contexto de contenido principal (fondos claros): botón visible */
+    .contenido-principal .btn-volver {
+      background: transparent;
+      color: #3498db;
+      border: 2px solid #3498db;
+    }
+    .contenido-principal .btn-volver:hover {
+      background: #3498db;
+      color: #ffffff;
     }
 
     .form-main{

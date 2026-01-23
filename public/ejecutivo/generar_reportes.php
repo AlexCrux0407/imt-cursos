@@ -220,7 +220,7 @@ require __DIR__ . '/../partials/nav.php';
                         <option value="">-- Selecciona un estudiante --</option>
                         <?php foreach ($estudiantes_disponibles as $estudiante): ?>
                             <option value="<?= $estudiante['id'] ?>" <?= $id == $estudiante['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($estudiante['nombre']) ?> - <?= htmlspecialchars($estudiante['email']) ?> (<?= $estudiante['cursos_inscritos'] ?> cursos)
+                                <?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?> - <?= htmlspecialchars($estudiante['email']) ?> (<?= $estudiante['cursos_inscritos'] ?> cursos)
                             </option>
                         <?php endforeach; ?>
                     </select>

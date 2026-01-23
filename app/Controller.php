@@ -1,7 +1,10 @@
 <?php
 
-/**
- * Controlador base: utilidades para vistas, JSON, redirecciones y validación.
+/*
+ Controlador Base
+ - Renderiza vistas y layouts con datos.
+ - Responde JSON y gestiona redirecciones.
+ - Valida parámetros de entrada y roles de sesión.
  */
 abstract class Controller
 {
@@ -52,6 +55,11 @@ abstract class Controller
      */
     protected function redirect(string $url): void
     {
+        // Si se pasa una ruta absoluta tipo "/algo", prefijar BASE_URL cuando esté definida.
+        if (isset($url[0]) && $url[0] === '/') {
+            $prefix = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
+            $url = $prefix . $url;
+        }
         header("Location: {$url}");
         exit;
     }

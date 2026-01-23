@@ -61,7 +61,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/master.css">
 
-<div class="contenido">
+<div class="admin-container">
     <!-- Header Principal -->
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h2 style="margin: 0; font-size: 1.8rem; font-weight: 600;">Administración de ejecutivos</h2>
@@ -161,7 +161,7 @@ require __DIR__ . '/../partials/nav.php';
                             <tr style="border-bottom: 1px solid #e8ecef;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
                                 <td style="padding: 15px; vertical-align: middle;">
                                     <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
-                                        <?= htmlspecialchars($ejecutivo['nombre']) ?>
+                                        <?= htmlspecialchars(format_nombre($ejecutivo['nombre'])) ?>
                                     </div>
                                     <div style="color: #95a5a6; font-size: 0.85rem;">
                                         Usuario: <?= htmlspecialchars($ejecutivo['usuario']) ?>

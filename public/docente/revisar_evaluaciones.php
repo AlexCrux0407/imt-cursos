@@ -60,7 +60,7 @@ require __DIR__ . '/../partials/header.php';
         <div class="alert alert-info">
             <h4>✅ Todo al día</h4>
             <p>No hay evaluaciones pendientes de revisión en este momento.</p>
-            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="btn-primary">Volver a Mis Cursos</a>
+            <a href="<?= BASE_URL ?>/docente/admin_cursos.php" class="btn-volver">← Volver a Mis Cursos</a>
         </div>
     <?php else: ?>
         <div class="stats-grid">
@@ -90,7 +90,7 @@ require __DIR__ . '/../partials/header.php';
                             <img src="<?= BASE_URL ?>/styles/iconos/user.png" alt="Estudiante">
                         </div>
                         <div class="estudiante-datos">
-                            <div class="estudiante-nombre"><?= htmlspecialchars($intento['estudiante_nombre']) ?></div>
+                            <div class="estudiante-nombre"><?= htmlspecialchars(format_nombre($intento['estudiante_nombre'])) ?></div>
                             <div class="estudiante-email"><?= htmlspecialchars($intento['estudiante_email']) ?></div>
                         </div>
                     </div>

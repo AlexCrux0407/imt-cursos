@@ -55,7 +55,7 @@ require __DIR__ . '/../partials/nav.php';
         <div class="div-fila" style="gap: 20px;">
             <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
                 <div style="font-weight: 600; color: #2c3e50;">Nombre</div>
-                <div style="color: #34495e;"><?= htmlspecialchars($docente['nombre']) ?></div>
+                <div style="color: #34495e;"><?= htmlspecialchars(format_nombre($docente['nombre'])) ?></div>
             </div>
             <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
                 <div style="font-weight: 600; color: #2c3e50;">Email</div>

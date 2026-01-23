@@ -11,7 +11,12 @@ if ($id <= 0) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT id, nombre, email, usuario, estado, created_at, updated_at FROM usuarios WHERE id = :id AND role = 'estudiante' LIMIT 1");
+$stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'tipo_estudiante'");
+$stmt->execute();
+$tiene_tipo_estudiante = (bool)$stmt->fetch();
+
+$select_tipo_estudiante = $tiene_tipo_estudiante ? ", tipo_estudiante" : ", 'interno' as tipo_estudiante";
+$stmt = $conn->prepare("SELECT id, nombre, email, usuario, estado, created_at, updated_at $select_tipo_estudiante FROM usuarios WHERE id = :id AND role = 'estudiante' LIMIT 1");
 $stmt->execute([':id' => $id]);
 $estudiante = $stmt->fetch();
 if (!$estudiante) {
@@ -54,7 +59,7 @@ require __DIR__ . '/../partials/nav.php';
         <div class="div-fila" style="gap: 20px;">
             <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
                 <div style="font-weight: 600; color: #2c3e50;">Nombre</div>
-                <div style="color: #34495e;"><?= htmlspecialchars($estudiante['nombre']) ?></div>
+                <div style="color: #34495e;"><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></div>
             </div>
             <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
                 <div style="font-weight: 600; color: #2c3e50;">Email</div>
@@ -73,6 +78,10 @@ require __DIR__ . '/../partials/nav.php';
                         <?= ucfirst($estudiante['estado']) ?>
                     </span>
                 </div>
+            </div>
+            <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
+                <div style="font-weight: 600; color: #2c3e50;">Tipo</div>
+                <div style="color: #34495e;"><?= ucfirst($estudiante['tipo_estudiante'] ?? 'interno') ?></div>
             </div>
             <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
                 <div style="font-weight: 600; color: #2c3e50;">Registro</div>

@@ -131,7 +131,7 @@ require __DIR__ . '/../partials/nav.php';
             <button onclick="cerrarModal()" class="modal-close">&times;</button>
         </div>
         
-        <form method="POST" action="<?= BASE_URL ?>/docente/procesar_subtema.php">
+        <form method="POST" action="<?= BASE_URL ?>/docente/procesar_subtema.php" enctype="multipart/form-data">
             <input type="hidden" name="tema_id" value="<?= $tema_id ?>">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
@@ -149,6 +149,12 @@ require __DIR__ . '/../partials/nav.php';
             <div class="form-group">
                 <label class="form-label">Orden</label>
                 <input type="number" name="orden" value="<?= count($subtemas) + 1 ?>" min="1" required class="form-input">
+            </div>
+
+            <div class="form-group" style="padding: 16px; border: 2px dashed #e8ecef; border-radius: 8px; background: #fafbfc;">
+                <label class="form-label">Subir Archivos (opcional)</label>
+                <input type="file" name="archivos[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.avi,.mov,.jpg,.jpeg,.png" class="form-input">
+                <small style="color: #7f8c8d; display:block; margin-top:8px;">Puedes seleccionar varios archivos. Formatos permitidos: PDF, DOC, DOCX, PPT, PPTX, MP4, AVI, MOV, JPG, PNG (Max: 50MB por archivo)</small>
             </div>
             
             <div class="modal-actions">

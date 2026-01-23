@@ -1,6 +1,13 @@
 <?php
 require_once __DIR__ . '/../config/paths.php';
 
+/*
+ Servicio de Media (Proxy Seguro)
+ - Sirve videos de bienvenida desde `uploads/media`.
+ - Valida nombre y extensión, detecta MIME y cachea.
+ - Soporta peticiones parciales (HTTP Range) y ETag.
+ */
+
 // Proxy seguro para servir videos de bienvenida desde uploads/media,
 // tanto si están en PUBLIC_PATH como si están en UPLOADS_PATH.
 
@@ -52,9 +59,31 @@ $start = 0;
 $end   = $size - 1;
 $length = $size;
 
+// Cabeceras de caché robustas para revalidación
+$mtime = filemtime($path);
+$filename = basename($path);
+$etag = '"' . md5($filename . '-' . $size . '-' . $mtime) . '"';
+$lastModified = gmdate('D, d M Y H:i:s', $mtime) . ' GMT';
+
 header('Content-Type: ' . $mime);
 header('Accept-Ranges: bytes');
-header('Cache-Control: public, max-age=604800'); // 7 días
+// Evitar contenido obsoleto: revalidación en cada request
+header('Cache-Control: public, max-age=0, must-revalidate');
+header('ETag: ' . $etag);
+header('Last-Modified: ' . $lastModified);
+
+// Si el cliente tiene una copia válida, responder 304
+if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+    http_response_code(304);
+    exit;
+}
+if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+    $ifModifiedSince = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+    if ($ifModifiedSince !== false && $ifModifiedSince >= $mtime) {
+        http_response_code(304);
+        exit;
+    }
+}
 
 // Manejar peticiones parciales
 if (isset($_SERVER['HTTP_RANGE'])) {

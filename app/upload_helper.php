@@ -1,6 +1,9 @@
 <?php
-/**
- * Helper para manejo de archivos organizados por curso.
+/*
+ Helper de Subidas y Organización de Archivos
+ - Construye rutas por curso/módulo/tema/subtema/lección.
+ - Valida extensiones y mueve archivos de forma segura.
+ - Elimina archivos y genera URL pública bajo `uploads/cursos`.
  */
 
 require_once __DIR__ . '/../config/database.php';

@@ -127,7 +127,7 @@ function generarReporteCursos($pdf, $conn, $id = null) {
     $fill = false;
     
     foreach ($cursos as $curso) {
-        // Verificar si necesitamos una nueva página
+        // Verificar si se necesita una nueva página
         if ($pdf->GetY() > 250) {
             $pdf->AddPage();
             // Repetir encabezados
@@ -166,7 +166,7 @@ function generarReporteCursos($pdf, $conn, $id = null) {
         }
         
         $pdf->Cell(25, 8, number_format($progreso, 1) . '%', 1, 1, 'C', true);
-        $pdf->SetTextColor(0, 0, 0); // Volver a negro
+        $pdf->SetTextColor(0, 0, 0); // negro
         
         $fill = !$fill;
     }
@@ -508,6 +508,7 @@ switch ($tipo) {
 
 // Generar nombre del archivo
 $filename = 'reporte_' . $tipo . ($id ? '_' . $id : '') . '_' . date('Y-m-d_H-i') . '.pdf';
+
 
 // Salida del PDF
 $pdf->Output($filename, 'D');

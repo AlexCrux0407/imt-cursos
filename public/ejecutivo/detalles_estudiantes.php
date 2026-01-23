@@ -118,6 +118,7 @@ require __DIR__ . '/../partials/nav.php';
 ?>
 
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/ejecutivo.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/ejecutivo-detalles-estudiantes.css">
 
 <div class="exec-dashboard">
     <div class="exec-header">
@@ -206,7 +207,7 @@ require __DIR__ . '/../partials/nav.php';
                 <div class="student-detail-card">
                     <div class="student-header">
                         <div class="student-info">
-                            <h3 class="student-name"><?= htmlspecialchars($estudiante['nombre']) ?></h3>
+                            <h3 class="student-name"><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></h3>
                             <p class="student-email"><?= htmlspecialchars($estudiante['email']) ?></p>
                             <?php if (isset($estudiante['telefono']) && $estudiante['telefono']): ?>
                                 <p class="student-phone"><?= htmlspecialchars($estudiante['telefono']) ?></p>

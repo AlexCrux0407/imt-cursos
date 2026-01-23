@@ -20,6 +20,10 @@ if (!$usuario) {
     exit;
 }
 
+$stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'tipo_estudiante'");
+$stmt->execute();
+$tiene_tipo_estudiante = (bool)$stmt->fetch();
+
 $success = $_GET['success'] ?? '';
 $error = $_GET['error'] ?? '';
 
@@ -30,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Removed telefono (no requerido)
     $estado = $_POST['estado'] ?? 'activo';
     $password = trim($_POST['password'] ?? '');
+    $tipo_estudiante = $_POST['tipo_estudiante'] ?? 'interno';
 
     $errors = [];
 
@@ -37,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'El email es obligatorio y debe ser válido';
     if ($usuario_name === '') $errors[] = 'El usuario es obligatorio';
     if (!in_array($estado, ['activo','inactivo'], true)) $errors[] = 'Estado inválido';
+    if ($tiene_tipo_estudiante && !in_array($tipo_estudiante, ['interno', 'externo'], true)) $errors[] = 'Tipo de estudiante inválido';
 
     // Verificar email único (excluyendo el actual)
     $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
@@ -52,27 +58,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
+            $set_parts = [
+                "nombre = :nombre",
+                "email = :email",
+                "usuario = :usuario",
+                "estado = :estado",
+                "updated_at = NOW()"
+            ];
+            $params = [
+                ':nombre' => $nombre,
+                ':email' => $email,
+                ':usuario' => $usuario_name,
+                ':estado' => $estado,
+                ':id' => $id
+            ];
+            
+            if ($tiene_tipo_estudiante) {
+                $set_parts[] = "tipo_estudiante = :tipo_estudiante";
+                $params[':tipo_estudiante'] = $tipo_estudiante;
+            }
+            
             if (!empty($password)) {
                 $hashed = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $conn->prepare("UPDATE usuarios SET nombre = :nombre, email = :email, usuario = :usuario, estado = :estado, password = :password, updated_at = NOW() WHERE id = :id AND role = 'estudiante'");
-                $stmt->execute([
-                    ':nombre' => $nombre,
-                    ':email' => $email,
-                    ':usuario' => $usuario_name,
-                    ':estado' => $estado,
-                    ':password' => $hashed,
-                    ':id' => $id
-                ]);
-            } else {
-                $stmt = $conn->prepare("UPDATE usuarios SET nombre = :nombre, email = :email, usuario = :usuario, estado = :estado, updated_at = NOW() WHERE id = :id AND role = 'estudiante'");
-                $stmt->execute([
-                    ':nombre' => $nombre,
-                    ':email' => $email,
-                    ':usuario' => $usuario_name,
-                    ':estado' => $estado,
-                    ':id' => $id
-                ]);
+                $set_parts[] = "password = :password";
+                $params[':password'] = $hashed;
             }
+            
+            $stmt = $conn->prepare("UPDATE usuarios SET " . implode(', ', $set_parts) . " WHERE id = :id AND role = 'estudiante'");
+            $stmt->execute($params);
             header('Location: ' . BASE_URL . '/master/editar_estudiante.php?id=' . $id . '&success=perfil_actualizado');
             exit;
         } catch (Throwable $e) {
@@ -141,6 +154,17 @@ require __DIR__ . '/../partials/nav.php';
                         <option value="inactivo" <?= $usuario['estado'] === 'inactivo' ? 'selected' : '' ?>>Inactivo</option>
                     </select>
                 </div>
+                <?php if ($tiene_tipo_estudiante): ?>
+                    <div style="flex: 1;">
+                        <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Tipo de Estudiante</label>
+                        <select name="tipo_estudiante" style="width: 100%; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                            <option value="interno" <?= ($usuario['tipo_estudiante'] ?? 'interno') === 'interno' ? 'selected' : '' ?>>Interno</option>
+                            <option value="externo" <?= ($usuario['tipo_estudiante'] ?? 'interno') === 'externo' ? 'selected' : '' ?>>Externo</option>
+                        </select>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="div-fila" style="gap: 16px;">
                 <div style="flex: 1;">
                     <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Nueva Contraseña</label>
                     <input type="password" name="password" placeholder="Dejar en blanco para no cambiar" 

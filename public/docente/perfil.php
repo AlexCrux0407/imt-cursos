@@ -81,7 +81,7 @@ require __DIR__ . '/../partials/nav.php';
                 <div style="margin-top: 20px;">
                     <button onclick="window.location.href='<?= BASE_URL ?>/docente/dashboard.php'" 
                             style="width: 100%; background: transparent; color: #3498db; border: 2px solid #3498db; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                        Volver al Dashboard
+                        Volver al Tablero
                     </button>
                 </div>
             </div>

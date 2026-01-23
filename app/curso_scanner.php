@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Escanea un curso importado con convención de carpetas y retorna CSS opcional y lista de lecciones ordenadas.
- *
- * @param string $cursoDir Ruta física al curso
- * @return array{css:string|null, lecciones:array}
+/*
+ Escáner de Curso Importado
+ - Detecta CSS de tema y construye lista de lecciones.
+ - Navega estructura módulo/tema/subtema/lección ordenada.
+ - Extrae títulos desde <h1> y normaliza rutas relativas.
  */
 function scanImportedCourse(string $cursoDir): array {
     $result = [

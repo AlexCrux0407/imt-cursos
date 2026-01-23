@@ -4,8 +4,10 @@ require_once __DIR__ . '/../Controller.php';
 
 /*
  Controlador Docente
- Gestiona dashboard, cursos, módulos y reportes del docente.
-*/
+ - Muestra dashboard con métricas y cursos recientes.
+ - Administra cursos propios: listado, edición y creación.
+ - Genera reportes y vistas de módulos/temas/subtemas.
+ */
 
 class DocenteController extends Controller
 {

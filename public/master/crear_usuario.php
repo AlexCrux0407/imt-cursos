@@ -51,23 +51,41 @@ if ($stmt->fetch()) {
     exit;
 }
 
+$stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'tipo_estudiante'");
+$stmt->execute();
+$tiene_tipo_estudiante = (bool)$stmt->fetch();
+$tipo_estudiante = $input['tipo_estudiante'] ?? 'interno';
+if ($tiene_tipo_estudiante && !in_array($tipo_estudiante, ['interno', 'externo'], true)) {
+    echo json_encode(['success' => false, 'message' => 'Tipo de estudiante no válido']);
+    exit;
+}
+
 try {
     // Crear el usuario
     $password_hash = password_hash($input['password'], PASSWORD_DEFAULT);
     $estado = $input['estado'] ?? 'activo';
-    
-    $sql = "INSERT INTO usuarios (nombre, email, usuario, password, role, estado, created_at) 
-            VALUES (:nombre, :email, :usuario, :password, :role, :estado, NOW())";
-    
-    $stmt = $conn->prepare($sql);
-    $result = $stmt->execute([
+
+    $sql = "INSERT INTO usuarios (nombre, email, usuario, password, role, estado, created_at";
+    $valores = "VALUES (:nombre, :email, :usuario, :password, :role, :estado, NOW()";
+    $parametros = [
         ':nombre' => $input['nombre'],
         ':email' => $input['email'],
         ':usuario' => $input['usuario'],
         ':password' => $password_hash,
         ':role' => $input['role'],
         ':estado' => $estado
-    ]);
+    ];
+    
+    if ($tiene_tipo_estudiante) {
+        $sql .= ", tipo_estudiante";
+        $valores .= ", :tipo_estudiante";
+        $parametros[':tipo_estudiante'] = $tipo_estudiante;
+    }
+    
+    $sql .= ") " . $valores . ")";
+    
+    $stmt = $conn->prepare($sql);
+    $result = $stmt->execute($parametros);
     
     if ($result) {
         $user_id = $conn->lastInsertId();

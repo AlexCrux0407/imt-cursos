@@ -78,7 +78,7 @@ require __DIR__ . '/../partials/nav.php';
                  onmouseover="this.style.borderColor='#3498db'; this.style.transform='translateY(-2px)'"
                  onmouseout="this.style.borderColor='#e3f2fd'; this.style.transform='translateY(0)'">
                 <img src="<?= BASE_URL ?>/styles/iconos/home.png" style="width: 48px; height: 48px; filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(210deg) brightness(104%) contrast(97%); margin-bottom: 15px;">
-                <h4 style="color: #2c3e50; margin-bottom: 10px;">Dashboard</h4>
+                <h4 style="color: #2c3e50; margin-bottom: 10px;">Tablero</h4>
                 <p style="color: #7f8c8d; margin: 0;">Volver al panel principal</p>
             </div>
         </div>

@@ -150,21 +150,58 @@ require __DIR__ . '/../partials/nav.php';
               <input type="color" name="fecha_font_color" id="fecha_font_color" value="<?= htmlspecialchars($config['fecha_font_color'] ?? '') ?>" style="width:50%; padding:10px; border:2px solid #e1e5e9; border-radius:8px; height:42px;">
             </div>
           </div>
+
+          <?php // Mostrar duración (horas) solo si la opción está activada ?>
+          <div style="flex:1; min-width:280px; <?= (int)($config['mostrar_duracion'] ?? 0) !== 1 ? 'display:none;' : '' ?>">
+            <label>Duración (horas) - Fuente</label>
+            <select name="duracion_font_family" id="duracion_font_family" style="width:100%; padding:10px; border:2px solid #e1e5e9; border-radius:8px;">
+              <option value="">(Usar global)</option>
+              <option value="Arial" <?= ($config['duracion_font_family'] ?? '') === 'Arial' ? 'selected' : '' ?>>Arial</option>
+              <option value="Times New Roman" <?= ($config['duracion_font_family'] ?? '') === 'Times New Roman' ? 'selected' : '' ?>>Times New Roman</option>
+              <option value="Verdana" <?= ($config['duracion_font_family'] ?? '') === 'Verdana' ? 'selected' : '' ?>>Verdana</option>
+              <option value="Tahoma" <?= ($config['duracion_font_family'] ?? '') === 'Tahoma' ? 'selected' : '' ?>>Tahoma</option>
+              <option value="Georgia" <?= ($config['duracion_font_family'] ?? '') === 'Georgia' ? 'selected' : '' ?>>Georgia</option>
+            </select>
+            <div class="div-fila" style="gap:10px; margin-top:8px;">
+              <input type="number" name="duracion_font_size" id="duracion_font_size" value="<?= htmlspecialchars($config['duracion_font_size'] ?? '') ?>" placeholder="Tamaño (pt)" min="8" max="72" step="1" style="width:50%; padding:10px; border:2px solid #e1e5e9; border-radius:8px;">
+              <input type="color" name="duracion_font_color" id="duracion_font_color" value="<?= htmlspecialchars($config['duracion_font_color'] ?? '') ?>" style="width:50%; padding:10px; border:2px solid #e1e5e9; border-radius:8px; height:42px;">
+            </div>
+          </div>
+
+          <div style="flex:1; min-width:280px;">
+            <label>ID del Certificado - Fuente</label>
+            <select name="codigo_font_family" id="codigo_font_family" style="width:100%; padding:10px; border:2px solid #e1e5e9; border-radius:8px;">
+              <option value="">(Usar global)</option>
+              <option value="Arial" <?= ($config['codigo_font_family'] ?? '') === 'Arial' ? 'selected' : '' ?>>Arial</option>
+              <option value="Times New Roman" <?= ($config['codigo_font_family'] ?? '') === 'Times New Roman' ? 'selected' : '' ?>>Times New Roman</option>
+              <option value="Verdana" <?= ($config['codigo_font_family'] ?? '') === 'Verdana' ? 'selected' : '' ?>>Verdana</option>
+              <option value="Tahoma" <?= ($config['codigo_font_family'] ?? '') === 'Tahoma' ? 'selected' : '' ?>>Tahoma</option>
+              <option value="Georgia" <?= ($config['codigo_font_family'] ?? '') === 'Georgia' ? 'selected' : '' ?>>Georgia</option>
+            </select>
+            <div class="div-fila" style="gap:10px; margin-top:8px;">
+              <input type="number" name="codigo_font_size" id="codigo_font_size" value="<?= htmlspecialchars($config['codigo_font_size'] ?? '') ?>" placeholder="Tamaño (pt)" min="8" max="72" step="1" style="width:50%; padding:10px; border:2px solid #e1e5e9; border-radius:8px;">
+              <input type="color" name="codigo_font_color" id="codigo_font_color" value="<?= htmlspecialchars($config['codigo_font_color'] ?? '#2c3e50') ?>" style="width:50%; padding:10px; border:2px solid #e1e5e9; border-radius:8px; height:42px;">
+            </div>
+          </div>
         </div>
         <p style="color:#6b7280; margin-top:8px;">Si dejas vacío un estilo, se usará el estilo global.</p>
       </div>
 
       <div style="margin-bottom: 20px;">
         <label style="display:block; margin-bottom:8px; font-weight:500; color:#333;">Campos y posiciones (arrastrables)</label>
-        <div id="templatePreview" style="position:relative; border:1px solid #e1e5e9; border-radius:8px; overflow:hidden; min-height:300px;">
+        <div id="templatePreview" style="position:relative; border:1px solid #e1e5e9; border-radius:8px; overflow:hidden; min-height:300px; max-height:80vh; display:inline-block; margin:0 auto;">
           <?php if (!empty($config['template_path'])): ?>
-            <img id="previewImage" src="<?= BASE_URL ?>/serve_certificado_template.php?curso_id=<?= (int)$curso['id'] ?>&path=<?= urlencode($config['template_path'] ?? '') ?>" alt="Plantilla" style="width:100%; display:block;">
+            <img id="previewImage" src="<?= BASE_URL ?>/serve_certificado_template.php?curso_id=<?= (int)$curso['id'] ?>&path=<?= urlencode($config['template_path'] ?? '') ?>" alt="Plantilla" style="max-width:100%; max-height:80vh; width:auto; height:auto; display:block;">
             <div class="drag-field" id="field-nombre">Nombre del Estudiante</div>
             <div class="drag-field" id="field-curso">Nombre del Curso</div>
             <?php if ((int)($config['mostrar_calificacion'] ?? 0) === 1): ?>
               <div class="drag-field" id="field-calificacion">Calificación</div>
             <?php endif; ?>
             <div class="drag-field" id="field-fecha">Fecha de Completado</div>
+            <?php if ((int)($config['mostrar_duracion'] ?? 0) === 1): ?>
+              <div class="drag-field" id="field-duracion">Duración Estimada (horas)</div>
+            <?php endif; ?>
+            <div class="drag-field" id="field-codigo">ID del Certificado</div>
           <?php else: ?>
             <div style="padding:20px; color:#6c757d;">Sube una imagen de plantilla para activar la vista previa y arrastrar los campos.</div>
           <?php endif; ?>
@@ -180,6 +217,10 @@ require __DIR__ . '/../partials/nav.php';
         <input type="hidden" name="calificacion_y" id="calificacion_y" value="<?= htmlspecialchars($config['calificacion_y'] ?? '') ?>">
         <input type="hidden" name="fecha_x" id="fecha_x" value="<?= htmlspecialchars($config['fecha_x'] ?? '') ?>">
         <input type="hidden" name="fecha_y" id="fecha_y" value="<?= htmlspecialchars($config['fecha_y'] ?? '') ?>">
+        <input type="hidden" name="duracion_x" id="duracion_x" value="<?= htmlspecialchars($config['duracion_x'] ?? '') ?>">
+        <input type="hidden" name="duracion_y" id="duracion_y" value="<?= htmlspecialchars($config['duracion_y'] ?? '') ?>">
+        <input type="hidden" name="codigo_x" id="codigo_x" value="<?= htmlspecialchars($config['codigo_x'] ?? '') ?>">
+        <input type="hidden" name="codigo_y" id="codigo_y" value="<?= htmlspecialchars($config['codigo_y'] ?? '') ?>">
 
         <div class="div-fila" style="gap: 15px; margin-top: 10px; flex-wrap: wrap;">
           <div style="flex:1; min-width:260px;">
@@ -210,6 +251,20 @@ require __DIR__ . '/../partials/nav.php';
               <input type="number" step="0.1" min="0" max="100" id="fecha_y_input" value="<?= htmlspecialchars($config['fecha_y'] ?? '') ?>" style="width:100%; padding:8px; border:2px solid #e1e5e9; border-radius:8px;">
             </div>
           </div>
+          <div style="flex:1; min-width:260px;">
+            <label>Duración (x%, y%)</label>
+            <div class="div-fila" style="gap:10px;">
+              <input type="number" step="0.1" min="0" max="100" id="duracion_x_input" value="<?= htmlspecialchars($config['duracion_x'] ?? '') ?>" style="width:100%; padding:8px; border:2px solid #e1e5e9; border-radius:8px;">
+              <input type="number" step="0.1" min="0" max="100" id="duracion_y_input" value="<?= htmlspecialchars($config['duracion_y'] ?? '') ?>" style="width:100%; padding:8px; border:2px solid #e1e5e9; border-radius:8px;">
+            </div>
+          </div>
+          <div style="flex:1; min-width:260px;">
+            <label>ID del Certificado (x%, y%)</label>
+            <div class="div-fila" style="gap:10px;">
+              <input type="number" step="0.1" min="0" max="100" id="codigo_x_input" value="<?= htmlspecialchars($config['codigo_x'] ?? '') ?>" style="width:100%; padding:8px; border:2px solid #e1e5e9; border-radius:8px;">
+              <input type="number" step="0.1" min="0" max="100" id="codigo_y_input" value="<?= htmlspecialchars($config['codigo_y'] ?? '') ?>" style="width:100%; padding:8px; border:2px solid #e1e5e9; border-radius:8px;">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -218,6 +273,11 @@ require __DIR__ . '/../partials/nav.php';
         <div>
           <label style="display:flex; align-items:center; gap:8px;">
             <input type="checkbox" name="mostrar_calificacion" value="1" <?= (int)($config['mostrar_calificacion'] ?? 0) === 1 ? 'checked' : '' ?>> Mostrar calificación en el certificado
+          </label>
+        </div>
+        <div style="margin-top:8px;">
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" name="mostrar_duracion" value="1" <?= (int)($config['mostrar_duracion'] ?? 0) === 1 ? 'checked' : '' ?>> Mostrar duración estimada (horas)
           </label>
         </div>
         <div style="margin-top:8px;">
@@ -238,6 +298,33 @@ require __DIR__ . '/../partials/nav.php';
 <script>
       function ptToPx(pt) { return pt * (96 / 72); }
 
+      function getPreviewScale() {
+        const img = document.getElementById('previewImage');
+        if (!img) return 1;
+        const rect = img.getBoundingClientRect();
+        const rectW = rect.width || 1;
+        const rectH = rect.height || 1;
+        const naturalW = img.naturalWidth || rectW;
+        const naturalH = img.naturalHeight || rectH;
+        // Normalizar por devicePixelRatio para que el zoom del navegador no afecte la escala
+        const dpr = window.devicePixelRatio || 1;
+        const naturalCssW = naturalW / dpr;
+        const naturalCssH = naturalH / dpr;
+        const scaleW = rectW / (naturalCssW || rectW);
+        const scaleH = rectH / (naturalCssH || rectH);
+        return Math.min(scaleW, scaleH);
+      }
+
+      function syncContainerSizeToImage() {
+        const img = document.getElementById('previewImage');
+        const container = document.getElementById('templatePreview');
+        if (!img || !container) return;
+        // No fijar ancho/alto; dejar que el contenedor se adapte al tamaño actual de la imagen
+        // para evitar quedarse "pequeño" tras cambios de zoom.
+        container.style.width = '';
+        container.style.height = '';
+      }
+
       function applyStylesField(el, familyInput, sizeInput, colorInput) {
         const globalFamily = document.getElementById('font_family').value || 'Arial';
         const globalSizePt = parseInt(document.getElementById('font_size').value || '24', 10);
@@ -247,8 +334,10 @@ require __DIR__ . '/../partials/nav.php';
         const sizePt = (sizeInput && sizeInput.value) ? parseInt(sizeInput.value, 10) : globalSizePt;
         const color = (colorInput && colorInput.value) ? colorInput.value : globalColor;
 
+        // Escalar tamaño por la relación de la imagen mostrada vs su tamaño natural
+        const scale = getPreviewScale();
         el.style.fontFamily = family;
-        el.style.fontSize = ptToPx(sizePt) + 'px';
+        el.style.fontSize = (ptToPx(sizePt) * scale) + 'px';
         el.style.color = color;
         el.style.textAlign = 'center';
         el.style.transform = 'translate(-50%, -50%)';
@@ -259,6 +348,8 @@ require __DIR__ . '/../partials/nav.php';
         const cursoEl = document.getElementById('field-curso');
         const calEl = document.getElementById('field-calificacion');
         const fechaEl = document.getElementById('field-fecha');
+        const durEl = document.getElementById('field-duracion');
+        const codigoEl = document.getElementById('field-codigo');
 
         const nombreFamily = document.getElementById('nombre_font_family');
         const nombreSize = document.getElementById('nombre_font_size');
@@ -276,10 +367,20 @@ require __DIR__ . '/../partials/nav.php';
         const fechaSize = document.getElementById('fecha_font_size');
         const fechaColor = document.getElementById('fecha_font_color');
 
+        const durFamily = document.getElementById('duracion_font_family');
+        const durSize = document.getElementById('duracion_font_size');
+        const durColor = document.getElementById('duracion_font_color');
+
+        const codigoFamily = document.getElementById('codigo_font_family');
+        const codigoSize = document.getElementById('codigo_font_size');
+        const codigoColor = document.getElementById('codigo_font_color');
+
         if (nombreEl) applyStylesField(nombreEl, nombreFamily, nombreSize, nombreColor);
         if (cursoEl) applyStylesField(cursoEl, cursoFamily, cursoSize, cursoColor);
         if (calEl) applyStylesField(calEl, calFamily, calSize, calColor);
         if (fechaEl) applyStylesField(fechaEl, fechaFamily, fechaSize, fechaColor);
+        if (durEl) applyStylesField(durEl, durFamily, durSize, durColor);
+        if (codigoEl) applyStylesField(codigoEl, codigoFamily, codigoSize, codigoColor);
       }
 
       function makeDraggable(fieldId, hiddenXId, hiddenYId, inputXId, inputYId) {
@@ -357,14 +458,28 @@ require __DIR__ . '/../partials/nav.php';
         syncHidden(initX, initY);
       }
 
+      // Debounce helper para evitar oscilaciones de tamaño
+      let syncTimer = null;
+      function debouncedSyncAndApply(){
+        if(syncTimer) clearTimeout(syncTimer);
+        syncTimer = setTimeout(function(){
+          syncContainerSizeToImage();
+          applyStylesAll();
+        }, 100);
+      }
+
       window.addEventListener('load', function() {
-        applyStylesAll();
+        debouncedSyncAndApply();
         makeDraggable('field-nombre', 'nombre_x', 'nombre_y', 'nombre_x_input', 'nombre_y_input');
         makeDraggable('field-curso', 'curso_x', 'curso_y', 'curso_x_input', 'curso_y_input');
         <?php if ((int)($config['mostrar_calificacion'] ?? 0) === 1): ?>
           makeDraggable('field-calificacion', 'calificacion_x', 'calificacion_y', 'calificacion_x_input', 'calificacion_y_input');
         <?php endif; ?>
         makeDraggable('field-fecha', 'fecha_x', 'fecha_y', 'fecha_x_input', 'fecha_y_input');
+        <?php if ((int)($config['mostrar_duracion'] ?? 0) === 1): ?>
+          makeDraggable('field-duracion', 'duracion_x', 'duracion_y', 'duracion_x_input', 'duracion_y_input');
+        <?php endif; ?>
+        makeDraggable('field-codigo', 'codigo_x', 'codigo_y', 'codigo_x_input', 'codigo_y_input');
 
         // Estilos en tiempo real: globales y por campo
         const styleInputs = [
@@ -372,7 +487,9 @@ require __DIR__ . '/../partials/nav.php';
           'nombre_font_family','nombre_font_size','nombre_font_color',
           'curso_font_family','curso_font_size','curso_font_color',
           'calificacion_font_family','calificacion_font_size','calificacion_font_color',
-          'fecha_font_family','fecha_font_size','fecha_font_color'
+          'fecha_font_family','fecha_font_size','fecha_font_color',
+          'duracion_font_family','duracion_font_size','duracion_font_color',
+          'codigo_font_family','codigo_font_size','codigo_font_color'
         ];
         styleInputs.forEach(id => {
           const el = document.getElementById(id);
@@ -380,6 +497,18 @@ require __DIR__ . '/../partials/nav.php';
           el.addEventListener('input', applyStylesAll);
           el.addEventListener('change', applyStylesAll);
         });
+
+        // Reaplicar estilos en resize/zoom para mantener proporción sin cambiar tamaño en ediciones
+        window.addEventListener('resize', debouncedSyncAndApply);
+        const img = document.getElementById('previewImage');
+        if (img) img.addEventListener('load', debouncedSyncAndApply);
+        // Observar cambios de tamaño de la imagen (e.g., por zoom, reflow, cambios de viewport)
+        if (window.ResizeObserver) {
+          const ro = new ResizeObserver(() => debouncedSyncAndApply());
+          if (img) ro.observe(img);
+        }
+        // Primera sincronización por si la imagen ya está cargada
+        debouncedSyncAndApply();
       });
     </script>
 

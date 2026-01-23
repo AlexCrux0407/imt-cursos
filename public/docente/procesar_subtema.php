@@ -47,20 +47,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $subtema_id = $conn->lastInsertId();
         
-        // Handle file upload if exists using new structure
-        if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
+        // Manejar múltiples archivos si se enviaron (archivos[])
+        if (isset($_FILES['archivos']) && is_array($_FILES['archivos']['name'])) {
             require_once __DIR__ . '/../../app/upload_helper.php';
-            
+            try {
+                // Crear tabla subtema_recursos si no existe
+                $checkTable = $conn->query("SHOW TABLES LIKE 'subtema_recursos'");
+                if (!$checkTable->fetch()) {
+                    $conn->exec("CREATE TABLE IF NOT EXISTS subtema_recursos (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        subtema_id INT NOT NULL,
+                        url VARCHAR(255) NOT NULL,
+                        nombre VARCHAR(255) NULL,
+                        tipo VARCHAR(50) NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        INDEX(subtema_id)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                }
+
+                $upload_helper = new UploadHelper($conn);
+                $names = $_FILES['archivos']['name'];
+                $tmp_names = $_FILES['archivos']['tmp_name'];
+                $errors = $_FILES['archivos']['error'];
+                $sizes = $_FILES['archivos']['size'];
+                $types = $_FILES['archivos']['type'];
+
+                for ($i = 0; $i < count($names); $i++) {
+                    if ($errors[$i] === UPLOAD_ERR_OK) {
+                        $file = [
+                            'name' => $names[$i],
+                            'type' => $types[$i] ?? '',
+                            'tmp_name' => $tmp_names[$i],
+                            'error' => $errors[$i],
+                            'size' => $sizes[$i]
+                        ];
+
+                        try {
+                            $archivo_url_multi = $upload_helper->handleFileUpload($file, 'subtema', $subtema_id);
+                            if ($archivo_url_multi) {
+                                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                                $ins = $conn->prepare("INSERT INTO subtema_recursos (subtema_id, url, nombre, tipo) VALUES (:sid, :url, :nombre, :tipo)");
+                                $ins->execute([
+                                    ':sid' => $subtema_id,
+                                    ':url' => $archivo_url_multi,
+                                    ':nombre' => $file['name'],
+                                    ':tipo' => $ext
+                                ]);
+                            }
+                        } catch (Exception $e) {
+                            error_log('Error subiendo archivo múltiple de subtema: ' . $e->getMessage());
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                error_log('Error procesando múltiples archivos de subtema: ' . $e->getMessage());
+            }
+        } elseif (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
+            // Compatibilidad: si viene un único archivo en 'archivo', guárdalo en recurso_url
+            require_once __DIR__ . '/../../app/upload_helper.php';
             try {
                 $upload_helper = new UploadHelper($conn);
                 $archivo_url = $upload_helper->handleFileUpload($_FILES['archivo'], 'subtema', $subtema_id);
-                
                 if ($archivo_url) {
-                    // Check if subtemas table has recurso_url column
                     $stmt = $conn->prepare("SHOW COLUMNS FROM subtemas LIKE 'recurso_url'");
                     $stmt->execute();
                     $column_exists = $stmt->fetch();
-                    
+                    if (!$column_exists) {
+                        try {
+                            $conn->exec("ALTER TABLE subtemas ADD COLUMN recurso_url VARCHAR(255) NULL");
+                            $stmt = $conn->prepare("SHOW COLUMNS FROM subtemas LIKE 'recurso_url'");
+                            $stmt->execute();
+                            $column_exists = $stmt->fetch();
+                        } catch (Exception $e) {
+                            error_log('No se pudo crear la columna recurso_url en subtemas: ' . $e->getMessage());
+                        }
+                    }
+
                     if ($column_exists) {
                         $update_stmt = $conn->prepare("UPDATE subtemas SET recurso_url = :archivo_url WHERE id = :id");
                         $update_stmt->execute([':archivo_url' => $archivo_url, ':id' => $subtema_id]);
@@ -68,7 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } catch (Exception $e) {
                 error_log("Error subiendo archivo de subtema: " . $e->getMessage());
-                // Continuar sin archivo si hay error
             }
         }
         

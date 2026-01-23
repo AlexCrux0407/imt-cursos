@@ -74,10 +74,7 @@ require __DIR__ . '/../partials/nav.php';
                 <span style="color: #3498db; font-weight: 500;"><?= count($lecciones) ?> lecciones</span>
             </div>
             <div>
-                <button onclick="window.history.back()" 
-                        style="background: #e8ecef; color: #5a5c69; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
-                    ← Volver a Módulos
-                </button>
+                <button onclick="window.history.back()" class="btn-volver">← Volver a Módulos</button>
             </div>
         </div>
     </div>

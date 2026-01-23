@@ -19,17 +19,20 @@ $params = [':estudiante_id' => $estudiante_id];
 
 if (!empty($estado_filtro)) {
     if ($estado_filtro === 'completado') {
-        $where_conditions[] = "i.progreso = 100";
+        // Contar como completados por estado explícito
+        $where_conditions[] = "i.estado = 'completado'";
     } elseif ($estado_filtro === 'en_progreso') {
-        $where_conditions[] = "i.progreso > 0 AND i.progreso < 100";
+        // En progreso: excluir completados por estado y tener algún avance
+        $where_conditions[] = "(i.estado IS NULL OR i.estado <> 'completado') AND i.progreso > 0";
     } elseif ($estado_filtro === 'sin_iniciar') {
-        $where_conditions[] = "i.progreso = 0";
+        // Sin iniciar: excluir completados por estado y progreso cero
+        $where_conditions[] = "(i.estado IS NULL OR i.estado <> 'completado') AND i.progreso = 0";
     }
 }
 
-// Excluir cursos completados por defecto, salvo cuando se filtra explícitamente por 'completado'
+// Excluir cursos completados por defecto (por estado), salvo cuando se filtra explícitamente por 'completado'
 if ($estado_filtro !== 'completado') {
-    $where_conditions[] = "i.progreso < 100";
+    $where_conditions[] = "(i.estado IS NULL OR i.estado <> 'completado')";
 }
 
 if (!empty($buscar)) {
@@ -140,14 +143,16 @@ require __DIR__ . '/../partials/nav.php';
                 <h1 class="catalogo-title">Mis Cursos</h1>
                 <p class="catalogo-subtitle">Gestiona tu progreso de aprendizaje</p>
             </div>
-            <div class="header-right">
-                <div class="header-circle">
-                    <div class="circle-value"><?= (int)($estadisticas['total_cursos'] ?? 0) ?></div>
+                <div class="header-right">
+                    <div class="header-circle">
+                        <div class="circle-value"><?= (int)count($cursos) ?></div>
+                    </div>
+                    <div class="header-circle-info">
+                        <div class="header-circle-label">
+                            <?= $estado_filtro === 'completado' ? 'Cursos Completados' : ($estado_filtro === 'en_progreso' ? 'Cursos en Progreso' : ($estado_filtro === 'sin_iniciar' ? 'Cursos Sin Iniciar' : 'Cursos Activos')) ?>
+                        </div>
+                    </div>
                 </div>
-                <div class="header-circle-info">
-                    <div class="header-circle-label">Cursos Inscritos</div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -276,14 +281,7 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     
-    <div class="navegacion-enlaces">
-        <a href="<?= BASE_URL ?>/estudiante/dashboard.php" class="enlace-nav">
-            <i class="icono-nav">←</i> Volver al Dashboard
-        </a>
-        <a href="<?= BASE_URL ?>/estudiante/catalogo.php" class="enlace-nav">
-            Explorar Más Cursos <i class="icono-nav">→</i>
-        </a>
-    </div>
+
 </div>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

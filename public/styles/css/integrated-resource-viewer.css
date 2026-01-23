@@ -108,6 +108,17 @@
     border-radius: 0 0 12px 12px;
 }
 
+/* Ajuste para imágenes verticales: que se vean completas dentro del modal */
+.recurso-viewer-content img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    margin: auto;
+    display: block;
+}
+
 .recurso-message {
     text-align: center;
     padding: 40px 20px;

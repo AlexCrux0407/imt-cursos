@@ -31,8 +31,9 @@
 
 /* Layout principal */
 .dashboard-container {
-    padding: 20px 50px;
-    margin-top: 0;
+    /* El nav compensa el header fijo; no necesitamos pading-top */
+    padding: 0 50px 20px 50px;
+    margin-top: 20px;
     animation: fadeInUp 0.6s ease-out;
 }
 
@@ -49,6 +50,27 @@
     font-size: 1.1rem;
     margin-bottom: 30px;
     animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+/* Encabezado estilo Estudiante (hero compacto) */
+.dashboard-head {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #fff;
+    padding: 24px 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.dashboard-head .dashboard-title {
+    color: #fff;
+    margin: 0 0 6px 0;
+}
+
+.dashboard-head .dashboard-welcome {
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0;
 }
 
 /* Cards de funcionalidades */
@@ -428,7 +450,8 @@
 
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 15px 20px;
+        /* Sin padding-top también en móvil */
+        padding: 0 20px 20px 20px;
     }
     
     .dashboard-title {

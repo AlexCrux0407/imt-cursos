@@ -1,7 +1,10 @@
 <?php
 
-/**
- * Enrutador HTTP simple con soporte de middleware y parámetros de ruta.
+/*
+ Enrutador HTTP
+ - Registra rutas GET/POST con middleware.
+ - Matchea URIs con parámetros `{}` y extrae valores.
+ - Despacha controladores y maneja 404.
  */
 class Router
 {

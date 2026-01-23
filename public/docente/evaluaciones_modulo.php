@@ -181,10 +181,7 @@ require __DIR__ . '/../partials/nav.php';
                 <p style="opacity: 0.9;"><?= htmlspecialchars($modulo['titulo']) ?> - <?= htmlspecialchars($modulo['curso_titulo']) ?></p>
             </div>
             <div style="display: flex; gap: 12px;">
-                <button onclick="window.location.href='<?= BASE_URL ?>/docente/modulos_curso.php?id=<?= $curso_id ?>'" 
-                        style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                    ← Volver a Módulos
-                </button>
+                <button onclick="window.location.href='<?= BASE_URL ?>/docente/modulos_curso.php?id=<?= $curso_id ?>'" class="btn-volver">← Volver a Módulos</button>
                 <button onclick="mostrarFormularioNuevaEvaluacion()" 
                         style="background: white; color: #3498db; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
                     + Nueva Evaluación
@@ -312,8 +309,7 @@ require __DIR__ . '/../partials/nav.php';
                             style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px;">
                         <option value="examen">Examen</option>
                         <option value="quiz">Quiz</option>
-                        <option value="tarea">Tarea</option>
-                        <option value="proyecto">Proyecto</option>
+
                     </select>
                 </div>
                 <div>

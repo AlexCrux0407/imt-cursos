@@ -44,7 +44,7 @@ require __DIR__ . '/../partials/nav.php';
 
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/master.css">
 
-<div class="contenido">
+<div class="admin-container">
     <!-- Header Principal -->
     <div class="form-container-head" style="background: linear-gradient(135deg, #3498db, #3498db); color: white; text-align: center;">
         <h1 style="margin: 0; font-size: 2rem; font-weight: 600;">Administración de Cursos</h1>
@@ -152,9 +152,7 @@ require __DIR__ . '/../partials/nav.php';
                     </label>
                     <select id="estado" name="estado"
                             style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;">
-                        <option value="borrador">Borrador</option>
-                        <option value="revision">En Revisión</option>
-                        <option value="activo" title="Solo usar si el curso está completamente listo">Activo</option>
+                        <option value="borrador">Borrador</option>                        <option value="activo" title="Solo usar si el curso está completamente listo">Activo</option>
                     </select>
                     <small style="color: #6c757d; font-size: 0.85rem;">Recomendado: Borrador para cursos nuevos</small>
                 </div>
@@ -171,6 +169,35 @@ require __DIR__ . '/../partials/nav.php';
             </div>
 
             <div style="margin-bottom: 20px;">
+                <label for="objetivo_general" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                    Objetivo General (opcional)
+                </label>
+                <textarea id="objetivo_general" name="objetivo_general" rows="3"
+                          style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem; resize: vertical;"
+                          placeholder="Objetivo principal del curso"></textarea>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label for="objetivos_especificos" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                    Objetivos Específicos (opcional)
+                </label>
+                <textarea id="objetivos_especificos" name="objetivos_especificos" rows="4"
+                          style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem; resize: vertical;"
+                          placeholder="Lista los objetivos específicos del curso"></textarea>
+            </div>
+
+            <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label for="duracion" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
+                        Duración (opcional)
+                    </label>
+                    <input type="text" id="duracion" name="duracion"
+                           style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;"
+                           placeholder="Ej: 10 horas, 4 semanas, etc.">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
                 <label for="asignado_a" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
                     Asignar a docente (opcional)
                 </label>
@@ -178,7 +205,7 @@ require __DIR__ . '/../partials/nav.php';
                         style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;">
                     <option value="">Sin asignar</option>
                     <?php foreach ($docentes as $docente): ?>
-                        <option value="<?= $docente['id'] ?>"><?= htmlspecialchars($docente['nombre']) ?> (<?= htmlspecialchars($docente['email']) ?>)</option>
+                        <option value="<?= $docente['id'] ?>"><?= htmlspecialchars(format_nombre($docente['nombre'])) ?> (<?= htmlspecialchars($docente['email']) ?>)</option>
                     <?php endforeach; ?>
                 </select>
                 <small style="color: #6c757d; font-size: 0.85rem;">El docente podrá desarrollar el contenido del curso</small>
@@ -340,7 +367,7 @@ require __DIR__ . '/../partials/nav.php';
                     <option value="">Seleccionar docente</option>
                     <?php foreach ($docentes as $docente): ?>
                         <option value="<?= $docente['id'] ?>">
-                            <?= htmlspecialchars($docente['nombre']) ?> (<?= htmlspecialchars($docente['email']) ?>)
+                            <?= htmlspecialchars(format_nombre($docente['nombre'])) ?> (<?= htmlspecialchars($docente['email']) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>

@@ -139,6 +139,7 @@ require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
 ?>
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/estudiante.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/tema-contenido.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/integrated-resource-viewer.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/curso-sidebar.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/styles/css/modulo-contenido.css">
@@ -177,6 +178,7 @@ require __DIR__ . '/../partials/nav.php';
             </h1>
         </div>
 
+        <div class="contenido-modulo">
         <?php if (!empty($subtema['contenido'])): ?>
             <div class="contenido-modulo-section">
                 <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Subtema</h2>
@@ -186,68 +188,95 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         <?php endif; ?>
 
-        <!-- Recursos del subtema -->
-        <?php if (!empty($subtema['recurso_url'])): ?>
+        <!-- Recursos del subtema (múltiples) -->
+        <?php
+        // Construir lista de recursos del subtema desde tabla subtema_recursos + recurso_url legado
+        $recursos_total = [];
+        try {
+            $checkTable = $conn->query("SHOW TABLES LIKE 'subtema_recursos'");
+            if ($checkTable->fetch()) {
+                $st = $conn->prepare("SELECT id, url, nombre, tipo FROM subtema_recursos WHERE subtema_id = :sid ORDER BY id");
+                $st->execute([':sid' => (int)$subtema['id']]);
+                $recursos_total = $st->fetchAll();
+            }
+        } catch (Exception $e) {
+            $recursos_total = [];
+        }
+        if (!empty($subtema['recurso_url'])) {
+            $recursos_total[] = [
+                'id' => 0,
+                'url' => $subtema['recurso_url'],
+                'nombre' => basename($subtema['recurso_url']),
+                'tipo' => strtolower(pathinfo($subtema['recurso_url'], PATHINFO_EXTENSION))
+            ];
+        }
+        ?>
+
+        <?php if (!empty($recursos_total)): ?>
             <div class="contenido-modulo-section">
                 <h2 class="seccion-titulo"><i class="icon-download"></i> Recursos del Subtema</h2>
                 <div class="recursos-lista">
-                    <?php
-                    $extension = strtolower(pathinfo($subtema['recurso_url'], PATHINFO_EXTENSION));
-                    $es_archivo_local = strpos($subtema['recurso_url'], '/imt-cursos/uploads/') === 0;
-                    $es_url_externa = filter_var($subtema['recurso_url'], FILTER_VALIDATE_URL);
-                    $nombre_archivo = basename($subtema['recurso_url']);
-                    
-                    // Determinar el tipo de recurso
-                    $tipo_recurso = 'archivo';
-                    $icono = 'icon-file';
-                    
-                    if (in_array($extension, ['pdf'])) {
-                        $tipo_recurso = 'PDF';
-                        $icono = 'icon-file-pdf';
-                    } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv'])) {
-                        $tipo_recurso = 'Video';
-                        $icono = 'icon-play';
-                    } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        $tipo_recurso = 'Imagen';
-                        $icono = 'icon-image';
-                    } elseif (in_array($extension, ['doc', 'docx'])) {
-                        $tipo_recurso = 'Documento Word';
-                        $icono = 'icon-file-word';
-                    } elseif (in_array($extension, ['ppt', 'pptx'])) {
-                        $tipo_recurso = 'Presentación';
-                        $icono = 'icon-file-powerpoint';
-                    } elseif ($es_url_externa) {
-                        $tipo_recurso = 'Enlace externo';
-                        $icono = 'icon-link';
-                    }
-                    ?>
-                    
-                    <div class="recurso-item">
-                        <div class="recurso-info">
-                            <i class="<?= $icono ?>"></i>
-                            <div class="recurso-detalles">
-                                <h4 class="recurso-nombre"><?= htmlspecialchars($nombre_archivo) ?></h4>
-                                <span class="recurso-tipo"><?= $tipo_recurso ?></span>
+                    <?php foreach ($recursos_total as $rc): ?>
+                        <?php
+                            $recurso = $rc['url'];
+                            $extension = strtolower(pathinfo($recurso, PATHINFO_EXTENSION));
+                            $path = @parse_url($recurso, PHP_URL_PATH);
+                            $host = @parse_url($recurso, PHP_URL_HOST);
+                            $baseHost = @parse_url(BASE_URL, PHP_URL_HOST);
+                            $es_archivo_local = ($path && strpos($path, '/uploads/') !== false) && (!$host || $host === $baseHost);
+                            $es_url_externa = filter_var($recurso, FILTER_VALIDATE_URL) && !$es_archivo_local;
+                            $nombre_archivo = !empty($rc['nombre']) ? $rc['nombre'] : basename($recurso);
+
+                            $tipo_recurso = 'archivo';
+                            $icono = 'icon-file';
+                            if (in_array($extension, ['pdf'])) {
+                                $tipo_recurso = 'PDF';
+                                $icono = 'icon-file-pdf';
+                            } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv'])) {
+                                $tipo_recurso = 'Video';
+                                $icono = 'icon-play';
+                            } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                                $tipo_recurso = 'Imagen';
+                                $icono = 'icon-image';
+                            } elseif (in_array($extension, ['doc', 'docx'])) {
+                                $tipo_recurso = 'Documento Word';
+                                $icono = 'icon-file-word';
+                            } elseif (in_array($extension, ['ppt', 'pptx'])) {
+                                $tipo_recurso = 'Presentación';
+                                $icono = 'icon-file-powerpoint';
+                            } elseif ($es_url_externa) {
+                                $tipo_recurso = 'Enlace externo';
+                                $icono = 'icon-link';
+                            }
+                        ?>
+
+                        <div class="recurso-item">
+                            <div class="recurso-info">
+                                <i class="<?= $icono ?>"></i>
+                                <div class="recurso-detalles">
+                                    <h4 class="recurso-nombre"><?= htmlspecialchars($nombre_archivo) ?></h4>
+                                    <span class="recurso-tipo"><?= $tipo_recurso ?></span>
+                                </div>
+                            </div>
+                            <div class="recurso-acciones">
+                                <?php if ($es_url_externa): ?>
+                                    <a href="<?= htmlspecialchars($recurso) ?>" target="_blank" class="btn-recurso">
+                                        <i class="icon-external-link"></i> Abrir enlace
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($recurso) ?>&titulo=<?= urlencode($subtema['titulo']) ?>"
+                                       target="_blank" class="btn-recurso">
+                                        <i class="icon-eye"></i> Ver recurso
+                                    </a>
+                                    <?php if ($es_archivo_local): ?>
+                                        <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($recurso) ?>&titulo=<?= urlencode($subtema['titulo']) ?>" target="_blank" class="btn-recurso-download">
+                                            <i class="icon-download"></i> Descargar
+                                        </a>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
-                        <div class="recurso-acciones">
-                            <?php if ($es_url_externa): ?>
-                                <a href="<?= htmlspecialchars($subtema['recurso_url']) ?>" target="_blank" class="btn-recurso">
-                                    <i class="icon-external-link"></i> Abrir enlace
-                                </a>
-                            <?php else: ?>
-                                <button onclick="toggleRecursoViewer('<?= htmlspecialchars($subtema['recurso_url']) ?>', '<?= htmlspecialchars($subtema['titulo']) ?>', '<?= $extension ?>')" 
-                                        class="btn-recurso">
-                                    <i class="icon-eye"></i> Ver recurso
-                                </button>
-                                <?php if ($es_archivo_local): ?>
-                                    <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($subtema['recurso_url']) ?>&titulo=<?= urlencode($subtema['titulo']) ?>" target="_blank" class="btn-recurso-download">
-                                        <i class="icon-download"></i> Descargar
-                                    </a>
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -289,6 +318,7 @@ require __DIR__ . '/../partials/nav.php';
                 <p>Este subtema aún no tiene contenido publicado.</p>
             </div>
         <?php endif; ?>
+        </div><!-- /.contenido-modulo -->
 
         <!-- Botón para volver al tema -->
         <div class="navegacion-tema" style="margin-top: 30px;">

@@ -93,6 +93,7 @@ $font_family = $_POST['font_family'] ?? 'helvetica';
 $font_size = (int)($_POST['font_size'] ?? 24);
 $font_color = $_POST['font_color'] ?? '#000000';
 $mostrar_calificacion = isset($_POST['mostrar_calificacion']) ? 1 : 0;
+$mostrar_duracion = isset($_POST['mostrar_duracion']) ? 1 : 0;
 $valid_days = (int)($_POST['valid_days'] ?? 15);
 
 // Estilos por campo (opcionales; si se dejan vacíos, se usa el global)
@@ -121,6 +122,16 @@ $fecha_font_family = isset($_POST['fecha_font_family']) && $_POST['fecha_font_fa
 $fecha_font_size = norm_int_opt($_POST['fecha_font_size'] ?? null);
 $fecha_font_color = isset($_POST['fecha_font_color']) && $_POST['fecha_font_color'] !== '' ? $_POST['fecha_font_color'] : null;
 
+// Estilos para Duración (opcionales)
+$duracion_font_family = isset($_POST['duracion_font_family']) && $_POST['duracion_font_family'] !== '' ? $_POST['duracion_font_family'] : null;
+$duracion_font_size = norm_int_opt($_POST['duracion_font_size'] ?? null);
+$duracion_font_color = isset($_POST['duracion_font_color']) && $_POST['duracion_font_color'] !== '' ? $_POST['duracion_font_color'] : null;
+
+// Estilos para ID del certificado (opcionales)
+$codigo_font_family = isset($_POST['codigo_font_family']) && $_POST['codigo_font_family'] !== '' ? $_POST['codigo_font_family'] : null;
+$codigo_font_size = norm_int_opt($_POST['codigo_font_size'] ?? null);
+$codigo_font_color = isset($_POST['codigo_font_color']) && $_POST['codigo_font_color'] !== '' ? $_POST['codigo_font_color'] : null;
+
 // Posiciones
 $nombre_x = $_POST['nombre_x'] ?? null;
 $nombre_y = $_POST['nombre_y'] ?? null;
@@ -130,6 +141,14 @@ $calificacion_x = $_POST['calificacion_x'] ?? null;
 $calificacion_y = $_POST['calificacion_y'] ?? null;
 $fecha_x = $_POST['fecha_x'] ?? null;
 $fecha_y = $_POST['fecha_y'] ?? null;
+
+// Posición para duración (horas)
+$duracion_x = $_POST['duracion_x'] ?? null;
+$duracion_y = $_POST['duracion_y'] ?? null;
+
+// Posición para ID del certificado
+$codigo_x = $_POST['codigo_x'] ?? null;
+$codigo_y = $_POST['codigo_y'] ?? null;
 
 // Validar rangos 0-100
 function norm_perc($v) {
@@ -146,8 +165,36 @@ $calificacion_x = norm_perc($calificacion_x);
 $calificacion_y = norm_perc($calificacion_y);
 $fecha_x = norm_perc($fecha_x);
 $fecha_y = norm_perc($fecha_y);
+$duracion_x = norm_perc($duracion_x);
+$duracion_y = norm_perc($duracion_y);
+$codigo_x = norm_perc($codigo_x);
+$codigo_y = norm_perc($codigo_y);
 
 try {
+  // Crear tabla base si no existe para evitar fallos al asegurar columnas nuevas
+  // Incluye las columnas mínimas que el insert/update usa siempre
+  $conn->exec(
+    "CREATE TABLE IF NOT EXISTS certificados_config (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      curso_id INT NOT NULL UNIQUE,
+      template_path VARCHAR(255) NULL,
+      template_mime VARCHAR(64) NULL,
+      font_family VARCHAR(64) NOT NULL,
+      font_size INT NOT NULL,
+      font_color VARCHAR(16) NOT NULL,
+      mostrar_calificacion TINYINT(1) NOT NULL DEFAULT 1,
+      valid_days INT NOT NULL,
+      nombre_x FLOAT NULL,
+      nombre_y FLOAT NULL,
+      curso_x FLOAT NULL,
+      curso_y FLOAT NULL,
+      calificacion_x FLOAT NULL,
+      calificacion_y FLOAT NULL,
+      fecha_x FLOAT NULL,
+      fecha_y FLOAT NULL
+    )"
+  );
+
   // Ver si existe registro
   $stmt = $conn->prepare('SELECT id FROM certificados_config WHERE curso_id = :curso_id LIMIT 1');
   $stmt->execute([':curso_id' => $curso_id]);
@@ -161,6 +208,29 @@ try {
     return (bool)$q->fetch(PDO::FETCH_ASSOC);
   };
 
+  // Asegurar columnas para el ID del certificado si no existen
+  $ensure = function(string $col, string $def) use ($conn, $hasCol) {
+    try {
+      if (!$hasCol($col)) {
+        $conn->exec("ALTER TABLE certificados_config ADD COLUMN `{$col}` {$def}");
+      }
+    } catch (Exception $e) {
+      // Ignorar errores de concurrencia o permisos; el guardado seguirá con columnas existentes
+    }
+  };
+  $ensure('codigo_x', 'FLOAT NULL');
+  $ensure('codigo_y', 'FLOAT NULL');
+  $ensure('codigo_font_family', 'VARCHAR(64) NULL');
+  $ensure('codigo_font_size', 'INT NULL');
+  $ensure('codigo_font_color', 'VARCHAR(16) NULL');
+  // Asegurar columnas para duración (horas)
+  $ensure('mostrar_duracion', 'TINYINT(1) NOT NULL DEFAULT 0');
+  $ensure('duracion_x', 'FLOAT NULL');
+  $ensure('duracion_y', 'FLOAT NULL');
+  $ensure('duracion_font_family', 'VARCHAR(64) NULL');
+  $ensure('duracion_font_size', 'INT NULL');
+  $ensure('duracion_font_color', 'VARCHAR(16) NULL');
+
   if ($exists) {
     $sets = [];
     $params = [':curso_id' => $curso_id];
@@ -171,6 +241,7 @@ try {
     $sets[] = 'font_size = :font_size'; $params[':font_size'] = $font_size;
     $sets[] = 'font_color = :font_color'; $params[':font_color'] = $font_color;
     $sets[] = 'mostrar_calificacion = :mostrar_calificacion'; $params[':mostrar_calificacion'] = $mostrar_calificacion;
+    if ($hasCol('mostrar_duracion')) { $sets[] = 'mostrar_duracion = :mostrar_duracion'; $params[':mostrar_duracion'] = $mostrar_duracion; }
     $sets[] = 'valid_days = :valid_days'; $params[':valid_days'] = $valid_days;
     $sets[] = 'nombre_x = :nombre_x'; $params[':nombre_x'] = $nombre_x;
     $sets[] = 'nombre_y = :nombre_y'; $params[':nombre_y'] = $nombre_y;
@@ -180,6 +251,10 @@ try {
     $sets[] = 'calificacion_y = :calificacion_y'; $params[':calificacion_y'] = $calificacion_y;
     $sets[] = 'fecha_x = :fecha_x'; $params[':fecha_x'] = $fecha_x;
     $sets[] = 'fecha_y = :fecha_y'; $params[':fecha_y'] = $fecha_y;
+    if ($hasCol('duracion_x')) { $sets[] = 'duracion_x = :duracion_x'; $params[':duracion_x'] = $duracion_x; }
+    if ($hasCol('duracion_y')) { $sets[] = 'duracion_y = :duracion_y'; $params[':duracion_y'] = $duracion_y; }
+    if ($hasCol('codigo_x')) { $sets[] = 'codigo_x = :codigo_x'; $params[':codigo_x'] = $codigo_x; }
+    if ($hasCol('codigo_y')) { $sets[] = 'codigo_y = :codigo_y'; $params[':codigo_y'] = $codigo_y; }
     if ($hasCol('nombre_font_family')) { $sets[] = 'nombre_font_family = :nombre_font_family'; $params[':nombre_font_family'] = $nombre_font_family; }
     if ($hasCol('nombre_font_size')) { $sets[] = 'nombre_font_size = :nombre_font_size'; $params[':nombre_font_size'] = $nombre_font_size; }
     if ($hasCol('nombre_font_color')) { $sets[] = 'nombre_font_color = :nombre_font_color'; $params[':nombre_font_color'] = $nombre_font_color; }
@@ -192,6 +267,12 @@ try {
     if ($hasCol('fecha_font_family')) { $sets[] = 'fecha_font_family = :fecha_font_family'; $params[':fecha_font_family'] = $fecha_font_family; }
     if ($hasCol('fecha_font_size')) { $sets[] = 'fecha_font_size = :fecha_font_size'; $params[':fecha_font_size'] = $fecha_font_size; }
     if ($hasCol('fecha_font_color')) { $sets[] = 'fecha_font_color = :fecha_font_color'; $params[':fecha_font_color'] = $fecha_font_color; }
+    if ($hasCol('duracion_font_family')) { $sets[] = 'duracion_font_family = :duracion_font_family'; $params[':duracion_font_family'] = $duracion_font_family; }
+    if ($hasCol('duracion_font_size')) { $sets[] = 'duracion_font_size = :duracion_font_size'; $params[':duracion_font_size'] = $duracion_font_size; }
+    if ($hasCol('duracion_font_color')) { $sets[] = 'duracion_font_color = :duracion_font_color'; $params[':duracion_font_color'] = $duracion_font_color; }
+    if ($hasCol('codigo_font_family')) { $sets[] = 'codigo_font_family = :codigo_font_family'; $params[':codigo_font_family'] = $codigo_font_family; }
+    if ($hasCol('codigo_font_size')) { $sets[] = 'codigo_font_size = :codigo_font_size'; $params[':codigo_font_size'] = $codigo_font_size; }
+    if ($hasCol('codigo_font_color')) { $sets[] = 'codigo_font_color = :codigo_font_color'; $params[':codigo_font_color'] = $codigo_font_color; }
 
     $sql = 'UPDATE certificados_config SET ' . implode(', ', $sets) . ' WHERE curso_id = :curso_id';
     $stmt = $conn->prepare($sql);
@@ -217,6 +298,11 @@ try {
     if ($hasCol('template_mime')) { $cols[] = 'template_mime'; $place[] = ':template_mime'; $params[':template_mime'] = $template_mime; }
     if ($hasCol('curso_x')) { $cols[] = 'curso_x'; $place[] = ':curso_x'; $params[':curso_x'] = $curso_x; }
     if ($hasCol('curso_y')) { $cols[] = 'curso_y'; $place[] = ':curso_y'; $params[':curso_y'] = $curso_y; }
+    if ($hasCol('codigo_x')) { $cols[] = 'codigo_x'; $place[] = ':codigo_x'; $params[':codigo_x'] = $codigo_x; }
+    if ($hasCol('codigo_y')) { $cols[] = 'codigo_y'; $place[] = ':codigo_y'; $params[':codigo_y'] = $codigo_y; }
+    if ($hasCol('mostrar_duracion')) { $cols[] = 'mostrar_duracion'; $place[] = ':mostrar_duracion'; $params[':mostrar_duracion'] = $mostrar_duracion; }
+    if ($hasCol('duracion_x')) { $cols[] = 'duracion_x'; $place[] = ':duracion_x'; $params[':duracion_x'] = $duracion_x; }
+    if ($hasCol('duracion_y')) { $cols[] = 'duracion_y'; $place[] = ':duracion_y'; $params[':duracion_y'] = $duracion_y; }
 
     if ($hasCol('nombre_font_family')) { $cols[] = 'nombre_font_family'; $place[] = ':nombre_font_family'; $params[':nombre_font_family'] = $nombre_font_family; }
     if ($hasCol('nombre_font_size')) { $cols[] = 'nombre_font_size'; $place[] = ':nombre_font_size'; $params[':nombre_font_size'] = $nombre_font_size; }
@@ -230,6 +316,12 @@ try {
     if ($hasCol('fecha_font_family')) { $cols[] = 'fecha_font_family'; $place[] = ':fecha_font_family'; $params[':fecha_font_family'] = $fecha_font_family; }
     if ($hasCol('fecha_font_size')) { $cols[] = 'fecha_font_size'; $place[] = ':fecha_font_size'; $params[':fecha_font_size'] = $fecha_font_size; }
     if ($hasCol('fecha_font_color')) { $cols[] = 'fecha_font_color'; $place[] = ':fecha_font_color'; $params[':fecha_font_color'] = $fecha_font_color; }
+    if ($hasCol('duracion_font_family')) { $cols[] = 'duracion_font_family'; $place[] = ':duracion_font_family'; $params[':duracion_font_family'] = $duracion_font_family; }
+    if ($hasCol('duracion_font_size')) { $cols[] = 'duracion_font_size'; $place[] = ':duracion_font_size'; $params[':duracion_font_size'] = $duracion_font_size; }
+    if ($hasCol('duracion_font_color')) { $cols[] = 'duracion_font_color'; $place[] = ':duracion_font_color'; $params[':duracion_font_color'] = $duracion_font_color; }
+    if ($hasCol('codigo_font_family')) { $cols[] = 'codigo_font_family'; $place[] = ':codigo_font_family'; $params[':codigo_font_family'] = $codigo_font_family; }
+    if ($hasCol('codigo_font_size')) { $cols[] = 'codigo_font_size'; $place[] = ':codigo_font_size'; $params[':codigo_font_size'] = $codigo_font_size; }
+    if ($hasCol('codigo_font_color')) { $cols[] = 'codigo_font_color'; $place[] = ':codigo_font_color'; $params[':codigo_font_color'] = $codigo_font_color; }
 
     $sql = 'INSERT INTO certificados_config (' . implode(', ', $cols) . ') VALUES (' . implode(', ', $place) . ')';
     $stmt = $conn->prepare($sql);

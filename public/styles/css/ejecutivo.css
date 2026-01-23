@@ -718,7 +718,9 @@
     gap: 20px;
 }
 
-.stat-item {
+/* Restringimos estilos de .stat-item al resumen de estadísticas del estudiante
+   para no afectar otros bloques que usan la misma clase en el perfil. */
+.student-stats-summary .stat-item {
     text-align: center;
     padding: 15px;
     background: linear-gradient(135deg, #3498db, #3498db);
@@ -727,14 +729,14 @@
     min-width: 80px;
 }
 
-.stat-value {
+.student-stats-summary .stat-value {
     display: block;
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 5px;
 }
 
-.stat-label {
+.student-stats-summary .stat-label {
     font-size: 0.8rem;
     opacity: 0.9;
 }
@@ -861,7 +863,8 @@
 }
 
 .progress-bar-small {
-    width: 100px;
+    width: 100%;
+    max-width: 140px;
     height: 8px;
     background: #e9ecef;
     border-radius: 4px;
@@ -883,13 +886,14 @@
 
 .course-performance-item {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: 15px;
     align-items: center;
     padding: 12px;
     background: white;
     border-radius: 8px;
     border: 1px solid #e9ecef;
+    box-sizing: border-box;
 }
 
 .course-name {
@@ -906,6 +910,22 @@
 .course-modules, .course-grade {
     font-size: 0.85rem;
     color: #6c757d;
+}
+
+/* Responsivo: evita desbordes en pantallas reducidas */
+@media (max-width: 900px) {
+    .course-performance-item {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .course-grade { justify-self: start; }
+}
+
+@media (max-width: 640px) {
+    .course-performance-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .course-progress { justify-content: space-between; }
 }
 
 /* Acciones del estudiante */

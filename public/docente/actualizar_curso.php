@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     dirigido_a = :dirigido_a, 
                     estado = :estado, 
                     updated_at = NOW()
-                WHERE id = :id AND creado_por = :creado_por
+                WHERE id = :id AND (creado_por = :docente_id OR asignado_a = :docente_id2)
             ");
             
             $result = $stmt->execute([
@@ -69,7 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':dirigido_a' => $dirigido_a ?: null,
                 ':estado' => $estado,
                 ':id' => $curso_id,
-                ':creado_por' => $_SESSION['user_id']
+                ':docente_id' => $_SESSION['user_id'],
+                ':docente_id2' => $_SESSION['user_id']
             ]);
         } else {
             // Actualizar solo los campos básicos si las nuevas columnas no existen
@@ -81,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     dirigido_a = :dirigido_a, 
                     estado = :estado, 
                     updated_at = NOW()
-                WHERE id = :id AND creado_por = :creado_por
+                WHERE id = :id AND (creado_por = :docente_id OR asignado_a = :docente_id2)
             ");
             
             $result = $stmt->execute([
@@ -91,7 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':dirigido_a' => $dirigido_a ?: null,
                 ':estado' => $estado,
                 ':id' => $curso_id,
-                ':creado_por' => $_SESSION['user_id']
+                ':docente_id' => $_SESSION['user_id'],
+                ':docente_id2' => $_SESSION['user_id']
             ]);
         }
         

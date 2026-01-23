@@ -38,10 +38,7 @@ require __DIR__ . '/../partials/nav.php';
                 <h1 style="font-size: 2rem; margin-bottom: 10px;">Editar Módulo</h1>
                 <p style="opacity: 0.9;"><?= htmlspecialchars($modulo['curso_titulo']) ?></p>
             </div>
-            <button onclick="window.history.back()" 
-                    style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
-                ← Volver
-            </button>
+            <button onclick="window.history.back()" class="btn-volver">← Volver</button>
         </div>
     </div>
 

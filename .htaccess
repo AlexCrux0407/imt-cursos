@@ -1,0 +1,17 @@
+# Evitar listado de directorios
+Options -Indexes
+
+# Redirigir la raíz al login
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Si es la raíz, ir al login
+    RewriteRule ^$ public/login.php [L]
+    
+    # Si el archivo no existe, verificar en public
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

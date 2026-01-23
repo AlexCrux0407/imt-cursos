@@ -88,7 +88,7 @@ require __DIR__ . '/../partials/header.php';
                 <div class="estudiante-card">
                     <img src="<?= BASE_URL ?>/styles/iconos/user.png" alt="Estudiante" class="estudiante-avatar">
                     <div class="estudiante-datos">
-                        <div class="estudiante-nombre"><?= htmlspecialchars($intento['estudiante_nombre']) ?></div>
+                        <div class="estudiante-nombre"><?= htmlspecialchars(format_nombre($intento['estudiante_nombre'])) ?></div>
                         <div class="estudiante-email"><?= htmlspecialchars($intento['estudiante_email']) ?></div>
                     </div>
                 </div>

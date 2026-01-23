@@ -121,7 +121,7 @@ require __DIR__ . '/../partials/nav.php';
             </a>
         </div>
         
-        <h1 class="exec-title"><?= htmlspecialchars($estudiante['nombre']) ?></h1>
+        <h1 class="exec-title"><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></h1>
         <p class="exec-subtitle">Perfil completo y análisis de rendimiento académico</p>
         
         <div class="student-meta-info">

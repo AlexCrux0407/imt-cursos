@@ -11,15 +11,15 @@
   cursor: pointer;
 }
 
-.modulo-icon { font-size: 1.1rem; width: 22px; text-align: center; }
-.modulo-info { flex: 1; min-width: 0; }
+.contenido-principal .modulo-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+.contenido-principal .modulo-info { flex: 1; min-width: 0; }
 .contenido-principal .modulo-titulo {
   display: block;
-  color: #fff;
+  color: #2c3e50;
   font-weight: 700;
   line-height: 1.1;
 }
-.modulo-progreso {
+.contenido-principal .modulo-progreso {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -27,15 +27,15 @@
   color: #6b7280;
   font-size: .85rem;
 }
-.barra-mini {
+.contenido-principal .barra-mini {
   flex: 1;
   height: 6px;
   background: #eef2f7;
   border-radius: 999px;
   overflow: hidden;
 }
-.fill-mini { height: 100%; background: linear-gradient(90deg,#6dd5ed,#2193b0); }
-.expand-icon { font-size: .95rem; width: 18px; text-align: center; }
+.contenido-principal .fill-mini { height: 100%; background: linear-gradient(90deg,#6dd5ed,#2193b0); }
+.contenido-principal .expand-icon { font-size: .95rem; width: 18px; text-align: center; }
 
 /* ===== Encabezado de página + Breadcrumb ===== */
 .page-header {
@@ -85,31 +85,8 @@
 .page-title { margin: 0; font-size: 1.35rem; font-weight: 700; color: #111827; }
 
 /* ===== Layout con sidebar ===== */
-.contenido-con-sidebar {
-  display: flex;
-  gap: 30px;
-  align-items: flex-start;
-}
-@media (max-width: 992px){
-  .contenido-con-sidebar { flex-direction: column; gap: 15px; }
-}
+/* Eliminado: el layout de la sidebar y contenedor se define en curso-sidebar.css */
 
-/* Contenido expandible del módulo en sidebar */
-.sidebar-navegacion .modulo-header {
-  background: transparent !important;
-  color: inherit !important;
-  padding: 12px !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  cursor: pointer;
-}
-.sidebar-navegacion .modulo-titulo {
-  color: #2c3e50 !important;
-  font-weight: 600 !important;
-  font-size: .85rem !important;
-  line-height: 1.2;
-}
 
 /* ===== Contenido principal ===== */
 .contenido-principal { flex: 1; min-width: 0; }
@@ -128,13 +105,13 @@
   padding: 18px;
   margin-bottom: 24px;
 }
-.progreso-header {
+.contenido-principal .progreso-header {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
 }
-.progreso-header h3 {
+.contenido-principal .progreso-header h3 {
   margin: 0; font-size: 1rem; color: #2c3e50; font-weight: 700; display: flex; gap: 8px; align-items: center;
 }
-.progreso-info { margin-top: 8px; color: #34495e; font-weight: 600; }
+.contenido-principal .progreso-info { margin-top: 8px; color: #34495e; font-weight: 600; }
 
 /* ===== Círculo de progreso ===== */
 .progress-circle {
@@ -307,7 +284,7 @@
 }
 
 .contenido-principal .contenido-modulo .tema-titulo{
-  flex:1 !important; color:#dcdcdc !important; font-weight:700 !important;
+  flex:1 !important; color:#2c3e50 !important; font-weight:700 !important;
 }
 
 .tema-titulo-link {

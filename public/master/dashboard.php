@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../app/auth.php';
 require_role('master');
 require_once __DIR__ . '/../../config/database.php';
 
-$page_title = 'Master – Dashboard Administrativo';
+$page_title = 'Master – Tablero Administrativo';
 
 // Obtener estadísticas del sistema
 $stmt = $conn->prepare("
@@ -96,140 +96,6 @@ require __DIR__ . '/../partials/nav.php';
     </div>
 
     <div class="div-fila" style="gap: 25px; margin-bottom: 30px;">
-        <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;" 
-             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,102,204,0.15)'"
-             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
-             onclick="window.location.href='<?= BASE_URL ?>/master/admin_estudiantes.php'">
-            <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Estudiantes" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                </div>
-                <div>
-                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Estudiantes</h3>
-                    <p style="color: #7f8c8d; font-size: 0.9rem;"><?= $stats_usuarios['total_estudiantes'] ?> estudiantes registrados</p>
-                </div>
-            </div>
-            <p style="color: #5a5c69; margin-bottom: 20px; line-height: 1.5;">
-                Gestiona estudiantes registrados, revisa progreso académico y administra inscripciones a cursos.
-            </p>
-            <div class="div-fila-alt">
-                <a href="<?= BASE_URL ?>/master/admin_estudiantes.php" 
-                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='var(--master-secondary)'"
-                   onmouseout="this.style.background='var(--master-primary)'">
-                    Administrar →
-                </a>
-            </div>
-        </div>
-
-        <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
-             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(52,152,219,0.15)'"
-             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
-             onclick="window.location.href='<?= BASE_URL ?>/master/admin_docentes.php'">
-            <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <img src="<?= BASE_URL ?>/styles/iconos/edit.png" alt="Docentes" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                </div>
-                <div>
-                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Docentes</h3>
-                    <p style="color: #7f8c8d; font-size: 0.9rem;"><?= $stats_usuarios['total_docentes'] ?> docentes activos</p>
-                </div>
-            </div>
-            <p style="color: #5a5c69; margin-bottom: 20px; line-height: 1.5;">
-                Administra personal docente, asigna cursos y supervisa la actividad educativa del instituto.
-            </p>
-            <div class="div-fila-alt">
-                <a href="<?= BASE_URL ?>/master/admin_docentes.php" 
-                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='var(--master-secondary)'"
-                   onmouseout="this.style.background='var(--master-primary)'">
-                    Administrar →
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="div-fila" style="gap: 25px; margin-bottom: 30px;">
-        <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
-             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(93,173,226,0.15)'"
-             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
-             onclick="window.location.href='<?= BASE_URL ?>/master/admin_cursos.php'">
-            <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <img src="<?= BASE_URL ?>/styles/iconos/desk.png" alt="Cursos" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                </div>
-                <div>
-                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Cursos</h3>
-                    <p style="color: #7f8c8d; font-size: 0.9rem;"><?= $stats_cursos['total_cursos'] ?> cursos en el catálogo</p>
-                </div>
-            </div>
-            <p style="color: #5a5c69; margin-bottom: 20px; line-height: 1.5;">
-                Controla el catálogo de cursos, aprueba contenido y gestiona certificaciones académicas.
-            </p>
-            <div class="div-fila-alt">
-                <a href="<?= BASE_URL ?>/master/admin_cursos.php" 
-                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='var(--master-secondary)'"
-                   onmouseout="this.style.background='var(--master-primary)'">
-                    Administrar →
-                </a>
-            </div>
-        </div>
-
-        <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
-             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(46,134,193,0.15)'"
-             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
-             onclick="window.location.href='<?= BASE_URL ?>/master/admin_ejecutivos.php'">
-            <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <img src="<?= BASE_URL ?>/styles/iconos/addicon.png" alt="Ejecutivos" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                </div>
-                <div>
-                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Gestión de Ejecutivos</h3>
-                    <p style="color: #7f8c8d; font-size: 0.9rem;">Administrar usuarios ejecutivos</p>
-                </div>
-            </div>
-            <p style="color: #5a5c69; margin-bottom: 20px; line-height: 1.5;">
-                Gestiona usuarios ejecutivos del sistema, crea nuevos perfiles y administra permisos de acceso.
-            </p>
-            <div class="div-fila-alt">
-                <a href="<?= BASE_URL ?>/master/admin_ejecutivos.php" 
-                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='var(--master-secondary)'"
-                   onmouseout="this.style.background='var(--master-primary)'">
-                    Gestionar →
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="div-fila" style="gap: 25px; margin-bottom: 30px;">
-        <div class="form-container-body" style="flex: 1; transition: all 0.3s ease; cursor: pointer;"
-             onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(133,193,233,0.15)'"
-             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='4px 4px 10px rgba(0, 0, 0, 0.3)'"
-             onclick="window.location.href='<?= BASE_URL ?>/master/admin_plataforma.php'">
-            <div class="div-fila-alt-start" style="margin-bottom: 20px;">
-                <div style="width: 50px; height: 50px; background: var(--master-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                    <img src="<?= BASE_URL ?>/styles/iconos/config.png" alt="Sistema" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
-                </div>
-                <div>
-                    <h3 style="color: var(--master-primary); font-size: 1.3rem; margin-bottom: 5px;">Configuración</h3>
-                    <p style="color: #7f8c8d; font-size: 0.9rem;">Parámetros del sistema</p>
-                </div>
-            </div>
-            <p style="color: #5a5c69; margin-bottom: 20px; line-height: 1.5;">
-                Administra configuraciones globales, parámetros del sistema y mantenimiento general.
-            </p>
-            <div class="div-fila-alt">
-                <a href="<?= BASE_URL ?>/master/admin_plataforma.php" 
-                   style="background: var(--master-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
-                   onmouseover="this.style.background='var(--master-secondary)'"
-                   onmouseout="this.style.background='var(--master-primary)'">
-                    Configurar →
-                </a>
-            </div>
-        </div>
-    </div>
 
     <div class="form-container-body">
         <h2 style="color: var(--master-primary); font-size: 1.5rem; margin-bottom: 25px; border-bottom: 2px solid #e8ecef; padding-bottom: 15px;">
@@ -284,7 +150,7 @@ require __DIR__ . '/../partials/nav.php';
                 <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
                     <div style="width: 8px; height: 8px; background: #3498db; border-radius: 50%;"></div>
                     <div style="flex: 1;">
-                        <strong><?= htmlspecialchars($actividad['nombre']) ?></strong> se registró en el sistema
+                        <strong><?= htmlspecialchars(format_nombre($actividad['nombre'])) ?></strong> se registró en el sistema
                         <small style="color: #7f8c8d; margin-left: 10px;"><?= date('d/m/Y H:i', strtotime($actividad['fecha'])) ?></small>
                     </div>
                 </div>

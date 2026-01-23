@@ -14,6 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Obtener y validar datos del formulario
     $titulo = trim($_POST['titulo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
+    $objetivo_general = trim($_POST['objetivo_general'] ?? '');
+    $objetivos_especificos = trim($_POST['objetivos_especificos'] ?? '');
+    $duracion = trim($_POST['duracion'] ?? '');
     $categoria = trim($_POST['categoria'] ?? '');
     $dirigido_a = trim($_POST['dirigido_a'] ?? '');
     $estado = $_POST['estado'] ?? 'borrador';
@@ -90,9 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        // Preparar la consulta de inserción
-        $sql = "INSERT INTO cursos (titulo, descripcion, categoria, dirigido_a, estado, creado_por";
-        $valores = "(:titulo, :descripcion, :categoria, :dirigido_a, :estado, :creado_por";
+        $columnas = ['titulo', 'descripcion', 'categoria', 'dirigido_a', 'estado', 'creado_por'];
+        $placeholders = [':titulo', ':descripcion', ':categoria', ':dirigido_a', ':estado', ':creado_por'];
         $parametros = [
             ':titulo' => $titulo,
             ':descripcion' => $descripcion ?: null,
@@ -101,16 +103,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':estado' => $estado,
             ':creado_por' => $_SESSION['user_id']
         ];
+
+        $stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'objetivo_general'");
+        $stmt->execute();
+        if ($stmt->fetch()) {
+            $columnas[] = 'objetivo_general';
+            $placeholders[] = ':objetivo_general';
+            $parametros[':objetivo_general'] = $objetivo_general ?: null;
+        }
+
+        $stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'objetivos_especificos'");
+        $stmt->execute();
+        if ($stmt->fetch()) {
+            $columnas[] = 'objetivos_especificos';
+            $placeholders[] = ':objetivos_especificos';
+            $parametros[':objetivos_especificos'] = $objetivos_especificos ?: null;
+        }
+
+        $stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'duracion'");
+        $stmt->execute();
+        if ($stmt->fetch()) {
+            $columnas[] = 'duracion';
+            $placeholders[] = ':duracion';
+            $parametros[':duracion'] = $duracion ?: null;
+        }
         
         // Si hay asignación, agregar campos relacionados
         if ($asignado_a > 0) {
-            $sql .= ", asignado_a, fecha_asignacion, estado_asignacion";
-            $valores .= ", :asignado_a, NOW(), :estado_asignacion";
+            $columnas[] = 'asignado_a';
+            $columnas[] = 'fecha_asignacion';
+            $columnas[] = 'estado_asignacion';
+            $placeholders[] = ':asignado_a';
+            $placeholders[] = 'NOW()';
+            $placeholders[] = ':estado_asignacion';
             $parametros[':asignado_a'] = $asignado_a;
             $parametros[':estado_asignacion'] = 'pendiente';
         }
         
-        $sql .= ") VALUES " . $valores . ")";
+        $sql = "INSERT INTO cursos (" . implode(', ', $columnas) . ") VALUES (" . implode(', ', $placeholders) . ")";
         
         // DEBUGGING: Log de la consulta SQL y parámetros
         error_log("=== DEBUGGING MASTER PROCESAR_CURSO ===");

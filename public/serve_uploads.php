@@ -1,21 +1,26 @@
 <?php
 require_once __DIR__ . '/../config/paths.php';
 
+/*
+ Servicio de Uploads de Cursos (Proxy Seguro)
+ - Sirve archivos desde `uploads/cursos` con validación de ruta.
+ - Detecta MIME, cachea con ETag/Last-Modified y soporta Range.
+ - Evita traversal y restringe a rutas bajo `cursos/`.
+ */
+
 // Proxy seguro para servir archivos de cursos desde uploads/cursos,
 // funcionando tanto si están en PUBLIC_PATH como en UPLOADS_PATH.
 
-// Validar parámetro
 $path = $_GET['path'] ?? '';
 $path = trim($path);
 
-// Solo permitimos rutas bajo "cursos/" y sin traversal
+// Validación y seguridad: rutas bajo "cursos/" y sin traversal
 if ($path === '' || !preg_match('#^(cursos/)[A-Za-z0-9._/\-]+$#', $path)) {
     http_response_code(400);
     echo 'Parámetro de ruta inválido.';
     exit;
 }
 
-// Rechazar cualquier intento de traversal
 if (strpos($path, '..') !== false) {
     http_response_code(400);
     echo 'Ruta no permitida.';
@@ -23,9 +28,8 @@ if (strpos($path, '..') !== false) {
 }
 
 $publicPath = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $path;
-$rootPath   = rtrim(UPLOADS_PATH, '/\\') . DIRECTORY_SEPARATOR . $path; // en raíz ya está dentro de uploads
+$rootPath   = rtrim(UPLOADS_PATH, '/\\') . DIRECTORY_SEPARATOR . $path;
 
-// Elegir el path existente y legible
 $filePath = null;
 if (is_readable($publicPath)) {
     $filePath = $publicPath;
@@ -39,12 +43,10 @@ if ($filePath === null) {
     exit;
 }
 
-// Detectar MIME
 $finfo = finfo_open(FILEINFO_MIME_TYPE);
 $mime  = finfo_file($finfo, $filePath) ?: 'application/octet-stream';
 finfo_close($finfo);
 
-// Soporte básico de descarga directa
 $filename = basename($filePath);
 
 // Streaming con soporte de Range para videos/archivos grandes
@@ -53,10 +55,30 @@ $start = 0;
 $end   = $size - 1;
 $length = $size;
 
+// Cabeceras de caché robustas: ETag y Last-Modified para revalidación
+$mtime = filemtime($filePath);
+$etag = '"' . md5($filename . '-' . $size . '-' . $mtime) . '"';
+$lastModified = gmdate('D, d M Y H:i:s', $mtime) . ' GMT';
+
 header('Content-Type: ' . $mime);
 header('Accept-Ranges: bytes');
-header('Cache-Control: public, max-age=604800'); // 7 días
+header('Cache-Control: public, max-age=0, must-revalidate');
+header('ETag: ' . $etag);
+header('Last-Modified: ' . $lastModified);
 header('Content-Disposition: inline; filename="' . $filename . '"');
+
+// Responder 304 Not Modified si el cliente tiene una copia válida
+if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+    http_response_code(304);
+    exit;
+}
+if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+    $ifModifiedSince = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+    if ($ifModifiedSince !== false && $ifModifiedSince >= $mtime) {
+        http_response_code(304);
+        exit;
+    }
+}
 
 if (isset($_SERVER['HTTP_RANGE'])) {
     if (preg_match('/bytes=([0-9]*)-([0-9]*)/', $_SERVER['HTTP_RANGE'], $matches)) {
@@ -72,7 +94,7 @@ if (isset($_SERVER['HTTP_RANGE'])) {
 
         if ($start > $end || $start >= $size) {
             header('Content-Range: bytes */' . $size);
-            http_response_code(416); // Range Not Satisfiable
+            http_response_code(416);
             exit;
         }
 

@@ -5,7 +5,29 @@
 
 if (!defined('BASE_URL')) {
     $baseUrlEnv = getenv('BASE_URL');
-    define('BASE_URL', $baseUrlEnv !== false ? rtrim($baseUrlEnv, '/') : '/');
+    if ($baseUrlEnv !== false && $baseUrlEnv !== '') {
+        define('BASE_URL', rtrim($baseUrlEnv, '/'));
+    } else {
+        // Detección robusta del subdirectorio base (p. ej., /imt-cursos) sin incluir /public
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $scriptName = str_replace('\\', '/', $scriptName);
+
+        $autoBase = '/';
+        if ($scriptName) {
+            $posPublic = strpos($scriptName, '/public/');
+            if ($posPublic !== false) {
+                // Si el script está bajo /public, tomar la parte previa como base
+                $autoBase = substr($scriptName, 0, $posPublic);
+                if ($autoBase === '') { $autoBase = '/'; }
+            } else {
+                // Si el docroot ya es /public, dirname del script determina la base (posible subcarpeta)
+                $dir = rtrim(dirname($scriptName), '/');
+                $autoBase = ($dir === '' || $dir === '/') ? '/' : $dir;
+            }
+        }
+
+        define('BASE_URL', rtrim($autoBase, '/'));
+    }
 }
 
 if (!defined('ROOT_PATH')) {

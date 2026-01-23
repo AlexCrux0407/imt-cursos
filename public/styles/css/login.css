@@ -1,0 +1,80 @@
+/*
+ Estilos dedicados para la página de Login
+ - Centrado vertical, tarjeta limpia y logo visible
+ - Paleta y tipografía alineada con vistas existentes
+*/
+
+:root {
+  --imt-bg: #f7f8fb;
+  --imt-text: #5C5C69;
+  --imt-primary: #0d6efd; /* Bootstrap primary */
+  --imt-card: #ffffff;
+  --imt-border: #e5e7eb;
+}
+
+body.login-body {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--imt-bg) 0%, #ffffff 100%);
+}
+
+.login-wrapper {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.login-card {
+  background-color: var(--imt-card);
+  border: 1px solid var(--imt-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.login-header {
+  padding: 24px 24px 0 24px;
+  text-align: center;
+}
+
+.login-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.login-title {
+  color: var(--imt-text);
+  font-weight: 600;
+  margin: 0;
+}
+
+.login-body {
+  padding: 24px;
+}
+
+.login-body .form-label {
+  color: var(--imt-text);
+  font-weight: 500;
+}
+
+.login-actions {
+  margin-top: 4px;
+}
+
+.login-actions .btn-primary {
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.login-footer-space {
+  height: 48px; /* espacio para footer fijo */
+}
+
+/* Mejora en alertas */
+.login-body .alert {
+  border-radius: 8px;
+}

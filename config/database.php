@@ -4,18 +4,30 @@
  * Fallback a DB_* 
  */
 
+// No definas BASE_URL aquí salvo que venga del entorno;
+// deja que config/paths.php detecte automáticamente la base bajo /public.
 if (!defined('BASE_URL')) {
     $baseUrlEnv = getenv('BASE_URL');
-    define('BASE_URL', $baseUrlEnv !== false ? rtrim($baseUrlEnv, '/') : '/');
+    if ($baseUrlEnv !== false && $baseUrlEnv !== '') {
+        define('BASE_URL', rtrim($baseUrlEnv, '/'));
+    }
 }
 
-// 1) Prioriza MYSQL* de Railway; si no existen, usa DB_* (externa)
+// 1) Prioriza MYSQL* de Railway; si no existen, usa DB_* (local)
+//    Fallback por defecto orientado a Laragon: host 127.0.0.1, puerto 3306, db "imt_cursos", user "root", sin password.
 $host    = getenv('MYSQLHOST')      ?: getenv('DB_HOST') ?: '127.0.0.1';
 $port    = getenv('MYSQLPORT')      ?: getenv('DB_PORT') ?: '3306';
-$db      = getenv('MYSQLDATABASE')  ?: getenv('DB_NAME') ?: '';
-$user    = getenv('MYSQLUSER')      ?: getenv('DB_USER') ?: '';
-$pass    = getenv('MYSQLPASSWORD')  ?: getenv('DB_PASSWORD') ?: '';
+$db      = getenv('MYSQLDATABASE')  ?: getenv('DB_NAME') ?: 'imt_cursos';
+$user    = getenv('MYSQLUSER')      ?: getenv('DB_USER') ?: 'root';
+$pass    = getenv('MYSQLPASSWORD')  ?: (getenv('DB_PASSWORD') ?: getenv('DB_PASS') ?: '');
 $charset = getenv('DB_CHARSET')     ?: 'utf8mb4';
+
+// 1.1) Zona horaria: usa TZ si está definida; por defecto CDMX
+try {
+    $tz = getenv('TZ');
+    if ($tz) { date_default_timezone_set($tz); }
+    elseif (function_exists('date_default_timezone_get')) { date_default_timezone_set('America/Mexico_City'); }
+} catch (Throwable $e) { /* noop */ }
 
 // 2) DSN y opciones PDO
 $dsn = "mysql:host={$host};port={$port};dbname={$db};charset={$charset}";

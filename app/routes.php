@@ -1,6 +1,9 @@
 <?php
-/**
- * Definición de rutas principales de la aplicación IMT-Cursos.
+/*
+ Mapa de Rutas de IMT-Cursos
+ - Define rutas públicas y protegidas por rol.
+ - Despacha controladores y alias de archivos .php.
+ - Incluye stub de cliente Vite en entornos sin bundler.
  */
 require_once __DIR__ . '/Router.php';
 require_once __DIR__ . '/middleware/AuthMiddleware.php';
@@ -18,22 +21,22 @@ $router->get('/', function() {
         $role = $_SESSION['role'] ?? '';
         switch ($role) {
             case 'estudiante':
-                header('Location: /estudiante/dashboard');
+                header('Location: ' . BASE_URL . '/estudiante/dashboard');
                 break;
             case 'docente':
-                header('Location: /docente/dashboard');
+                header('Location: ' . BASE_URL . '/docente/dashboard');
                 break;
             case 'master':
-                header('Location: /master/dashboard');
+                header('Location: ' . BASE_URL . '/master/dashboard');
                 break;
             case 'ejecutivo':
-                header('Location: /ejecutivo/dashboard');
+                header('Location: ' . BASE_URL . '/ejecutivo/dashboard');
                 break;
             default:
-                header('Location: /login.php');
+                header('Location: ' . BASE_URL . '/login.php');
         }
     } else {
-        header('Location: /login.php');
+        header('Location: ' . BASE_URL . '/login.php');
     }
     exit;
 });
@@ -42,6 +45,14 @@ $router->get('/', function() {
 $router->get('/login', 'AuthController@showLogin');
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
+
+// Alias para compatibilidad con URLs directas a archivo
+$router->get('/login.php', function() {
+    include PUBLIC_PATH . '/login.php';
+});
+$router->post('/login.php', function() {
+    include PUBLIC_PATH . '/login.php';
+});
 
 // ESTUDIANTE
 $router->get('/estudiante/dashboard', 'EstudianteController@dashboard', ['AuthMiddleware']);
