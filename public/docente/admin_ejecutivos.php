@@ -16,7 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? 'list';
     
     if ($action === 'create') {
+        $nombres = trim($_POST['nombres'] ?? '');
+        $apellidos = trim($_POST['apellidos'] ?? '');
         $nombre = trim($_POST['nombre'] ?? '');
+        if ($nombre === '') {
+            $nombre = trim($nombres . ' ' . $apellidos);
+        }
         $email = trim($_POST['email'] ?? '');
         // Teléfono eliminado (no requerido)
         $password = $_POST['password'] ?? '';
@@ -54,7 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($action === 'update') {
         $id = $_POST['id'] ?? null;
+        $nombres = trim($_POST['nombres'] ?? '');
+        $apellidos = trim($_POST['apellidos'] ?? '');
         $nombre = trim($_POST['nombre'] ?? '');
+        if ($nombre === '') {
+            $nombre = trim($nombres . ' ' . $apellidos);
+        }
         $email = trim($_POST['email'] ?? '');
         // Teléfono eliminado (no requerido)
         $password = $_POST['password'] ?? '';
@@ -287,9 +297,15 @@ require __DIR__ . '/../partials/nav.php';
                 <input type="hidden" name="action" value="create">
                 
                 <div class="form-group">
-                    <label for="nombre">Nombre Completo *</label>
-                    <input type="text" id="nombre" name="nombre" required 
-                           value="<?= htmlspecialchars($_POST['nombre'] ?? '') ?>">
+                    <label for="nombres">Nombres *</label>
+                    <input type="text" id="nombres" name="nombres" required 
+                           value="<?= htmlspecialchars($_POST['nombres'] ?? '') ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="apellidos">Apellidos *</label>
+                    <input type="text" id="apellidos" name="apellidos" required 
+                           value="<?= htmlspecialchars($_POST['apellidos'] ?? '') ?>">
                 </div>
                 
                 <div class="form-group">
@@ -326,9 +342,16 @@ require __DIR__ . '/../partials/nav.php';
                 <input type="hidden" name="id" value="<?= $ejecutivo_data['id'] ?>">
                 
                 <div class="form-group">
-                    <label for="nombre">Nombre Completo *</label>
-                    <input type="text" id="nombre" name="nombre" required 
-                           value="<?= htmlspecialchars($_POST['nombre'] ?? $ejecutivo_data['nombre']) ?>">
+                    <?php list($nombres_actual, $apellidos_actual) = split_nombre_apellidos($ejecutivo_data['nombre'] ?? ''); ?>
+                    <label for="nombres">Nombres *</label>
+                    <input type="text" id="nombres" name="nombres" required 
+                           value="<?= htmlspecialchars($_POST['nombres'] ?? $nombres_actual) ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="apellidos">Apellidos *</label>
+                    <input type="text" id="apellidos" name="apellidos" required 
+                           value="<?= htmlspecialchars($_POST['apellidos'] ?? $apellidos_actual) ?>">
                 </div>
                 
                 <div class="form-group">

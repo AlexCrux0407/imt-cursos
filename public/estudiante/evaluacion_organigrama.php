@@ -289,8 +289,8 @@ require __DIR__ . '/../partials/header.php';
             </div>
 
             <div class="controls">
-                <button class="btn btn-primary" onclick="verificarRespuestas()">🔍 Verificar Respuestas</button>
-                <button class="btn btn-secondary" onclick="reiniciarEjercicio()">🔄 Reiniciar</button>
+                <button class="btn btn-primary" onclick="verificarRespuestas()">📤 Enviar respuestas</button>
+                <a class="btn btn-secondary" href="<?= BASE_URL ?>/estudiante/modulo_contenido.php?id=<?= (int)$evaluacion['modulo_id'] ?>">↩ Volver al módulo</a>
                 <button class="btn btn-success" id="mostrarSolucionBtn" onclick="mostrarSolucion()" style="display: none;">💡 Mostrar Solución</button>
             </div>
 
@@ -301,6 +301,7 @@ require __DIR__ . '/../partials/header.php';
                 <input type="hidden" name="evaluacion_id" value="<?= $evaluacion_id ?>">
                 <input type="hidden" name="es_organigrama" value="1">
                 <input type="hidden" name="respuesta_<?= $pregunta_organigrama['id'] ?>" id="respuesta_organigrama" value="">
+                <input type="hidden" name="respuesta_correcta_organigrama" id="respuesta_correcta_organigrama" value="">
                 <!-- Debug: mostrar el ID de la pregunta -->
                 <input type="hidden" name="debug_pregunta_id" value="<?= $pregunta_organigrama['id'] ?>">
             </form>
@@ -357,7 +358,7 @@ require __DIR__ . '/../partials/header.php';
     border-radius: 20px;
     padding: 15px;
     position: relative;
-    min-height: 450px;
+    min-height: 0;
     box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
     overflow-x: auto;
     overflow-y: hidden;
@@ -413,14 +414,17 @@ require __DIR__ . '/../partials/header.php';
 
 .organigrama {
     position: relative;
-    width: 1000px;
-    height: 450px;
+    width: 100%;
+    height: auto;
     margin: 0 auto;
     max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
 }
 
 .drop-zone {
-    position: absolute;
+    position: relative;
     width: 170px;
     height: 75px;
     border: 2px dashed #cbd5e1;
@@ -437,6 +441,40 @@ require __DIR__ . '/../partials/header.php';
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     line-height: 1.2;
+    z-index: 2;
+}
+
+.organigrama.levels .drop-zone {
+    position: relative;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+}
+
+.levels-row {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    gap: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 220px;
+}
+
+.level-title {
+    min-width: 170px;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+}
+
+.level-zones {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
 }
 
 .drop-zone.drag-over {
@@ -479,29 +517,39 @@ require __DIR__ . '/../partials/header.php';
     font-weight: 600;
 }
 
-/* Posiciones específicas del organigrama - Optimizadas para mejor distribución */
+/* Posiciones específicas del organigrama */
 .director-general { top: 15px; left: 50%; transform: translateX(-50%); }
 
-/* Segunda fila - Coordinadores principales con más espacio */
-.coord-seguridad { top: 110px; left: 20px; }
-.coord-infraestructura { top: 110px; left: 200px; }
-.coord-transporte { top: 110px; left: 380px; }
-.coord-logistica { top: 110px; left: 560px; }
-.coord-administracion { top: 110px; left: 740px; }
+/* Segunda fila - Coordinaciones */
+.coord-seguridad-operacion { top: 110px; left: 20px; }
+.coord-normatividad-infraestructura { top: 110px; left: 210px; }
+.coord-estudios-economicos { top: 110px; left: 400px; }
+.coord-ingenieria-vehicular { top: 110px; left: 590px; }
+.coord-transporte-logistica { top: 110px; left: 780px; }
+.coord-infraestructura-vias { top: 110px; left: 970px; }
+.coord-ingenieria-portuaria { top: 110px; left: 1160px; }
+.coord-administracion-finanzas { top: 110px; left: 1350px; }
 
-/* Tercera fila - Divisiones con mejor separación */
-.div-desarrollo { top: 210px; left: 20px; }
-.div-investigacion { top: 210px; left: 200px; }
-.div-laboratorios { top: 210px; left: 380px; }
-.div-transito { top: 210px; left: 560px; }
-.div-recursos { top: 210px; left: 740px; }
+/* Tercera fila - Divisiones y unidades */
+.unidad-seguridad-vial { top: 230px; left: 20px; }
+.div-desarrollo-normas { top: 230px; left: 210px; }
+.unidad-sistemas-geoespacial { top: 230px; left: 400px; }
+.div-laboratorios-desempeno { top: 230px; left: 590px; }
+.unidad-sistemas-inteligentes { top: 230px; left: 780px; }
+.div-laboratorios-infraestructura { top: 230px; left: 970px; }
+.div-telematica { top: 230px; left: 1160px; }
+.div-recursos-financieros-materiales { top: 230px; left: 1350px; }
 
-/* Cuarta fila - Unidades específicas con espaciado mejorado */
-.unidad-seguridad { top: 310px; left: 30px; }
-.unidad-transporte { top: 310px; left: 210px; }
-.unidad-sistemas { top: 310px; left: 390px; }
-.unidad-laboratorio { top: 310px; left: 570px; }
-.unidad-adquisiciones { top: 310px; left: 750px; }
+/* Cuarta fila */
+.unidad-operacion-transporte { top: 320px; left: 20px; }
+.div-investigacion-normas { top: 320px; left: 210px; }
+.unidad-laboratorio-nacional { top: 320px; left: 780px; }
+.div-transporte-sostenible { top: 320px; left: 1160px; }
+.unidad-recursos-financieros { top: 320px; left: 1350px; }
+
+/* Quinta y sexta fila */
+.unidad-adquisiciones-recursos { top: 410px; left: 1350px; }
+.unidad-apoyo-juridico { top: 500px; left: 1350px; }
 
 .controls {
     text-align: center;
@@ -603,8 +651,8 @@ require __DIR__ . '/../partials/header.php';
     }
     
     .organigrama {
-        width: 1000px;
-        height: 450px;
+        width: 100%;
+        height: auto;
     }
     
     .drop-zone {
@@ -616,8 +664,8 @@ require __DIR__ . '/../partials/header.php';
 
 @media (max-width: 768px) {
     .organigrama {
-        width: 900px;
-        height: 380px;
+        width: 100%;
+        height: auto;
     }
     
     .drop-zone {
@@ -626,24 +674,32 @@ require __DIR__ . '/../partials/header.php';
         font-size: 0.7em;
     }
     
-    /* Ajustar posiciones para pantallas pequeñas */
-    .coord-seguridad { left: 40px; }
-    .coord-infraestructura { left: 180px; }
-    .coord-transporte { left: 320px; }
-    .coord-logistica { left: 460px; }
-    .coord-administracion { left: 600px; }
+    .coord-seguridad-operacion { left: 20px; }
+    .coord-normatividad-infraestructura { left: 210px; }
+    .coord-estudios-economicos { left: 400px; }
+    .coord-ingenieria-vehicular { left: 590px; }
+    .coord-transporte-logistica { left: 780px; }
+    .coord-infraestructura-vias { left: 970px; }
+    .coord-ingenieria-portuaria { left: 1160px; }
+    .coord-administracion-finanzas { left: 1350px; }
     
-    .div-desarrollo { left: 40px; }
-    .div-investigacion { left: 180px; }
-    .div-laboratorios { left: 320px; }
-    .div-transito { left: 460px; }
-    .div-recursos { left: 600px; }
+    .unidad-seguridad-vial { left: 20px; }
+    .div-desarrollo-normas { left: 210px; }
+    .unidad-sistemas-geoespacial { left: 400px; }
+    .div-laboratorios-desempeno { left: 590px; }
+    .unidad-sistemas-inteligentes { left: 780px; }
+    .div-laboratorios-infraestructura { left: 970px; }
+    .div-telematica { left: 1160px; }
+    .div-recursos-financieros-materiales { left: 1350px; }
     
-    .unidad-seguridad { left: 40px; }
-    .unidad-transporte { left: 180px; }
-    .unidad-sistemas { left: 320px; }
-    .unidad-laboratorio { left: 460px; }
-    .unidad-adquisiciones { left: 600px; }
+    .unidad-operacion-transporte { left: 20px; }
+    .div-investigacion-normas { left: 210px; }
+    .unidad-laboratorio-nacional { left: 780px; }
+    .div-transporte-sostenible { left: 1160px; }
+    .unidad-recursos-financieros { left: 1350px; }
+    
+    .unidad-adquisiciones-recursos { left: 1350px; }
+    .unidad-apoyo-juridico { left: 1350px; }
 }
 
 .progress-bar {
@@ -672,13 +728,22 @@ require __DIR__ . '/../partials/header.php';
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1;
+    z-index: 0;
+    display: none;
 }
 
 .connection-line {
-    stroke: #bdc3c7;
-    stroke-width: 2;
+    stroke: #94a3b8;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
     fill: none;
+}
+
+.level-line {
+    stroke: #e2e8f0;
+    stroke-width: 2;
+    stroke-dasharray: 6 6;
 }
 
 <?php if ($evaluacion['tiempo_limite'] > 0): ?>
@@ -741,7 +806,7 @@ require __DIR__ . '/../partials/header.php';
     }
     
     .organigrama-container {
-        min-height: 400px;
+        min-height: 580px;
     }
     
     .drop-zone {
@@ -752,23 +817,32 @@ require __DIR__ . '/../partials/header.php';
     
     /* Ajustar posiciones para pantallas medianas */
     .director-general { top: 10px; left: 50%; transform: translateX(-50%); }
-    .coord-seguridad { top: 100px; left: 20px; }
-    .coord-infraestructura { top: 100px; left: 180px; }
-    .coord-transporte { top: 100px; left: 340px; }
-    .coord-logistica { top: 100px; left: 500px; }
-    .coord-administracion { top: 100px; left: 660px; }
+    .coord-seguridad-operacion { top: 100px; left: 20px; }
+    .coord-normatividad-infraestructura { top: 100px; left: 210px; }
+    .coord-estudios-economicos { top: 100px; left: 400px; }
+    .coord-ingenieria-vehicular { top: 100px; left: 590px; }
+    .coord-transporte-logistica { top: 100px; left: 780px; }
+    .coord-infraestructura-vias { top: 100px; left: 970px; }
+    .coord-ingenieria-portuaria { top: 100px; left: 1160px; }
+    .coord-administracion-finanzas { top: 100px; left: 1350px; }
     
-    .div-desarrollo { top: 190px; left: 10px; }
-    .div-investigacion { top: 190px; left: 170px; }
-    .div-laboratorios { top: 190px; left: 330px; }
-    .div-transito { top: 190px; left: 490px; }
-    .div-recursos { top: 190px; left: 650px; }
+    .unidad-seguridad-vial { top: 210px; left: 20px; }
+    .div-desarrollo-normas { top: 210px; left: 210px; }
+    .unidad-sistemas-geoespacial { top: 210px; left: 400px; }
+    .div-laboratorios-desempeno { top: 210px; left: 590px; }
+    .unidad-sistemas-inteligentes { top: 210px; left: 780px; }
+    .div-laboratorios-infraestructura { top: 210px; left: 970px; }
+    .div-telematica { top: 210px; left: 1160px; }
+    .div-recursos-financieros-materiales { top: 210px; left: 1350px; }
     
-    .unidad-seguridad { top: 280px; left: 0px; }
-    .unidad-transporte { top: 280px; left: 160px; }
-    .unidad-sistemas { top: 280px; left: 320px; }
-    .unidad-laboratorio { top: 280px; left: 480px; }
-    .unidad-adquisiciones { top: 280px; left: 640px; }
+    .unidad-operacion-transporte { top: 300px; left: 20px; }
+    .div-investigacion-normas { top: 300px; left: 210px; }
+    .unidad-laboratorio-nacional { top: 300px; left: 780px; }
+    .div-transporte-sostenible { top: 300px; left: 1160px; }
+    .unidad-recursos-financieros { top: 300px; left: 1350px; }
+    
+    .unidad-adquisiciones-recursos { top: 390px; left: 1350px; }
+    .unidad-apoyo-juridico { top: 480px; left: 1350px; }
 }
 
 /* Responsividad para pantallas pequeñas */
@@ -790,7 +864,7 @@ require __DIR__ . '/../partials/header.php';
     
     .organigrama-container {
         padding: 15px;
-        min-height: 350px;
+        min-height: 0;
     }
     
     .drop-zone {
@@ -824,23 +898,32 @@ require __DIR__ . '/../partials/header.php';
     /* Reorganizar organigrama para móviles */
     .director-general { top: 5px; left: 50%; transform: translateX(-50%); }
     
-    .coord-seguridad { top: 70px; left: 10px; }
-    .coord-infraestructura { top: 70px; left: 120px; }
-    .coord-transporte { top: 130px; left: 10px; }
-    .coord-logistica { top: 130px; left: 120px; }
-    .coord-administracion { top: 190px; left: 65px; }
+    .coord-seguridad-operacion { top: 90px; left: 20px; }
+    .coord-normatividad-infraestructura { top: 90px; left: 210px; }
+    .coord-estudios-economicos { top: 90px; left: 400px; }
+    .coord-ingenieria-vehicular { top: 90px; left: 590px; }
+    .coord-transporte-logistica { top: 90px; left: 780px; }
+    .coord-infraestructura-vias { top: 90px; left: 970px; }
+    .coord-ingenieria-portuaria { top: 90px; left: 1160px; }
+    .coord-administracion-finanzas { top: 90px; left: 1350px; }
     
-    .div-desarrollo { top: 250px; left: 10px; }
-    .div-investigacion { top: 250px; left: 120px; }
-    .div-laboratorios { top: 310px; left: 10px; }
-    .div-transito { top: 310px; left: 120px; }
-    .div-recursos { top: 370px; left: 65px; }
+    .unidad-seguridad-vial { top: 200px; left: 20px; }
+    .div-desarrollo-normas { top: 200px; left: 210px; }
+    .unidad-sistemas-geoespacial { top: 200px; left: 400px; }
+    .div-laboratorios-desempeno { top: 200px; left: 590px; }
+    .unidad-sistemas-inteligentes { top: 200px; left: 780px; }
+    .div-laboratorios-infraestructura { top: 200px; left: 970px; }
+    .div-telematica { top: 200px; left: 1160px; }
+    .div-recursos-financieros-materiales { top: 200px; left: 1350px; }
     
-    .unidad-seguridad { top: 430px; left: 10px; }
-    .unidad-transporte { top: 430px; left: 120px; }
-    .unidad-sistemas { top: 490px; left: 10px; }
-    .unidad-laboratorio { top: 490px; left: 120px; }
-    .unidad-adquisiciones { top: 550px; left: 65px; }
+    .unidad-operacion-transporte { top: 290px; left: 20px; }
+    .div-investigacion-normas { top: 290px; left: 210px; }
+    .unidad-laboratorio-nacional { top: 290px; left: 780px; }
+    .div-transporte-sostenible { top: 290px; left: 1160px; }
+    .unidad-recursos-financieros { top: 290px; left: 1350px; }
+    
+    .unidad-adquisiciones-recursos { top: 380px; left: 1350px; }
+    .unidad-apoyo-juridico { top: 470px; left: 1350px; }
 }
 <?php endif; ?>
 </style>
@@ -848,40 +931,125 @@ require __DIR__ . '/../partials/header.php';
 <script>
 const organigramaConfig = {
     piezas: [
-        { id: 'director-general', texto: 'Director General', posicion: 'director-general' },
-        { id: 'coord-seguridad', texto: 'Coordinación de Seguridad y Operación del Transporte', posicion: 'coord-seguridad' },
-        { id: 'coord-infraestructura', texto: 'Coordinación de Infraestructura del Transporte', posicion: 'coord-infraestructura' },
-        { id: 'coord-transporte', texto: 'Coordinación de Transporte Integrado y Logística', posicion: 'coord-transporte' },
-        { id: 'coord-logistica', texto: 'Coordinación de Infraestructura de las Tecnologías', posicion: 'coord-logistica' },
-        { id: 'coord-administracion', texto: 'Coordinación de Administración y Finanzas', posicion: 'coord-administracion' },
-        { id: 'div-desarrollo', texto: 'División de Desarrollo y Diseño de Normas', posicion: 'div-desarrollo' },
-        { id: 'div-investigacion', texto: 'División de Investigación y Desarrollo de Tecnologías', posicion: 'div-investigacion' },
-        { id: 'div-laboratorios', texto: 'División de Laboratorios de Investigación', posicion: 'div-laboratorios' },
-        { id: 'div-transito', texto: 'División de Tránsito Sostenible y Calidad Operativa', posicion: 'div-transito' },
-        { id: 'div-recursos', texto: 'División de Recursos Financieros y Materiales', posicion: 'div-recursos' },
-        { id: 'unidad-seguridad', texto: 'Unidad de Seguridad', posicion: 'unidad-seguridad' },
-        { id: 'unidad-transporte', texto: 'Unidad de Transporte del Transporte', posicion: 'unidad-transporte' },
-        { id: 'unidad-sistemas', texto: 'Unidad de Sistemas de Información Georreferenciada', posicion: 'unidad-sistemas' },
-        { id: 'unidad-laboratorio', texto: 'Unidad de Laboratorio Nacional en Sistemas Logísticos', posicion: 'unidad-laboratorio' },
-        { id: 'unidad-adquisiciones', texto: 'Unidad de Adquisiciones, Recursos Materiales y Servicios', posicion: 'unidad-adquisiciones' }
+        { id: 'director-general', texto: 'Dirección General', posicion: 'director-general' },
+        { id: 'coord-seguridad-operacion', texto: 'Coordinación de Seguridad y Operación del Transporte', posicion: 'coord-seguridad-operacion' },
+        { id: 'coord-normatividad-infraestructura', texto: 'Coordinación de la Normatividad para la Infraestructura del Transporte', posicion: 'coord-normatividad-infraestructura' },
+        { id: 'coord-estudios-economicos', texto: 'Coordinación de Estudios Económicos y Sociales del Transporte', posicion: 'coord-estudios-economicos' },
+        { id: 'coord-ingenieria-vehicular', texto: 'Coordinación de Ingeniería Vehicular e Integridad Estructural', posicion: 'coord-ingenieria-vehicular' },
+        { id: 'coord-transporte-logistica', texto: 'Coordinación de Transporte Integrado y Logística', posicion: 'coord-transporte-logistica' },
+        { id: 'coord-infraestructura-vias', texto: 'Coordinación de Infraestructura de Vías Terrestres', posicion: 'coord-infraestructura-vias' },
+        { id: 'coord-ingenieria-portuaria', texto: 'Coordinación de Ingeniería Portuaria y Costera', posicion: 'coord-ingenieria-portuaria' },
+        { id: 'coord-administracion-finanzas', texto: 'Coordinación de Administración y Finanzas', posicion: 'coord-administracion-finanzas' },
+        { id: 'unidad-seguridad-vial', texto: 'Unidad de Seguridad Vial', posicion: 'unidad-seguridad-vial' },
+        { id: 'unidad-operacion-transporte', texto: 'Unidad de Operación del Transporte', posicion: 'unidad-operacion-transporte' },
+        { id: 'div-desarrollo-normas', texto: 'División de Desarrollo y Difusión de Normas', posicion: 'div-desarrollo-normas' },
+        { id: 'div-investigacion-normas', texto: 'División de Investigación y Actualización de Normas', posicion: 'div-investigacion-normas' },
+        { id: 'unidad-sistemas-geoespacial', texto: 'Unidad de Sistemas de Información Geoespacial', posicion: 'unidad-sistemas-geoespacial' },
+        { id: 'div-laboratorios-desempeno', texto: 'División de Laboratorios de Desempeño Vehicular y de Materiales', posicion: 'div-laboratorios-desempeno' },
+        { id: 'unidad-sistemas-inteligentes', texto: 'Unidad de Sistemas Inteligentes de Transporte', posicion: 'unidad-sistemas-inteligentes' },
+        { id: 'unidad-laboratorio-nacional', texto: 'Unidad de Laboratorio Nacional en Sistemas de Transporte y Logística', posicion: 'unidad-laboratorio-nacional' },
+        { id: 'div-laboratorios-infraestructura', texto: 'División de Laboratorios de Infraestructura', posicion: 'div-laboratorios-infraestructura' },
+        { id: 'div-telematica', texto: 'División de Tecnologías de la Información', posicion: 'div-telematica' },
+        { id: 'div-transporte-sostenible', texto: 'División de Transporte Sostenible y Cambio Climático', posicion: 'div-transporte-sostenible' },
+        { id: 'div-recursos-financieros-materiales', texto: 'División de Recursos Financieros y Materiales', posicion: 'div-recursos-financieros-materiales' },
+        { id: 'unidad-recursos-financieros', texto: 'Unidad de Recursos Financieros', posicion: 'unidad-recursos-financieros' },
+        { id: 'unidad-adquisiciones-recursos', texto: 'Unidad de Adquisiciones, Recursos Materiales y Servicios', posicion: 'unidad-adquisiciones-recursos' },
+        { id: 'unidad-apoyo-juridico', texto: 'Unidad de Apoyo Jurídico', posicion: 'unidad-apoyo-juridico' }
     ],
     espacios: [
         { id: 'director-general', clase: 'director-general', acepta: ['director-general'] },
-        { id: 'coord-seguridad', clase: 'coord-seguridad', acepta: ['coord-seguridad'] },
-        { id: 'coord-infraestructura', clase: 'coord-infraestructura', acepta: ['coord-infraestructura'] },
-        { id: 'coord-transporte', clase: 'coord-transporte', acepta: ['coord-transporte'] },
-        { id: 'coord-logistica', clase: 'coord-logistica', acepta: ['coord-logistica'] },
-        { id: 'coord-administracion', clase: 'coord-administracion', acepta: ['coord-administracion'] },
-        { id: 'div-desarrollo', clase: 'div-desarrollo', acepta: ['div-desarrollo'] },
-        { id: 'div-investigacion', clase: 'div-investigacion', acepta: ['div-investigacion'] },
-        { id: 'div-laboratorios', clase: 'div-laboratorios', acepta: ['div-laboratorios'] },
-        { id: 'div-transito', clase: 'div-transito', acepta: ['div-transito'] },
-        { id: 'div-recursos', clase: 'div-recursos', acepta: ['div-recursos'] },
-        { id: 'unidad-seguridad', clase: 'unidad-seguridad', acepta: ['unidad-seguridad'] },
-        { id: 'unidad-transporte', clase: 'unidad-transporte', acepta: ['unidad-transporte'] },
-        { id: 'unidad-sistemas', clase: 'unidad-sistemas', acepta: ['unidad-sistemas'] },
-        { id: 'unidad-laboratorio', clase: 'unidad-laboratorio', acepta: ['unidad-laboratorio'] },
-        { id: 'unidad-adquisiciones', clase: 'unidad-adquisiciones', acepta: ['unidad-adquisiciones'] }
+        { id: 'coord-seguridad-operacion', clase: 'coord-seguridad-operacion', acepta: ['coord-seguridad-operacion'] },
+        { id: 'coord-normatividad-infraestructura', clase: 'coord-normatividad-infraestructura', acepta: ['coord-normatividad-infraestructura'] },
+        { id: 'coord-estudios-economicos', clase: 'coord-estudios-economicos', acepta: ['coord-estudios-economicos'] },
+        { id: 'coord-ingenieria-vehicular', clase: 'coord-ingenieria-vehicular', acepta: ['coord-ingenieria-vehicular'] },
+        { id: 'coord-transporte-logistica', clase: 'coord-transporte-logistica', acepta: ['coord-transporte-logistica'] },
+        { id: 'coord-infraestructura-vias', clase: 'coord-infraestructura-vias', acepta: ['coord-infraestructura-vias'] },
+        { id: 'coord-ingenieria-portuaria', clase: 'coord-ingenieria-portuaria', acepta: ['coord-ingenieria-portuaria'] },
+        { id: 'coord-administracion-finanzas', clase: 'coord-administracion-finanzas', acepta: ['coord-administracion-finanzas'] },
+        { id: 'unidad-seguridad-vial', clase: 'unidad-seguridad-vial', acepta: ['unidad-seguridad-vial'] },
+        { id: 'unidad-operacion-transporte', clase: 'unidad-operacion-transporte', acepta: ['unidad-operacion-transporte'] },
+        { id: 'div-desarrollo-normas', clase: 'div-desarrollo-normas', acepta: ['div-desarrollo-normas'] },
+        { id: 'div-investigacion-normas', clase: 'div-investigacion-normas', acepta: ['div-investigacion-normas'] },
+        { id: 'unidad-sistemas-geoespacial', clase: 'unidad-sistemas-geoespacial', acepta: ['unidad-sistemas-geoespacial'] },
+        { id: 'div-laboratorios-desempeno', clase: 'div-laboratorios-desempeno', acepta: ['div-laboratorios-desempeno'] },
+        { id: 'unidad-sistemas-inteligentes', clase: 'unidad-sistemas-inteligentes', acepta: ['unidad-sistemas-inteligentes'] },
+        { id: 'unidad-laboratorio-nacional', clase: 'unidad-laboratorio-nacional', acepta: ['unidad-laboratorio-nacional'] },
+        { id: 'div-laboratorios-infraestructura', clase: 'div-laboratorios-infraestructura', acepta: ['div-laboratorios-infraestructura'] },
+        { id: 'div-telematica', clase: 'div-telematica', acepta: ['div-telematica'] },
+        { id: 'div-transporte-sostenible', clase: 'div-transporte-sostenible', acepta: ['div-transporte-sostenible'] },
+        { id: 'div-recursos-financieros-materiales', clase: 'div-recursos-financieros-materiales', acepta: ['div-recursos-financieros-materiales'] },
+        { id: 'unidad-recursos-financieros', clase: 'unidad-recursos-financieros', acepta: ['unidad-recursos-financieros'] },
+        { id: 'unidad-adquisiciones-recursos', clase: 'unidad-adquisiciones-recursos', acepta: ['unidad-adquisiciones-recursos'] },
+        { id: 'unidad-apoyo-juridico', clase: 'unidad-apoyo-juridico', acepta: ['unidad-apoyo-juridico'] }
+    ],
+    conexiones: [
+        { desde: 'director-general', hacia: 'coord-seguridad-operacion' },
+        { desde: 'director-general', hacia: 'coord-normatividad-infraestructura' },
+        { desde: 'director-general', hacia: 'coord-estudios-economicos' },
+        { desde: 'director-general', hacia: 'coord-ingenieria-vehicular' },
+        { desde: 'director-general', hacia: 'coord-transporte-logistica' },
+        { desde: 'director-general', hacia: 'coord-infraestructura-vias' },
+        { desde: 'director-general', hacia: 'coord-ingenieria-portuaria' },
+        { desde: 'director-general', hacia: 'coord-administracion-finanzas' },
+        { desde: 'coord-seguridad-operacion', hacia: 'unidad-seguridad-vial' },
+        { desde: 'coord-seguridad-operacion', hacia: 'unidad-operacion-transporte' },
+        { desde: 'coord-normatividad-infraestructura', hacia: 'div-desarrollo-normas' },
+        { desde: 'coord-normatividad-infraestructura', hacia: 'div-investigacion-normas' },
+        { desde: 'coord-estudios-economicos', hacia: 'unidad-sistemas-geoespacial' },
+        { desde: 'coord-ingenieria-vehicular', hacia: 'div-laboratorios-desempeno' },
+        { desde: 'coord-transporte-logistica', hacia: 'unidad-sistemas-inteligentes' },
+        { desde: 'coord-transporte-logistica', hacia: 'unidad-laboratorio-nacional' },
+        { desde: 'coord-infraestructura-vias', hacia: 'div-laboratorios-infraestructura' },
+        { desde: 'coord-ingenieria-portuaria', hacia: 'div-telematica' },
+        { desde: 'coord-ingenieria-portuaria', hacia: 'div-transporte-sostenible' },
+        { desde: 'coord-administracion-finanzas', hacia: 'div-recursos-financieros-materiales' },
+        { desde: 'div-recursos-financieros-materiales', hacia: 'unidad-recursos-financieros' },
+        { desde: 'unidad-recursos-financieros', hacia: 'unidad-adquisiciones-recursos' },
+        { desde: 'unidad-recursos-financieros', hacia: 'unidad-apoyo-juridico' }
+    ],
+    niveles: [
+        { id: 'area-1', titulo: 'Área de Dirección General', items: ['director-general'] },
+        { id: 'area-2', titulo: 'Área de Seguridad y Operación del Transporte', items: [
+            'coord-seguridad-operacion',
+            'unidad-seguridad-vial',
+            'unidad-operacion-transporte'
+        ] },
+        { id: 'area-3', titulo: 'Área de Normatividad para la Infraestructura del Transporte', items: [
+            'coord-normatividad-infraestructura',
+            'div-desarrollo-normas',
+            'div-investigacion-normas'
+        ] },
+        { id: 'area-4', titulo: 'Área de Estudios Económicos y Sociales del Transporte', items: [
+            'coord-estudios-economicos',
+            'unidad-sistemas-geoespacial'
+        ] },
+        { id: 'area-5', titulo: 'Área de Ingeniería Vehicular e Integridad Estructural', items: [
+            'coord-ingenieria-vehicular',
+            'div-laboratorios-desempeno'
+        ] },
+        { id: 'area-6', titulo: 'Área de Transporte Integrado y Logística', items: [
+            'coord-transporte-logistica',
+            'unidad-sistemas-inteligentes',
+            'unidad-laboratorio-nacional'
+        ] },
+        { id: 'area-7', titulo: 'Área de Infraestructura de Vías Terrestres', items: [
+            'coord-infraestructura-vias',
+            'div-laboratorios-infraestructura'
+        ] },
+        { id: 'area-8', titulo: 'Área de Ingeniería Portuaria y Costera', items: [
+            'coord-ingenieria-portuaria'
+        ] },
+        { id: 'area-9', titulo: 'Área de Administración y Finanzas', items: [
+            'coord-administracion-finanzas',
+            'div-recursos-financieros-materiales',
+            'unidad-recursos-financieros',
+            'unidad-adquisiciones-recursos',
+            'unidad-apoyo-juridico'
+        ] },
+        { id: 'area-10', titulo: 'Área de Divisiones Independientes', items: [
+            'div-telematica',
+            'div-transporte-sostenible'
+        ] }
     ]
 };
 
@@ -930,6 +1098,7 @@ function enviarEvaluacionAutomaticamente() {
 function inicializarEjercicio() {
     crearPiezas();
     crearEspacios();
+    dibujarConexiones();
     actualizarProgreso();
     <?php if ($evaluacion['tiempo_limite'] > 0): ?>
     iniciarTimer();
@@ -969,20 +1138,41 @@ function crearPiezas() {
 function crearEspacios() {
     const organigrama = document.getElementById('organigrama');
     organigrama.innerHTML = '';
-
-    organigramaConfig.espacios.forEach(espacio => {
-        const elemento = document.createElement('div');
-        elemento.className = `drop-zone ${espacio.clase}`;
-        elemento.dataset.espacioId = espacio.id;
-        elemento.dataset.acepta = JSON.stringify(espacio.acepta);
-        elemento.textContent = 'Colocar aquí';
-
-        elemento.addEventListener('dragover', permitirSoltar);
-        elemento.addEventListener('dragleave', salirZona);
-        elemento.addEventListener('drop', soltarPieza);
-
-        organigrama.appendChild(elemento);
+    organigrama.classList.add('levels');
+    const espaciosPorId = new Map(organigramaConfig.espacios.map(espacio => [espacio.id, espacio]));
+    organigramaConfig.niveles.forEach(nivel => {
+        const fila = document.createElement('div');
+        fila.className = 'levels-row';
+        fila.dataset.nivelId = nivel.id;
+        const titulo = document.createElement('div');
+        titulo.className = 'level-title';
+        titulo.textContent = nivel.titulo;
+        const zonas = document.createElement('div');
+        zonas.className = 'level-zones';
+        nivel.items.forEach(itemId => {
+            const espacio = espaciosPorId.get(itemId);
+            if (!espacio) return;
+            const elemento = document.createElement('div');
+            elemento.className = `drop-zone ${espacio.clase}`;
+            elemento.dataset.espacioId = espacio.id;
+            elemento.dataset.acepta = JSON.stringify(espacio.acepta);
+            elemento.textContent = 'Colocar aquí';
+            elemento.addEventListener('dragover', permitirSoltar);
+            elemento.addEventListener('dragleave', salirZona);
+            elemento.addEventListener('drop', soltarPieza);
+            zonas.appendChild(elemento);
+        });
+        fila.appendChild(titulo);
+        fila.appendChild(zonas);
+        organigrama.appendChild(fila);
     });
+}
+
+function dibujarConexiones() {
+    const svg = document.getElementById('connections');
+    if (!svg) return;
+    svg.innerHTML = '';
+    svg.style.display = 'none';
 }
 
 // Eventos de drag and drop
@@ -997,20 +1187,28 @@ function finalizarArrastre(e) {
 
 function permitirSoltar(e) {
     e.preventDefault();
-    e.target.classList.add('drag-over');
+    const zona = e.currentTarget;
+    zona.classList.add('drag-over');
 }
 
 function salirZona(e) {
-    e.target.classList.remove('drag-over');
+    const zona = e.currentTarget;
+    zona.classList.remove('drag-over');
 }
 
 function soltarPieza(e) {
     e.preventDefault();
-    const espacioId = e.target.dataset.espacioId;
+    const zona = e.currentTarget;
+    const espacioId = zona.dataset.espacioId;
     const pieceId = e.dataTransfer.getData('text/plain');
-    const acepta = JSON.parse(e.target.dataset.acepta);
+    let acepta = [];
+    try {
+        acepta = JSON.parse(zona.dataset.acepta || '[]');
+    } catch (error) {
+        acepta = [];
+    }
 
-    e.target.classList.remove('drag-over');
+    zona.classList.remove('drag-over');
 
     // Permitir colocar cualquier pieza en cualquier espacio
     // Remover pieza anterior si existe
@@ -1025,9 +1223,9 @@ function soltarPieza(e) {
     piezaClonada.draggable = false;
     piezaClonada.addEventListener('click', () => devolverPiezaAlBanco(pieceId));
 
-    e.target.innerHTML = '';
-    e.target.appendChild(piezaClonada);
-    e.target.classList.add('filled');
+    zona.innerHTML = '';
+    zona.appendChild(piezaClonada);
+    zona.classList.add('filled');
 
     // Ocultar pieza original
     pieza.style.display = 'none';
@@ -1037,6 +1235,10 @@ function soltarPieza(e) {
 
     actualizarProgreso();
     actualizarCampoRespuesta();
+    const campoCorrectas = document.getElementById('respuesta_correcta_organigrama');
+    if (campoCorrectas) {
+        campoCorrectas.value = JSON.stringify(organigramaConfig.espacios);
+    }
 }
 
 // Devolver pieza al banco
@@ -1105,6 +1307,28 @@ function verificarRespuestas() {
     
     // Crear formulario temporal para envío con AJAX
     const formData = new FormData(document.getElementById('evaluation-form'));
+    const campoCorrectas = document.getElementById('respuesta_correcta_organigrama');
+    if (campoCorrectas) {
+        campoCorrectas.value = JSON.stringify(organigramaConfig.espacios);
+        formData.set('respuesta_correcta_organigrama', campoCorrectas.value);
+    }
+    let totalEnvio = organigramaConfig.espacios.length;
+    let correctasEnvio = 0;
+    organigramaConfig.espacios.forEach(espacio => {
+        const respuestaUsuario = respuestasUsuario[espacio.id];
+        if (respuestaUsuario && espacio.acepta.includes(respuestaUsuario)) {
+            correctasEnvio++;
+        }
+    });
+    formData.set('organigrama_total', String(totalEnvio));
+    formData.set('organigrama_correctas', String(correctasEnvio));
+    if (campoRespuesta) {
+        const nombreRespuesta = campoRespuesta.getAttribute('name');
+        if (nombreRespuesta) {
+            formData.set(nombreRespuesta, campoRespuesta.value);
+        }
+    }
+    formData.set('es_organigrama', '1');
     
     console.log('=== DATOS DEL FORMULARIO ===');
     for (let [key, value] of formData.entries()) {
@@ -1297,7 +1521,10 @@ function mostrarSolucion() {
 }
 
 // Inicializar cuando se carga la página
-document.addEventListener('DOMContentLoaded', inicializarEjercicio);
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarEjercicio();
+    window.addEventListener('resize', dibujarConexiones);
+});
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

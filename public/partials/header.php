@@ -5,6 +5,33 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/../../config/paths.php';
 require_once __DIR__ . '/../../app/auth.php';
+if (!function_exists('format_nombre')) {
+    function format_nombre(string $full, string $orden = 'apellidos_nombres'): string
+    {
+        $clean = trim($full);
+        return $clean;
+    }
+}
+if (!function_exists('split_nombre_apellidos')) {
+    function split_nombre_apellidos(string $full): array
+    {
+        $clean = trim(preg_replace('/\s+/', ' ', $full));
+        if ($clean === '') {
+            return ['', ''];
+        }
+        $parts = preg_split('/\s+/', $clean);
+        $count = count($parts);
+        if ($count === 1) {
+            return [$parts[0], ''];
+        }
+        if ($count === 2) {
+            return [$parts[0], $parts[1]];
+        }
+        $apellidos = implode(' ', array_slice($parts, -2));
+        $nombres = implode(' ', array_slice($parts, 0, -2));
+        return [$nombres, $apellidos];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">

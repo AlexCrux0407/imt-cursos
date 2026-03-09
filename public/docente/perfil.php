@@ -25,10 +25,17 @@ require __DIR__ . '/../partials/nav.php';
             <!-- Información Personal -->
             <div style="flex: 2;">
                 <h2 style="color: #3498db; margin-bottom: 20px;">Información Personal</h2>
+                <?php list($nombres_actual, $apellidos_actual) = split_nombre_apellidos($usuario['nombre'] ?? ''); ?>
                 <form method="POST" action="<?= BASE_URL ?>/docente/actualizar_perfil.php">
                     <div style="margin-bottom: 20px;">
-                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Nombre Completo</label>
-                        <input type="text" name="nombre" value="<?= htmlspecialchars($usuario['nombre']) ?>" 
+                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Nombres</label>
+                        <input type="text" name="nombres" value="<?= htmlspecialchars($nombres_actual) ?>" 
+                               style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Apellidos</label>
+                        <input type="text" name="apellidos" value="<?= htmlspecialchars($apellidos_actual) ?>" 
                                style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px;">
                     </div>
                     

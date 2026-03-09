@@ -92,12 +92,7 @@ $nombre_estudiante = $usuario ? format_nombre($usuario['nombre'], 'nombres_apell
 
 $promedio = null;
 if ((int)($config['mostrar_calificacion'] ?? 0) === 1) {
-    $stmt = $conn->prepare("SELECT AVG(CASE WHEN ie.puntaje_obtenido IS NOT NULL THEN ie.puntaje_obtenido ELSE NULL END) as promedio FROM modulos m LEFT JOIN evaluaciones_modulo em ON m.id = em.modulo_id LEFT JOIN intentos_evaluacion ie ON em.id = ie.evaluacion_id AND ie.usuario_id = :uid WHERE m.curso_id = :cid");
-    $stmt->execute([':uid' => $usuario_id, ':cid' => $curso_id]);
-    $row = $stmt->fetch();
-    if ($row && $row['promedio'] !== null) {
-        $promedio = round($row['promedio'], 1);
-    }
+    $promedio = calcularCalificacionFinal($curso_id, $usuario_id);
 }
 
 $fecha_texto = $fecha_completado->format('d/m/Y');
@@ -291,8 +286,11 @@ function gdSavePng($img, $path) {
 
 function ptToPxGD($pt) { return $pt * (96.0 / 72.0); }
 
-function drawTextCenteredOnImage($img, string $text, string $familyOrig, string $style, int $sizePt, array $rgb, float $xPerc, float $yPerc): void {
+function drawTextCenteredOnImage($img, string $text, string $familyOrig, string $style, int $sizePt, array $rgb, float $xPerc, float $yPerc, string $align = 'center'): void {
     if ($text === '') return;
+    if (!in_array($align, ['left', 'center', 'right'], true)) {
+        $align = 'center';
+    }
     $w = imagesx($img);
     $h = imagesy($img);
     $centerX = $w * ($xPerc / 100.0);
@@ -312,7 +310,13 @@ function drawTextCenteredOnImage($img, string $text, string $familyOrig, string 
     if (!$bbox) return;
     $textW = abs($bbox[2] - $bbox[0]);
     $textH = abs($bbox[7] - $bbox[1]);
-    $startX = (int)round($centerX - ($textW / 2.0));
+    if ($align === 'left') {
+        $startX = (int)round($centerX);
+    } elseif ($align === 'right') {
+        $startX = (int)round($centerX - $textW);
+    } else {
+        $startX = (int)round($centerX - ($textW / 2.0));
+    }
     // En imagettftext Y es la línea de base, para centrar elevamos la mitad de la altura
     $baselineY = (int)round($centerY + ($textH / 2.0));
     imagettftext($img, $px, 0, $startX, $baselineY, $color, $path, $text);
@@ -337,29 +341,33 @@ if ($gdImg) {
     $codigo_size_base = (int)($config['codigo_font_size'] ?? max(12, (int)round($g_size_pt * 0.6)));
     $codigo_hex = trim($config['codigo_font_color'] ?? '#2c3e50');
 
+    $text_align = $config['text_align'] ?? 'center';
+    if (!in_array($text_align, ['left', 'center', 'right'], true)) {
+        $text_align = 'center';
+    }
     if (!empty($config['nombre_x']) && !empty($config['nombre_y'])) {
-        drawTextCenteredOnImage($gdImg, $nombre_estudiante, $nombre_family, $nombre_style, $nombre_size, hexToRgb($nombre_hex), floatval($config['nombre_x']), floatval($config['nombre_y']));
+        drawTextCenteredOnImage($gdImg, $nombre_estudiante, $nombre_family, $nombre_style, $nombre_size, hexToRgb($nombre_hex), floatval($config['nombre_x']), floatval($config['nombre_y']), $text_align);
     }
     if (!empty($config['curso_x']) && !empty($config['curso_y'])) {
-        drawTextCenteredOnImage($gdImg, $insc['titulo'], $curso_family, $curso_style, $curso_size, hexToRgb($curso_hex), floatval($config['curso_x']), floatval($config['curso_y']));
+        drawTextCenteredOnImage($gdImg, $insc['titulo'], $curso_family, $curso_style, $curso_size, hexToRgb($curso_hex), floatval($config['curso_x']), floatval($config['curso_y']), $text_align);
     }
     if ((int)($config['mostrar_calificacion'] ?? 0) === 1 && $promedio !== null && !empty($config['calificacion_x']) && !empty($config['calificacion_y'])) {
-        drawTextCenteredOnImage($gdImg, 'Calificación: ' . number_format($promedio, 1), $cal_family, $cal_style, $cal_size, hexToRgb($cal_hex), floatval($config['calificacion_x']), floatval($config['calificacion_y']));
+        drawTextCenteredOnImage($gdImg, number_format($promedio, 1), $cal_family, $cal_style, $cal_size, hexToRgb($cal_hex), floatval($config['calificacion_x']), floatval($config['calificacion_y']), $text_align);
     }
     if (!empty($config['fecha_x']) && !empty($config['fecha_y'])) {
-        drawTextCenteredOnImage($gdImg, $fecha_texto, $fecha_family, $fecha_style, $fecha_size, hexToRgb($fecha_hex), floatval($config['fecha_x']), floatval($config['fecha_y']));
+        drawTextCenteredOnImage($gdImg, $fecha_texto, $fecha_family, $fecha_style, $fecha_size, hexToRgb($fecha_hex), floatval($config['fecha_x']), floatval($config['fecha_y']), $text_align);
     }
 
     // Duración estimada (horas), opcional
     if ((int)($config['mostrar_duracion'] ?? 0) === 1 && !empty($config['duracion_x']) && !empty($config['duracion_y']) && isset($insc['duracion']) && $insc['duracion'] !== null && $insc['duracion'] !== '') {
-        $dur_text = 'Duración: ' . (int)$insc['duracion'] . ' horas';
-        drawTextCenteredOnImage($gdImg, $dur_text, $dur_family, $dur_style, $dur_size, hexToRgb($dur_hex), floatval($config['duracion_x']), floatval($config['duracion_y']));
+        $dur_text = (string)(int)$insc['duracion'];
+        drawTextCenteredOnImage($gdImg, $dur_text, $dur_family, $dur_style, $dur_size, hexToRgb($dur_hex), floatval($config['duracion_x']), floatval($config['duracion_y']), $text_align);
     }
 
     // Dibujar el ID único del certificado
     $codigo_x = isset($config['codigo_x']) ? floatval($config['codigo_x']) : 92.0;
     $codigo_y = isset($config['codigo_y']) ? floatval($config['codigo_y']) : 95.0;
-    drawTextCenteredOnImage($gdImg, 'ID: ' . $codigo_unico, $codigo_family, '', $codigo_size_base, hexToRgb($codigo_hex), $codigo_x, $codigo_y);
+    drawTextCenteredOnImage($gdImg, 'ID: ' . $codigo_unico, $codigo_family, '', $codigo_size_base, hexToRgb($codigo_hex), $codigo_x, $codigo_y, $text_align);
 
     // Guardar imagen compuesta temporalmente
     $tmpDir = dirname(__DIR__, 2) . '/uploads/temp';

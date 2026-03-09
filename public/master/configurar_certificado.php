@@ -79,6 +79,14 @@ require __DIR__ . '/../partials/nav.php';
             <label>Color</label>
             <input type="color" name="font_color" id="font_color" value="<?= htmlspecialchars($config['font_color'] ?? '#000000') ?>" style="width:100%; padding:10px; border:2px solid #e1e5e9; border-radius:8px; height:42px;">
           </div>
+          <div style="flex:1;">
+            <label>Alineación</label>
+            <select name="text_align" id="text_align" style="width:100%; padding:10px; border:2px solid #e1e5e9; border-radius:8px;">
+              <option value="center" <?= ($config['text_align'] ?? 'center') === 'center' ? 'selected' : '' ?>>Centro</option>
+              <option value="left" <?= ($config['text_align'] ?? '') === 'left' ? 'selected' : '' ?>>Izquierda</option>
+              <option value="right" <?= ($config['text_align'] ?? '') === 'right' ? 'selected' : '' ?>>Derecha</option>
+            </select>
+          </div>
         </div>
         <p style="color:#6b7280; margin-top:8px;">Estos estilos se aplican por defecto a todos los campos si no se define un estilo específico.</p>
       </div>
@@ -195,11 +203,11 @@ require __DIR__ . '/../partials/nav.php';
             <div class="drag-field" id="field-nombre">Nombre del Estudiante</div>
             <div class="drag-field" id="field-curso">Nombre del Curso</div>
             <?php if ((int)($config['mostrar_calificacion'] ?? 0) === 1): ?>
-              <div class="drag-field" id="field-calificacion">Calificación</div>
+              <div class="drag-field" id="field-calificacion">Ca</div>
             <?php endif; ?>
             <div class="drag-field" id="field-fecha">Fecha de Completado</div>
             <?php if ((int)($config['mostrar_duracion'] ?? 0) === 1): ?>
-              <div class="drag-field" id="field-duracion">Duración Estimada (horas)</div>
+              <div class="drag-field" id="field-duracion">Du</div>
             <?php endif; ?>
             <div class="drag-field" id="field-codigo">ID del Certificado</div>
           <?php else: ?>
@@ -325,7 +333,7 @@ require __DIR__ . '/../partials/nav.php';
         container.style.height = '';
       }
 
-      function applyStylesField(el, familyInput, sizeInput, colorInput) {
+      function applyStylesField(el, familyInput, sizeInput, colorInput, alignValue) {
         const globalFamily = document.getElementById('font_family').value || 'Arial';
         const globalSizePt = parseInt(document.getElementById('font_size').value || '24', 10);
         const globalColor = document.getElementById('font_color').value || '#000000';
@@ -339,8 +347,11 @@ require __DIR__ . '/../partials/nav.php';
         el.style.fontFamily = family;
         el.style.fontSize = (ptToPx(sizePt) * scale) + 'px';
         el.style.color = color;
-        el.style.textAlign = 'center';
-        el.style.transform = 'translate(-50%, -50%)';
+        const align = alignValue || 'center';
+        el.style.textAlign = align;
+        el.style.transform = align === 'left'
+          ? 'translate(0, -50%)'
+          : (align === 'right' ? 'translate(-100%, -50%)' : 'translate(-50%, -50%)');
       }
 
       function applyStylesAll() {
@@ -375,12 +386,13 @@ require __DIR__ . '/../partials/nav.php';
         const codigoSize = document.getElementById('codigo_font_size');
         const codigoColor = document.getElementById('codigo_font_color');
 
-        if (nombreEl) applyStylesField(nombreEl, nombreFamily, nombreSize, nombreColor);
-        if (cursoEl) applyStylesField(cursoEl, cursoFamily, cursoSize, cursoColor);
-        if (calEl) applyStylesField(calEl, calFamily, calSize, calColor);
-        if (fechaEl) applyStylesField(fechaEl, fechaFamily, fechaSize, fechaColor);
-        if (durEl) applyStylesField(durEl, durFamily, durSize, durColor);
-        if (codigoEl) applyStylesField(codigoEl, codigoFamily, codigoSize, codigoColor);
+        const alignValue = (document.getElementById('text_align') || {}).value || 'center';
+        if (nombreEl) applyStylesField(nombreEl, nombreFamily, nombreSize, nombreColor, alignValue);
+        if (cursoEl) applyStylesField(cursoEl, cursoFamily, cursoSize, cursoColor, alignValue);
+        if (calEl) applyStylesField(calEl, calFamily, calSize, calColor, alignValue);
+        if (fechaEl) applyStylesField(fechaEl, fechaFamily, fechaSize, fechaColor, alignValue);
+        if (durEl) applyStylesField(durEl, durFamily, durSize, durColor, alignValue);
+        if (codigoEl) applyStylesField(codigoEl, codigoFamily, codigoSize, codigoColor, alignValue);
       }
 
       function makeDraggable(fieldId, hiddenXId, hiddenYId, inputXId, inputYId) {
@@ -483,7 +495,7 @@ require __DIR__ . '/../partials/nav.php';
 
         // Estilos en tiempo real: globales y por campo
         const styleInputs = [
-          'font_family','font_size','font_color',
+          'font_family','font_size','font_color','text_align',
           'nombre_font_family','nombre_font_size','nombre_font_color',
           'curso_font_family','curso_font_size','curso_font_color',
           'calificacion_font_family','calificacion_font_size','calificacion_font_color',

@@ -6,6 +6,8 @@ require_once __DIR__ . '/../../config/database.php';
 $leccion_id = (int)($_GET['id'] ?? 0);
 $modulo_id = (int)($_GET['modulo_id'] ?? 0);
 $curso_id = (int)($_GET['curso_id'] ?? 0);
+$tema_id = (int)($_GET['tema_id'] ?? 0);
+$subtema_id = (int)($_GET['subtema_id'] ?? 0);
 
 if ($leccion_id === 0 || $modulo_id === 0) {
     header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=datos_invalidos');
@@ -35,11 +37,17 @@ try {
     $stmt = $conn->prepare("DELETE FROM lecciones WHERE id = :id");
     $stmt->execute([':id' => $leccion_id]);
     
-    header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_eliminada');
+    $dest = $subtema_id > 0
+        ? BASE_URL . '/docente/lecciones_subtema.php?id=' . $subtema_id . '&tema_id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id
+        : BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id;
+    header('Location: ' . $dest . '&success=leccion_eliminada');
     exit;
     
 } catch (Exception $e) {
-    header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_eliminar');
+    $dest = $subtema_id > 0
+        ? BASE_URL . '/docente/lecciones_subtema.php?id=' . $subtema_id . '&tema_id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id
+        : BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id;
+    header('Location: ' . $dest . '&error=error_eliminar');
     exit;
 }
 ?>

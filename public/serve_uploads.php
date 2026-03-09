@@ -47,7 +47,89 @@ $finfo = finfo_open(FILEINFO_MIME_TYPE);
 $mime  = finfo_file($finfo, $filePath) ?: 'application/octet-stream';
 finfo_close($finfo);
 
+$extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+$mimeMap = [
+    'css'  => 'text/css',
+    'js'   => 'application/javascript',
+    'json' => 'application/json',
+    'png'  => 'image/png',
+    'jpg'  => 'image/jpeg',
+    'jpeg' => 'image/jpeg',
+    'gif'  => 'image/gif',
+    'webp' => 'image/webp',
+    'svg'  => 'image/svg+xml',
+    'mp4'  => 'video/mp4',
+    'webm' => 'video/webm',
+    'mp3'  => 'audio/mpeg',
+    'wav'  => 'audio/wav',
+    'pdf'  => 'application/pdf',
+    'html' => 'text/html',
+    'htm'  => 'text/html'
+];
+if (isset($mimeMap[$extension])) {
+    $mime = $mimeMap[$extension];
+}
+
 $filename = basename($filePath);
+$isHtml = in_array($extension, ['html', 'htm'], true);
+if ($isHtml) {
+    $content = file_get_contents($filePath);
+    if ($content !== false) {
+        $currentDir = str_replace('\\', '/', dirname($path));
+        $content = preg_replace_callback(
+            '/\b(href|src)\s*=\s*(["\'])([^"\']+)\2/i',
+            function ($matches) use ($currentDir) {
+                $url = $matches[3];
+                if (preg_match('~^(https?:|mailto:|data:|#)~i', $url)) {
+                    return $matches[0];
+                }
+                $baseParts = $currentDir === '' || $currentDir === '.' ? [] : explode('/', $currentDir);
+                $relParts = explode('/', $url);
+                foreach ($relParts as $part) {
+                    if ($part === '' || $part === '.') {
+                        continue;
+                    }
+                    if ($part === '..') {
+                        array_pop($baseParts);
+                        continue;
+                    }
+                    $baseParts[] = $part;
+                }
+                $resolved = implode('/', $baseParts);
+                if ($resolved === '' || strpos($resolved, 'cursos/') !== 0) {
+                    return $matches[0];
+                }
+                $newUrl = 'serve_uploads.php?path=' . $resolved;
+                return $matches[1] . '=' . $matches[2] . $newUrl . $matches[2];
+            },
+            $content
+        );
+        $size = strlen($content);
+        $mtime = filemtime($filePath);
+        $etag = '"' . md5($filename . '-' . $size . '-' . $mtime) . '"';
+        $lastModified = gmdate('D, d M Y H:i:s', $mtime) . ' GMT';
+        header('Content-Type: ' . $mime);
+        header('Accept-Ranges: bytes');
+        header('Cache-Control: public, max-age=0, must-revalidate');
+        header('ETag: ' . $etag);
+        header('Last-Modified: ' . $lastModified);
+        header('Content-Disposition: inline; filename="' . $filename . '"');
+        header('Content-Length: ' . $size);
+        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+            http_response_code(304);
+            exit;
+        }
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+            $ifModifiedSince = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+            if ($ifModifiedSince !== false && $ifModifiedSince >= $mtime) {
+                http_response_code(304);
+                exit;
+            }
+        }
+        echo $content;
+        exit;
+    }
+}
 
 // Streaming con soporte de Range para videos/archivos grandes
 $size = filesize($filePath);

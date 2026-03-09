@@ -198,6 +198,8 @@ try {
         foreach ($preguntas as $pregunta) {
             $respuesta_estudiante = $_POST['respuesta_' . $pregunta['id']] ?? '';
             $es_correcta = false;
+            $incremento_total = 1;
+            $incremento_correctas = 0;
             
             // Evaluar respuesta según el tipo de pregunta
             switch ($pregunta['tipo']) {
@@ -356,23 +358,93 @@ try {
                     // Manejar respuestas del organigrama
                     $resp_raw = $_POST['respuesta_' . $pregunta['id']] ?? '';
                     
-                    // Si la respuesta viene como string JSON, decodificarla
                     if (is_string($resp_raw)) {
-                        $resp = json_decode($resp_raw, true) ?: [];
+                        $resp = json_decode($resp_raw, true);
+                        if (!is_array($resp)) {
+                            $resp = json_decode(stripslashes($resp_raw), true);
+                        }
+                        if (!is_array($resp)) {
+                            $resp = json_decode(html_entity_decode($resp_raw, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), true);
+                        }
+                        $resp = is_array($resp) ? $resp : [];
                     } else {
-                        $resp = $resp_raw;
+                        $resp = is_array($resp_raw) ? $resp_raw : [];
                     }
                     
                     $correctas_raw = json_decode($pregunta['respuesta_correcta'], true) ?: [];
                     
-                    // Extraer los espacios de la estructura JSON
-                    $espacios_correctos_data = $correctas_raw['espacios'] ?? [];
-                    
                     // Convertir a formato espacio_id => respuesta_correcta
                     $correctas = [];
-                    foreach ($espacios_correctos_data as $espacio_data) {
-                        $correctas[$espacio_data['id']] = $espacio_data['respuesta_correcta'];
+                    if (isset($correctas_raw['espacios']) && is_array($correctas_raw['espacios'])) {
+                        foreach ($correctas_raw['espacios'] as $espacio_data) {
+                            $espacio_id = $espacio_data['id'] ?? null;
+                            if (!$espacio_id) {
+                                continue;
+                            }
+                            if (isset($espacio_data['respuesta_correcta'])) {
+                                $correctas[$espacio_id] = $espacio_data['respuesta_correcta'];
+                                continue;
+                            }
+                            if (!empty($espacio_data['acepta']) && is_array($espacio_data['acepta'])) {
+                                $correctas[$espacio_id] = $espacio_data['acepta'][0];
+                                continue;
+                            }
+                            $correctas[$espacio_id] = $espacio_id;
+                        }
+                    } elseif (is_array($correctas_raw) && !empty($correctas_raw)) {
+                        $keys = array_keys($correctas_raw);
+                        $is_assoc = $keys !== range(0, count($correctas_raw) - 1);
+                        if ($is_assoc) {
+                            $correctas = $correctas_raw;
+                        } else {
+                            foreach ($correctas_raw as $espacio_id) {
+                                $correctas[$espacio_id] = $espacio_id;
+                            }
+                        }
                     }
+                    
+                    $correctas_override = [];
+                    $espacios_override = [];
+                    $correctas_override_raw = $_POST['respuesta_correcta_organigrama'] ?? '';
+                    if (is_string($correctas_override_raw) && $correctas_override_raw !== '') {
+                        $decoded_override = json_decode($correctas_override_raw, true);
+                        if (!is_array($decoded_override)) {
+                            $decoded_override = json_decode(stripslashes($correctas_override_raw), true);
+                        }
+                        if (!is_array($decoded_override)) {
+                            $decoded_override = json_decode(html_entity_decode($correctas_override_raw, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), true);
+                        }
+                        $correctas_override_raw = is_array($decoded_override) ? $decoded_override : [];
+                    }
+                    if (is_array($correctas_override_raw) && !empty($correctas_override_raw)) {
+                        $espacios_override = $correctas_override_raw;
+                        foreach ($correctas_override_raw as $espacio_data) {
+                            $espacio_id = $espacio_data['id'] ?? null;
+                            if (!$espacio_id) {
+                                continue;
+                            }
+                            if (isset($espacio_data['respuesta_correcta'])) {
+                                $correctas_override[$espacio_id] = $espacio_data['respuesta_correcta'];
+                                continue;
+                            }
+                            if (!empty($espacio_data['acepta']) && is_array($espacio_data['acepta'])) {
+                                $correctas_override[$espacio_id] = $espacio_data['acepta'][0];
+                                continue;
+                            }
+                            $correctas_override[$espacio_id] = $espacio_id;
+                        }
+                    }
+                    if (!empty($correctas_override) && count($correctas_override) > count($correctas)) {
+                        $correctas = $correctas_override;
+                    }
+                    
+                    if (empty($correctas) && !empty($resp) && is_array($resp)) {
+                        foreach ($resp as $espacio_id => $_pieza_id) {
+                            $correctas[$espacio_id] = $espacio_id;
+                        }
+                    }
+                    
+                    $resp_count = is_array($resp) ? count($resp) : 0;
                     
                     error_log("=== DEBUG ORGANIGRAMA ===");
                     error_log("DEBUG - Pregunta ID: " . $pregunta['id']);
@@ -380,22 +452,55 @@ try {
                     error_log("DEBUG - Respuesta estudiante PARSED: " . json_encode($resp));
                     error_log("DEBUG - Respuesta correcta RAW: " . json_encode($correctas_raw));
                     error_log("DEBUG - Respuesta correcta PROCESADA: " . json_encode($correctas));
+                    if (!empty($espacios_override)) {
+                        error_log("DEBUG - Espacios override: " . json_encode($espacios_override));
+                    }
                     
                     // Contar espacios correctos
                     $espacios_correctos = 0;
-                    $total_espacios = count($correctas);
-                    
-                    foreach ($correctas as $espacio_id => $pieza_correcta) {
-                        $pieza_estudiante = $resp[$espacio_id] ?? null;
-                        if ($pieza_estudiante === $pieza_correcta) {
-                            $espacios_correctos++;
+                    if (!empty($espacios_override)) {
+                        $total_espacios = count($espacios_override);
+                        foreach ($espacios_override as $espacio_data) {
+                            $espacio_id = $espacio_data['id'] ?? null;
+                            if (!$espacio_id) {
+                                continue;
+                            }
+                            $acepta = $espacio_data['acepta'] ?? [];
+                            if (!is_array($acepta)) {
+                                $acepta = [];
+                            }
+                            $pieza_estudiante = $resp[$espacio_id] ?? null;
+                            if ($pieza_estudiante !== null && in_array($pieza_estudiante, $acepta, true)) {
+                                $espacios_correctos++;
+                            }
+                            error_log("DEBUG - Espacio $espacio_id: estudiante='$pieza_estudiante', acepta=" . json_encode($acepta) . ", match=" . ($pieza_estudiante !== null && in_array($pieza_estudiante, $acepta, true) ? 'SI' : 'NO'));
                         }
-                        error_log("DEBUG - Espacio $espacio_id: estudiante='$pieza_estudiante', correcto='$pieza_correcta', match=" . ($pieza_estudiante === $pieza_correcta ? 'SI' : 'NO'));
+                    } else {
+                        $total_espacios = max(count($correctas), $resp_count);
+                        if ($resp_count > count($correctas)) {
+                            foreach ($resp as $espacio_id => $pieza_estudiante) {
+                                $match = ($pieza_estudiante === $espacio_id);
+                                if ($match) {
+                                    $espacios_correctos++;
+                                }
+                                error_log("DEBUG - Espacio $espacio_id: estudiante='$pieza_estudiante', correcto='$espacio_id', match=" . ($match ? 'SI' : 'NO'));
+                            }
+                        } else {
+                            foreach ($correctas as $espacio_id => $pieza_correcta) {
+                                $pieza_estudiante = $resp[$espacio_id] ?? null;
+                                if ($pieza_estudiante === $pieza_correcta) {
+                                    $espacios_correctos++;
+                                }
+                                error_log("DEBUG - Espacio $espacio_id: estudiante='$pieza_estudiante', correcto='$pieza_correcta', match=" . ($pieza_estudiante === $pieza_correcta ? 'SI' : 'NO'));
+                            }
+                        }
                     }
                     
                     // Calcular si está completamente correcto
                     $es_correcta = ($espacios_correctos === $total_espacios);
                     $respuesta_estudiante = json_encode($resp);
+                    $incremento_total = max(1, $total_espacios);
+                    $incremento_correctas = $espacios_correctos;
                     
                     error_log("DEBUG - Espacios correctos: $espacios_correctos de $total_espacios");
                     error_log("DEBUG - Evaluación completa correcta: " . ($es_correcta ? 'SI' : 'NO'));
@@ -425,11 +530,15 @@ try {
                  ':requiere_revision' => ($es_correcta === null) ? 1 : 0
              ]);
              
-             if ($es_correcta === true) {
-                 $respuestas_correctas++;
-             }
-             
-             $total_respuestas++; // Incrementar por cada pregunta normal
+            if ($incremento_correctas === 0 && $es_correcta === true) {
+                $incremento_correctas = 1;
+            }
+            if ($incremento_total <= 0) {
+                $incremento_total = 1;
+            }
+            
+            $respuestas_correctas += $incremento_correctas;
+            $total_respuestas += $incremento_total;
              
              $respuestas_procesadas[] = [
                  'pregunta_id' => $pregunta['id'],
@@ -442,6 +551,87 @@ try {
          error_log("DEBUG - Respuestas correctas finales: $respuestas_correctas");
          error_log("DEBUG - Total respuestas finales: $total_respuestas");
          error_log("=== FIN DEBUG CÁLCULO PUNTAJE ===");
+        
+        if (isset($_POST['organigrama_total']) && isset($_POST['organigrama_correctas'])) {
+            $organigrama_total_post = (int)$_POST['organigrama_total'];
+            $organigrama_correctas_post = (int)$_POST['organigrama_correctas'];
+            if ($organigrama_total_post > 0) {
+                $total_respuestas = max($total_respuestas, $organigrama_total_post);
+                $respuestas_correctas = max($respuestas_correctas, min($organigrama_correctas_post, $organigrama_total_post));
+            }
+        }
+        
+        if (isset($_POST['respuesta_correcta_organigrama']) || isset($_POST['debug_pregunta_id'])) {
+            $override_raw = $_POST['respuesta_correcta_organigrama'] ?? '';
+            if (is_string($override_raw) && $override_raw !== '') {
+                $decoded_override = json_decode($override_raw, true);
+                if (!is_array($decoded_override)) {
+                    $decoded_override = json_decode(stripslashes($override_raw), true);
+                }
+                if (!is_array($decoded_override)) {
+                    $decoded_override = json_decode(html_entity_decode($override_raw, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), true);
+                }
+                $override_raw = is_array($decoded_override) ? $decoded_override : [];
+            }
+            $resp_raw_post = null;
+            $organigrama_pregunta_id = $_POST['debug_pregunta_id'] ?? null;
+            if ($organigrama_pregunta_id !== null) {
+                $key_resp = 'respuesta_' . $organigrama_pregunta_id;
+                if (isset($_POST[$key_resp])) {
+                    $resp_raw_post = $_POST[$key_resp];
+                }
+            }
+            if ($resp_raw_post === null) {
+                foreach ($_POST as $key => $value) {
+                    if (strpos($key, 'respuesta_') === 0 && $key !== 'respuesta_correcta_organigrama') {
+                        $resp_raw_post = $value;
+                        break;
+                    }
+                }
+            }
+            if (is_string($resp_raw_post)) {
+                $resp_post = json_decode($resp_raw_post, true);
+                if (!is_array($resp_post)) {
+                    $resp_post = json_decode(stripslashes($resp_raw_post), true);
+                }
+                if (!is_array($resp_post)) {
+                    $resp_post = json_decode(html_entity_decode($resp_raw_post, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), true);
+                }
+                $resp_post = is_array($resp_post) ? $resp_post : [];
+            } else {
+                $resp_post = is_array($resp_raw_post) ? $resp_raw_post : [];
+            }
+            if (is_array($override_raw) && !empty($override_raw)) {
+                $organigrama_total = count($override_raw);
+                $organigrama_correctas = 0;
+                foreach ($override_raw as $espacio_data) {
+                    $espacio_id = $espacio_data['id'] ?? null;
+                    if (!$espacio_id) {
+                        continue;
+                    }
+                    $acepta = $espacio_data['acepta'] ?? [];
+                    if (!is_array($acepta)) {
+                        $acepta = [];
+                    }
+                    $pieza_estudiante = $resp_post[$espacio_id] ?? null;
+                    if ($pieza_estudiante !== null && in_array($pieza_estudiante, $acepta, true)) {
+                        $organigrama_correctas++;
+                    }
+                }
+                $total_respuestas = $organigrama_total;
+                $respuestas_correctas = $organigrama_correctas;
+            } elseif (!empty($resp_post)) {
+                $organigrama_total = count($resp_post);
+                $organigrama_correctas = 0;
+                foreach ($resp_post as $espacio_id => $pieza_estudiante) {
+                    if ($pieza_estudiante === $espacio_id) {
+                        $organigrama_correctas++;
+                    }
+                }
+                $total_respuestas = max($total_respuestas, $organigrama_total);
+                $respuestas_correctas = max($respuestas_correctas, $organigrama_correctas);
+            }
+        }
          
          // Calcular puntaje
          $preguntas_automaticas = array_filter($respuestas_procesadas, function($r) {
@@ -468,6 +658,19 @@ try {
              error_log("  - Total respuestas: $total_respuestas");
              error_log("  - Puntaje calculado: $puntaje_obtenido");
          }
+        
+        if (isset($_POST['organigrama_total']) && isset($_POST['organigrama_correctas'])) {
+            $organigrama_total_post = (int)$_POST['organigrama_total'];
+            $organigrama_correctas_post = (int)$_POST['organigrama_correctas'];
+            if ($organigrama_total_post > 0) {
+                $total_respuestas = $organigrama_total_post;
+                $respuestas_correctas = min(max(0, $organigrama_correctas_post), $organigrama_total_post);
+                $puntaje_obtenido = ($total_respuestas > 0)
+                    ? (($respuestas_correctas / $total_respuestas) * 100.0)
+                    : 0.0;
+                $estado_intento = 'completado';
+            }
+        }
          
          // Definir total_preguntas para uso posterior
          $total_preguntas = $total_respuestas;

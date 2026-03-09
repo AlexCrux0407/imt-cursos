@@ -42,6 +42,42 @@ if (!$leccion) {
     header('Location: ' . BASE_URL . '/estudiante/dashboard.php?error=acceso_denegado');
     exit;
 }
+$leccion_recurso_url_public = '';
+$leccion_recurso_extension = '';
+if (!empty($leccion['recurso_url'])) {
+    $leccion_recurso_extension = strtolower(pathinfo($leccion['recurso_url'], PATHINFO_EXTENSION));
+    $leccion_recurso_url_public = $leccion['recurso_url'];
+    if (!filter_var($leccion_recurso_url_public, FILTER_VALIDATE_URL)) {
+        $baseUrl = rtrim(BASE_URL, '/');
+        if ($baseUrl !== '' && strpos($leccion_recurso_url_public, $baseUrl . '/') === 0) {
+            $leccion_recurso_url_public = $leccion_recurso_url_public;
+        } elseif (strpos($leccion_recurso_url_public, '/') === 0) {
+            $leccion_recurso_url_public = $baseUrl . $leccion_recurso_url_public;
+        } else {
+            $leccion_recurso_url_public = $baseUrl . '/' . $leccion_recurso_url_public;
+        }
+    }
+    $path_en_url = parse_url($leccion_recurso_url_public, PHP_URL_PATH) ?: '';
+    $host_en_url = parse_url($leccion_recurso_url_public, PHP_URL_HOST) ?: '';
+    $host_base = parse_url(BASE_URL, PHP_URL_HOST) ?: '';
+    $es_archivo_local = (($host_en_url === $host_base) || $host_en_url === '' || $host_en_url === 'localhost' || $host_en_url === '127.0.0.1')
+        && (strpos($path_en_url, '/uploads/') !== false);
+    if (!$es_archivo_local && strpos($path_en_url, '/uploads/') !== false) {
+        $es_archivo_local = true;
+    }
+    if ($es_archivo_local) {
+        $pos = strpos($path_en_url, '/uploads/');
+        $rel = substr($path_en_url, $pos + strlen('/uploads/'));
+        if (strpos($rel, 'cursos/') === 0) {
+            $leccion_recurso_url_public = rtrim(BASE_URL, '/') . '/serve_uploads.php?path=' . rawurlencode($rel);
+        }
+    }
+}
+$contenido_embebido = null;
+if (is_array($leccion) && array_key_exists('contenido_embebido', $leccion)) {
+    $contenido_embebido = $leccion['contenido_embebido'] === null ? null : (int)$leccion['contenido_embebido'];
+}
+$tiene_embebido = $contenido_embebido === 1;
 
 // Obtener lecciones del mismo nivel para navegación
 $stmt = $conn->prepare("
@@ -201,33 +237,120 @@ require __DIR__ . '/../partials/nav.php';
 
     
     <div class="leccion-contenido">
-        <div class="contenido-texto">
-            <?php 
-            // Limpiar el contenido HTML para extraer solo el contenido del body
-            $contenido = $leccion['contenido'] ?? '';
-            
-            // Si el contenido incluye etiquetas HTML completas, extraer solo el contenido del body
-            if (strpos($contenido, '<html') !== false && strpos($contenido, '<body') !== false) {
-                // Extraer contenido entre <body> y </body>
-                preg_match('/<body[^>]*>(.*?)<\/body>/is', $contenido, $matches);
-                if (!empty($matches[1])) {
-                    $contenido = $matches[1];
-                }
+        <?php 
+        $contenido = $leccion['contenido'] ?? '';
+        if (strpos($contenido, '<html') !== false && strpos($contenido, '<body') !== false) {
+            preg_match('/<body[^>]*>(.*?)<\/body>/is', $contenido, $matches);
+            if (!empty($matches[1])) {
+                $contenido = $matches[1];
             }
-            
-            echo $contenido;
-            ?>
-        </div>
+        }
+        $contenido = str_replace(
+            [
+                '<p class="modulo-descripcion"></p>',
+                '<h1 class="modulo-titulo"></h1>',
+                '&lt;p class=&quot;modulo-descripcion&quot;&gt;&lt;/p&gt;',
+                '&lt;h1 class=&quot;modulo-titulo&quot;&gt;&lt;/h1&gt;'
+            ],
+            '',
+            $contenido
+        );
+        echo $contenido;
+        ?>
 
         
-        <?php if (!empty($leccion['recurso_url'])): ?>
+        <?php if ($tiene_embebido && !empty($leccion_recurso_url_public)): ?>
+            <?php
+            $leccion_recurso_url = $leccion_recurso_url_public;
+            $leccion_recurso_es_imagen = preg_match('/\.(jpe?g|png|gif|webp)(\?.*)?$/i', $leccion_recurso_url)
+                && (strpos($leccion_recurso_url, '/uploads/') !== false || strpos($leccion_recurso_url, 'serve_uploads.php?') !== false);
+            ?>
+            <div class="contenido-modulo-section">
+                <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido de la Lección</h2>
+                <div style="width: 100%; height: 70vh; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                    <?php if ($leccion_recurso_es_imagen): ?>
+                        <img src="<?= htmlspecialchars($leccion_recurso_url_public) ?>" style="width: 100%; height: auto; border: 0;" alt="<?= htmlspecialchars($leccion['titulo'] ?? 'Contenido de la Lección', ENT_QUOTES, 'UTF-8') ?>">
+                    <?php else: ?>
+                        <iframe src="<?= htmlspecialchars($leccion_recurso_url_public) ?>" style="width: 100%; height: 100%; border: 0;" title="<?= htmlspecialchars($leccion['titulo'] ?? 'Contenido de la Lección', ENT_QUOTES, 'UTF-8') ?>"></iframe>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!$tiene_embebido && !empty($leccion['recurso_url']) && in_array($leccion_recurso_extension, ['html', 'htm'], true)): ?>
+            <div class="contenido-modulo-section">
+                <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido de la Lección</h2>
+                <div style="width: 100%; height: 70vh; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                    <iframe src="<?= htmlspecialchars($leccion_recurso_url_public) ?>" style="width: 100%; height: 100%; border: 0;" title="<?= htmlspecialchars($leccion['titulo'] ?? 'Contenido de la Lección', ENT_QUOTES, 'UTF-8') ?>"></iframe>
+                </div>
+            </div>
+        <?php elseif (!$tiene_embebido && !empty($leccion['recurso_url'])): ?>
             <div class="leccion-resource">
                 <?php
-                $extension = strtolower(pathinfo($leccion['recurso_url'], PATHINFO_EXTENSION));
+                $extension = $leccion_recurso_extension;
                 $es_archivo_local = strpos($leccion['recurso_url'], '/imt-cursos/uploads/') === 0;
                 $es_url_externa = filter_var($leccion['recurso_url'], FILTER_VALIDATE_URL);
                 
                 // Determinar el tipo de recurso y el icono
+                $tipo_recurso = 'Archivo';
+                $icono = '📎';
+                
+                if ($es_url_externa) {
+                    $tipo_recurso = 'Enlace externo';
+                    $icono = '🔗';
+                } else {
+                    switch($extension) {
+                        case 'pdf':
+                            $tipo_recurso = 'Documento PDF';
+                            $icono = '📄';
+                            break;
+                        case 'doc':
+                        case 'docx':
+                            $tipo_recurso = 'Documento Word';
+                            $icono = '📝';
+                            break;
+                        case 'ppt':
+                        case 'pptx':
+                            $tipo_recurso = 'Presentación';
+                            $icono = '📊';
+                            break;
+                        case 'mp4':
+                        case 'avi':
+                        case 'mov':
+                        case 'webm':
+                            $tipo_recurso = 'Video';
+                            $icono = '🎥';
+                            break;
+                        case 'jpg':
+                        case 'jpeg':
+                        case 'png':
+                        case 'gif':
+                        case 'webp':
+                            $tipo_recurso = 'Imagen';
+                            $icono = '🖼️';
+                            break;
+                    }
+                }
+                ?>
+                
+                <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($leccion['recurso_url']) ?>&titulo=<?= urlencode($leccion['titulo']) ?>&leccion_id=<?= $leccion_id ?>" 
+                   class="resource-link" target="_blank">
+                    <div class="resource-icon"><?= $icono ?></div>
+                    <div class="resource-info">
+                        <span class="resource-title">Ver recurso adjunto</span>
+                        <span class="resource-type"><?= $tipo_recurso ?></span>
+                    </div>
+                </a>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($tiene_embebido && !empty($leccion['recurso_url']) && !in_array($leccion_recurso_extension, ['html', 'htm'], true)): ?>
+            <div class="leccion-resource">
+                <?php
+                $extension = $leccion_recurso_extension;
+                $es_archivo_local = strpos($leccion['recurso_url'], '/imt-cursos/uploads/') === 0;
+                $es_url_externa = filter_var($leccion['recurso_url'], FILTER_VALIDATE_URL);
+                
                 $tipo_recurso = 'Archivo';
                 $icono = '📎';
                 
@@ -365,6 +488,34 @@ require __DIR__ . '/../partials/nav.php';
 
 .leccion-contenido {
     margin-bottom: 40px;
+}
+
+.leccion-contenido {
+    display: flow-root;
+    overflow: hidden;
+}
+
+.leccion-contenido * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.leccion-contenido img,
+.leccion-contenido video,
+.leccion-contenido iframe,
+.leccion-contenido table {
+    max-width: 100%;
+    height: auto;
+}
+
+.leccion-contenido table {
+    width: 100%;
+}
+
+.leccion-contenido pre,
+.leccion-contenido code {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .leccion-navegacion {

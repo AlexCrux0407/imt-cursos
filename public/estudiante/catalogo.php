@@ -180,6 +180,7 @@ require __DIR__ . '/../partials/nav.php';
                                     <div class="detalle-item">
                                         <span class="detalle-label">⏱️</span>
                                         <span class="detalle-valor"><?= htmlspecialchars($curso['duracion']) ?></span>
+                                        <strong>horas</strong>
                                     </div>
                                 <?php endif; ?>
                             </div>

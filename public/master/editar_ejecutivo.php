@@ -23,9 +23,13 @@ $success = $_GET['success'] ?? '';
 $error = $_GET['error'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nombres = trim($_POST['nombres'] ?? '');
+    $apellidos = trim($_POST['apellidos'] ?? '');
     $nombre = trim($_POST['nombre'] ?? '');
+    if ($nombre === '') {
+        $nombre = trim($nombres . ' ' . $apellidos);
+    }
     $email = trim($_POST['email'] ?? '');
-    $usuario_name = trim($_POST['usuario'] ?? '');
     // Removed telefono (no requerido)
     $estado = $_POST['estado'] ?? 'activo';
     $password = trim($_POST['password'] ?? '');
@@ -33,16 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = [];
     if ($nombre === '') $errors[] = 'El nombre es obligatorio';
     if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'El email es obligatorio y debe ser válido';
-    if ($usuario_name === '') $errors[] = 'El usuario es obligatorio';
     if (!in_array($estado, ['activo','inactivo'], true)) $errors[] = 'Estado inválido';
 
     $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
     $stmt->execute([':email' => $email, ':id' => $id]);
     if ($stmt->fetch()) $errors[] = 'Ya existe otro usuario con este email';
-
-    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE usuario = :usuario AND id != :id");
-    $stmt->execute([':usuario' => $usuario_name, ':id' => $id]);
-    if ($stmt->fetch()) $errors[] = 'Ya existe otro usuario con este nombre de usuario';
 
     if (!empty($password) && strlen($password) < 6) $errors[] = 'La contraseña debe tener al menos 6 caracteres';
 
@@ -50,21 +49,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             if (!empty($password)) {
                 $hashed = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $conn->prepare("UPDATE usuarios SET nombre = :nombre, email = :email, usuario = :usuario, estado = :estado, password = :password, updated_at = NOW() WHERE id = :id AND role = 'ejecutivo'");
+                $stmt = $conn->prepare("UPDATE usuarios SET nombre = :nombre, email = :email, estado = :estado, password = :password, updated_at = NOW() WHERE id = :id AND role = 'ejecutivo'");
                 $stmt->execute([
                     ':nombre' => $nombre,
                     ':email' => $email,
-                    ':usuario' => $usuario_name,
                     ':estado' => $estado,
                     ':password' => $hashed,
                     ':id' => $id
                 ]);
             } else {
-                $stmt = $conn->prepare("UPDATE usuarios SET nombre = :nombre, email = :email, usuario = :usuario, estado = :estado, updated_at = NOW() WHERE id = :id AND role = 'ejecutivo'");
+                $stmt = $conn->prepare("UPDATE usuarios SET nombre = :nombre, email = :email, estado = :estado, updated_at = NOW() WHERE id = :id AND role = 'ejecutivo'");
                 $stmt->execute([
                     ':nombre' => $nombre,
                     ':email' => $email,
-                    ':usuario' => $usuario_name,
                     ':estado' => $estado,
                     ':id' => $id
                 ]);
@@ -108,23 +105,24 @@ require __DIR__ . '/../partials/nav.php';
             </div>
         <?php endif; ?>
 
+        <?php list($nombres_actual, $apellidos_actual) = split_nombre_apellidos($usuario['nombre'] ?? ''); ?>
         <form method="POST" class="div-fila" style="flex-direction: column; gap: 16px;">
             <div class="div-fila" style="gap: 16px;">
                 <div style="flex: 1;">
-                    <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Nombre *</label>
-                    <input type="text" name="nombre" value="<?= htmlspecialchars($usuario['nombre']) ?>" 
+                    <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Nombres *</label>
+                    <input type="text" name="nombres" value="<?= htmlspecialchars($nombres_actual) ?>" 
                            style="width: 100%; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;" required>
                 </div>
                 <div style="flex: 1;">
-                    <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Email *</label>
-                    <input type="email" name="email" value="<?= htmlspecialchars($usuario['email']) ?>" 
+                    <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Apellidos *</label>
+                    <input type="text" name="apellidos" value="<?= htmlspecialchars($apellidos_actual) ?>" 
                            style="width: 100%; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;" required>
                 </div>
             </div>
             <div class="div-fila" style="gap: 16px;">
                 <div style="flex: 1;">
-                    <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Usuario *</label>
-                    <input type="text" name="usuario" value="<?= htmlspecialchars($usuario['usuario']) ?>" 
+                    <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Email *</label>
+                    <input type="email" name="email" value="<?= htmlspecialchars($usuario['email']) ?>" 
                            style="width: 100%; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;" required>
                 </div>
                 <!-- Teléfono eliminado por no ser necesario -->
@@ -139,8 +137,19 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
                 <div style="flex: 1;">
                     <label style="display:block; margin-bottom:6px; color:#2c3e50; font-weight:500;">Nueva Contraseña</label>
-                    <input type="password" name="password" placeholder="Dejar en blanco para no cambiar" 
-                           style="width: 100%; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="password" id="passwordEditarEjecutivo" name="password" placeholder="Dejar en blanco para no cambiar" 
+                               style="flex: 1; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                        <button type="button" onclick="togglePasswordVisibility('passwordEditarEjecutivo', this)"
+                                style="padding: 8px 12px; border: 1px solid #dfe6ee; border-radius: 10px; background: linear-gradient(180deg,#ffffff,#f2f5f9); color: #2c3e50; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); width: 36px; font-size: 1rem; line-height: 1;">
+                            👁
+                        </button>
+                        <button type="button" onclick="generarPasswordTemporal('passwordEditarEjecutivo', this)"
+                                style="padding: 8px 12px; border: 1px solid #dfe6ee; border-radius: 10px; background: linear-gradient(180deg,#eaf4ff,#f6f9ff); color: #2c3e50; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                            Generar
+                        </button>
+                    </div>
+                    <div style="margin-top: 6px; color: #7f8c8d; font-size: 0.9rem;">Al guardar se reemplaza la contraseña del usuario.</div>
                 </div>
             </div>
 
@@ -157,5 +166,25 @@ require __DIR__ . '/../partials/nav.php';
         </form>
     </div>
 </div>
+
+<script>
+function togglePasswordVisibility(inputId, button) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+}
+
+function generarPasswordTemporal(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+        password += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    input.value = password;
+}
+</script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

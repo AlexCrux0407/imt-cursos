@@ -5,6 +5,8 @@ require_once __DIR__ . '/../../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $modulo_id = (int)($_POST['modulo_id'] ?? 0);
+    $tema_id = (int)($_POST['tema_id'] ?? 0);
+    $subtema_id = (int)($_POST['subtema_id'] ?? 0);
     $curso_id = (int)($_POST['curso_id'] ?? 0);
     $titulo = trim($_POST['titulo'] ?? '');
     $contenido = trim($_POST['contenido'] ?? '');
@@ -13,7 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orden = (int)($_POST['orden'] ?? 1);
     
     if (empty($titulo) || $modulo_id === 0) {
-        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_invalidos');
+        $dest = $subtema_id > 0
+            ? BASE_URL . '/docente/lecciones_subtema.php?id=' . $subtema_id . '&tema_id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id
+            : BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id;
+        header('Location: ' . $dest . '&error=datos_invalidos');
         exit;
     }
     
@@ -37,12 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Insertar lección primero para obtener el ID
         $stmt = $conn->prepare("
-            INSERT INTO lecciones (modulo_id, titulo, contenido, tipo, recurso_url, orden) 
-            VALUES (:modulo_id, :titulo, :contenido, :tipo, :recurso_url, :orden)
+            INSERT INTO lecciones (modulo_id, tema_id, subtema_id, titulo, contenido, tipo, recurso_url, orden) 
+            VALUES (:modulo_id, :tema_id, :subtema_id, :titulo, :contenido, :tipo, :recurso_url, :orden)
         ");
         
         $stmt->execute([
             ':modulo_id' => $modulo_id,
+            ':tema_id' => $tema_id ?: null,
+            ':subtema_id' => $subtema_id ?: null,
             ':titulo' => $titulo,
             ':contenido' => $contenido,
             ':tipo' => $tipo,
@@ -71,11 +78,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_creada');
+        $dest = $subtema_id > 0
+            ? BASE_URL . '/docente/lecciones_subtema.php?id=' . $subtema_id . '&tema_id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id
+            : BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id;
+        header('Location: ' . $dest . '&success=leccion_creada');
         exit;
         
     } catch (Exception $e) {
-        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_crear');
+        $dest = $subtema_id > 0
+            ? BASE_URL . '/docente/lecciones_subtema.php?id=' . $subtema_id . '&tema_id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id
+            : BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id;
+        header('Location: ' . $dest . '&error=error_crear');
         exit;
     }
 } else {

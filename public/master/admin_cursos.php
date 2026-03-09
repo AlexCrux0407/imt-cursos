@@ -189,7 +189,7 @@ require __DIR__ . '/../partials/nav.php';
             <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
                 <div style="flex: 1;">
                     <label for="duracion" style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">
-                        Duración (opcional)
+                        Duración (horas)
                     </label>
                     <input type="text" id="duracion" name="duracion"
                            style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;"
@@ -323,6 +323,11 @@ require __DIR__ . '/../partials/nav.php';
                                            style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem;"
                                            title="Editar curso">
                                             Editar
+                                        </a>
+                                        <a href="<?= BASE_URL ?>/docente/modulos_curso.php?id=<?= $curso['id'] ?>" 
+                                           style="background: #6f42c1; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem;"
+                                           title="Gestionar contenido">
+                                            Gestionar Contenido
                                         </a>
                                         <?php if (!$curso['docente_asignado']): ?>
                                             <button onclick="asignarCurso(<?= $curso['id'] ?>, '<?= htmlspecialchars($curso['titulo']) ?>')"

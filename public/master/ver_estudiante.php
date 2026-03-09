@@ -16,7 +16,7 @@ $stmt->execute();
 $tiene_tipo_estudiante = (bool)$stmt->fetch();
 
 $select_tipo_estudiante = $tiene_tipo_estudiante ? ", tipo_estudiante" : ", 'interno' as tipo_estudiante";
-$stmt = $conn->prepare("SELECT id, nombre, email, usuario, estado, created_at, updated_at $select_tipo_estudiante FROM usuarios WHERE id = :id AND role = 'estudiante' LIMIT 1");
+$stmt = $conn->prepare("SELECT id, nombre, email, estado, created_at, updated_at $select_tipo_estudiante FROM usuarios WHERE id = :id AND role = 'estudiante' LIMIT 1");
 $stmt->execute([':id' => $id]);
 $estudiante = $stmt->fetch();
 if (!$estudiante) {
@@ -64,10 +64,6 @@ require __DIR__ . '/../partials/nav.php';
             <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
                 <div style="font-weight: 600; color: #2c3e50;">Email</div>
                 <div style="color: #34495e;"><?= htmlspecialchars($estudiante['email']) ?></div>
-            </div>
-            <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
-                <div style="font-weight: 600; color: #2c3e50;">Usuario</div>
-                <div style="color: #34495e;"><?= htmlspecialchars($estudiante['usuario']) ?></div>
             </div>
         </div>
         <div class="div-fila" style="gap: 20px; margin-top: 15px;">

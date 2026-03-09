@@ -10,7 +10,10 @@ declare(strict_types=1);
 function scanImportedCourse(string $cursoDir): array {
     $result = [
         'css' => null,
-        'lecciones' => []
+        'lecciones' => [],
+        'modulos_detectados' => [],
+        'temas_detectados' => [],
+        'subtemas_detectados' => []
     ];
 
     $cssPath = $cursoDir . DIRECTORY_SEPARATOR . 'tema' . DIRECTORY_SEPARATOR . 'tema.css';
@@ -19,6 +22,19 @@ function scanImportedCourse(string $cursoDir): array {
     }
 
     $contenidoBase = $cursoDir . DIRECTORY_SEPARATOR . 'contenido';
+    if (!is_dir($contenidoBase)) {
+        $items = @scandir($cursoDir);
+        if ($items !== false) {
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..') continue;
+                $candidate = $cursoDir . DIRECTORY_SEPARATOR . $item . DIRECTORY_SEPARATOR . 'contenido';
+                if (is_dir($candidate)) {
+                    $contenidoBase = $candidate;
+                    break;
+                }
+            }
+        }
+    }
     if (!is_dir($contenidoBase)) {
         return $result;
     }
@@ -36,11 +52,23 @@ function scanImportedCourse(string $cursoDir): array {
         return array_values(array_filter($items, fn($x) => $x !== '.' && $x !== '..'));
     };
 
+    $toRelative = function (string $path) use ($cursoDir): string {
+        $relative = str_replace($cursoDir . DIRECTORY_SEPARATOR, '', $path);
+        return str_replace('\\', '/', $relative);
+    };
+
     foreach ($safeList($contenidoBase) as $moduloDirName) {
         $moduloPath = $contenidoBase . DIRECTORY_SEPARATOR . $moduloDirName;
         if (!is_dir($moduloPath)) continue;
         $mOrden = $numFrom($moduloDirName, 'modulo');
         if ($mOrden === null) continue;
+
+        $moduloIndexPath = $moduloPath . DIRECTORY_SEPARATOR . 'index.html';
+        $result['modulos_detectados'][] = [
+            'modulo_orden' => $mOrden,
+            'dir' => $moduloDirName,
+            'index_path' => is_file($moduloIndexPath) ? $toRelative($moduloIndexPath) : null
+        ];
 
         foreach ($safeList($moduloPath) as $temaDirName) {
             $temaPath = $moduloPath . DIRECTORY_SEPARATOR . $temaDirName;
@@ -48,11 +76,28 @@ function scanImportedCourse(string $cursoDir): array {
             $tOrden = $numFrom($temaDirName, 'tema');
             if ($tOrden === null) continue;
 
+            $temaIndexPath = $temaPath . DIRECTORY_SEPARATOR . 'index.html';
+            $result['temas_detectados'][] = [
+                'modulo_orden' => $mOrden,
+                'tema_orden' => $tOrden,
+                'dir' => $temaDirName,
+                'index_path' => is_file($temaIndexPath) ? $toRelative($temaIndexPath) : null
+            ];
+
             foreach ($safeList($temaPath) as $subtemaDirName) {
                 $subtemaPath = $temaPath . DIRECTORY_SEPARATOR . $subtemaDirName;
                 if (!is_dir($subtemaPath)) continue;
                 $sOrden = $numFrom($subtemaDirName, 'subtema');
                 if ($sOrden === null) continue;
+
+                $subtemaIndexPath = $subtemaPath . DIRECTORY_SEPARATOR . 'index.html';
+                $result['subtemas_detectados'][] = [
+                    'modulo_orden' => $mOrden,
+                    'tema_orden' => $tOrden,
+                    'subtema_orden' => $sOrden,
+                    'dir' => $subtemaDirName,
+                    'index_path' => is_file($subtemaIndexPath) ? $toRelative($subtemaIndexPath) : null
+                ];
 
                 foreach ($safeList($subtemaPath) as $fileName) {
                     $filePath = $subtemaPath . DIRECTORY_SEPARATOR . $fileName;
@@ -69,8 +114,7 @@ function scanImportedCourse(string $cursoDir): array {
                         if ($t !== '') $titulo = $t;
                     }
 
-                    $relative = str_replace($cursoDir . DIRECTORY_SEPARATOR, '', $filePath);
-                    $relative = str_replace('\\', '/', $relative);
+                    $relative = $toRelative($filePath);
 
                     $result['lecciones'][] = [
                         'modulo_orden'  => $mOrden,
@@ -88,6 +132,17 @@ function scanImportedCourse(string $cursoDir): array {
     usort($result['lecciones'], function($a, $b) {
         return [$a['modulo_orden'], $a['tema_orden'], $a['subtema_orden'], $a['leccion_orden']]
              <=> [$b['modulo_orden'], $b['tema_orden'], $b['subtema_orden'], $b['leccion_orden']];
+    });
+
+    usort($result['modulos_detectados'], function($a, $b) {
+        return [$a['modulo_orden']] <=> [$b['modulo_orden']];
+    });
+    usort($result['temas_detectados'], function($a, $b) {
+        return [$a['modulo_orden'], $a['tema_orden']] <=> [$b['modulo_orden'], $b['tema_orden']];
+    });
+    usort($result['subtemas_detectados'], function($a, $b) {
+        return [$a['modulo_orden'], $a['tema_orden'], $a['subtema_orden']]
+             <=> [$b['modulo_orden'], $b['tema_orden'], $b['subtema_orden']];
     });
 
     return $result;

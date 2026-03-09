@@ -1,6 +1,6 @@
 <?php
-// Vista Estudiante – Contenido del curso: módulos, temas y recursos
 declare(strict_types=1);
+// Vista Estudiante – Contenido del curso: módulos, temas y recursos
 
 require_once __DIR__ . '/../../config/paths.php';
 require_once __DIR__ . '/../../app/auth.php';
@@ -222,7 +222,7 @@ require __DIR__ . '/../partials/nav.php';
                 <?php if (!empty($curso['duracion'])): ?>
                 <div class="collapsible-section sec-orange">
                     <div class="collapsible-header" onclick="toggleSection('duracion')">
-                        <h3>Duración</h3>
+                        <h3>Duración (horas)</h3>
                         <span class="toggle-icon" id="icon-duracion">▶</span>
                     </div>
                     <div class="collapsible-content" id="content-duracion">

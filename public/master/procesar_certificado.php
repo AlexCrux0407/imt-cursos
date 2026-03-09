@@ -95,6 +95,10 @@ $font_color = $_POST['font_color'] ?? '#000000';
 $mostrar_calificacion = isset($_POST['mostrar_calificacion']) ? 1 : 0;
 $mostrar_duracion = isset($_POST['mostrar_duracion']) ? 1 : 0;
 $valid_days = (int)($_POST['valid_days'] ?? 15);
+$text_align = $_POST['text_align'] ?? 'center';
+if (!in_array($text_align, ['left', 'center', 'right'], true)) {
+  $text_align = 'center';
+}
 
 // Estilos por campo (opcionales; si se dejan vacíos, se usa el global)
 $nombre_font_family = isset($_POST['nombre_font_family']) && $_POST['nombre_font_family'] !== '' ? $_POST['nombre_font_family'] : null;
@@ -182,6 +186,7 @@ try {
       font_family VARCHAR(64) NOT NULL,
       font_size INT NOT NULL,
       font_color VARCHAR(16) NOT NULL,
+      text_align VARCHAR(10) NOT NULL DEFAULT 'center',
       mostrar_calificacion TINYINT(1) NOT NULL DEFAULT 1,
       valid_days INT NOT NULL,
       nombre_x FLOAT NULL,
@@ -230,6 +235,7 @@ try {
   $ensure('duracion_font_family', 'VARCHAR(64) NULL');
   $ensure('duracion_font_size', 'INT NULL');
   $ensure('duracion_font_color', 'VARCHAR(16) NULL');
+  $ensure('text_align', 'VARCHAR(10) NOT NULL DEFAULT "center"');
 
   if ($exists) {
     $sets = [];
@@ -240,6 +246,7 @@ try {
     $sets[] = 'font_family = :font_family'; $params[':font_family'] = $font_family;
     $sets[] = 'font_size = :font_size'; $params[':font_size'] = $font_size;
     $sets[] = 'font_color = :font_color'; $params[':font_color'] = $font_color;
+    if ($hasCol('text_align')) { $sets[] = 'text_align = :text_align'; $params[':text_align'] = $text_align; }
     $sets[] = 'mostrar_calificacion = :mostrar_calificacion'; $params[':mostrar_calificacion'] = $mostrar_calificacion;
     if ($hasCol('mostrar_duracion')) { $sets[] = 'mostrar_duracion = :mostrar_duracion'; $params[':mostrar_duracion'] = $mostrar_duracion; }
     $sets[] = 'valid_days = :valid_days'; $params[':valid_days'] = $valid_days;
@@ -294,6 +301,7 @@ try {
       ':fecha_x' => $fecha_x,
       ':fecha_y' => $fecha_y,
     ];
+    if ($hasCol('text_align')) { $cols[] = 'text_align'; $place[] = ':text_align'; $params[':text_align'] = $text_align; }
     if ($hasCol('template_path')) { $cols[] = 'template_path'; $place[] = ':template_path'; $params[':template_path'] = $template_path; }
     if ($hasCol('template_mime')) { $cols[] = 'template_mime'; $place[] = ':template_mime'; $params[':template_mime'] = $template_mime; }
     if ($hasCol('curso_x')) { $cols[] = 'curso_x'; $place[] = ':curso_x'; $params[':curso_x'] = $curso_x; }

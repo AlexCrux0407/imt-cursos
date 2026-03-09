@@ -1,7 +1,6 @@
 <?php
-// Vista Estudiante – Contenido del tema
-
 declare(strict_types=1);
+// Vista Estudiante – Contenido del tema
 
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
@@ -39,6 +38,36 @@ $tema = $stmt->fetch();
 if (!$tema) {
     header('Location: ' . BASE_URL . '/estudiante/catalogo.php?error=acceso_denegado');
     exit;
+}
+
+$tema_recurso_url_public = '';
+if (!empty($tema['recurso_url'])) {
+    $tema_recurso_url_public = $tema['recurso_url'];
+    if (!filter_var($tema_recurso_url_public, FILTER_VALIDATE_URL)) {
+        $baseUrl = rtrim(BASE_URL, '/');
+        if ($baseUrl !== '' && strpos($tema_recurso_url_public, $baseUrl . '/') === 0) {
+            $tema_recurso_url_public = $tema_recurso_url_public;
+        } elseif (strpos($tema_recurso_url_public, '/') === 0) {
+            $tema_recurso_url_public = $baseUrl . $tema_recurso_url_public;
+        } else {
+            $tema_recurso_url_public = $baseUrl . '/' . $tema_recurso_url_public;
+        }
+    }
+    $path_en_url = parse_url($tema_recurso_url_public, PHP_URL_PATH) ?: '';
+    $host_en_url = parse_url($tema_recurso_url_public, PHP_URL_HOST) ?: '';
+    $host_base = parse_url(BASE_URL, PHP_URL_HOST) ?: '';
+    $es_archivo_local = (($host_en_url === $host_base) || $host_en_url === '' || $host_en_url === 'localhost' || $host_en_url === '127.0.0.1')
+        && (strpos($path_en_url, '/uploads/') !== false);
+    if (!$es_archivo_local && strpos($path_en_url, '/uploads/') !== false) {
+        $es_archivo_local = true;
+    }
+    if ($es_archivo_local) {
+        $pos = strpos($path_en_url, '/uploads/');
+        $rel = substr($path_en_url, $pos + strlen('/uploads/'));
+        if (strpos($rel, 'cursos/') === 0) {
+            $tema_recurso_url_public = rtrim(BASE_URL, '/') . '/serve_uploads.php?path=' . rawurlencode($rel);
+        }
+    }
 }
 
 /* 2) Subtemas del tema */
@@ -170,135 +199,91 @@ require __DIR__ . '/../partials/nav.php';
             </h1>
         </div>
 
-        <?php if (!empty($tema['contenido'])): ?>
+        <?php if (!empty($tema_recurso_url_public)): ?>
+            <?php
+            $tema_recurso_url = $tema_recurso_url_public;
+            $tema_recurso_es_imagen = preg_match('/\.(jpe?g|png|gif|webp)(\?.*)?$/i', $tema_recurso_url)
+                && (strpos($tema_recurso_url, '/uploads/') !== false || strpos($tema_recurso_url, 'serve_uploads.php?') !== false);
+            ?>
             <div class="contenido-modulo-section">
                 <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Tema</h2>
-                <div class="contenido-texto">
-                    <?= $tema['contenido'] ?>
+                <div style="width: 100%; height: 70vh; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                    <?php if ($tema_recurso_es_imagen): ?>
+                        <img src="<?= htmlspecialchars($tema_recurso_url_public) ?>" style="width: 100%; height: auto; border: 0;" alt="<?= htmlspecialchars($tema['titulo'] ?? 'Contenido del Tema', ENT_QUOTES, 'UTF-8') ?>">
+                    <?php else: ?>
+                        <iframe src="<?= htmlspecialchars($tema_recurso_url_public) ?>" style="width: 100%; height: 100%; border: 0;" title="<?= htmlspecialchars($tema['titulo'] ?? 'Contenido del Tema', ENT_QUOTES, 'UTF-8') ?>"></iframe>
+                    <?php endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php else: ?>
+            <?php if (!empty($tema['contenido'])): ?>
+                <?php
+                $contenido_tema = $tema['contenido'];
+                $contenido_tema = str_replace(
+                    [
+                        '<p class="modulo-descripcion"></p>',
+                        '<h1 class="modulo-titulo"></h1>',
+                        '&lt;p class=&quot;modulo-descripcion&quot;&gt;&lt;/p&gt;',
+                        '&lt;h1 class=&quot;modulo-titulo&quot;&gt;&lt;/h1&gt;'
+                    ],
+                    '',
+                    $contenido_tema
+                );
+                ?>
+                <div class="contenido-modulo-section">
+                    <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Tema</h2>
+                    <div class="contenido-texto">
+                        <?= $contenido_tema ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
-        <!-- Recursos del tema -->
-        <?php if (!empty($tema['recurso_url'])): ?>
-            <div class="contenido-modulo-section">
-                <h2 class="seccion-titulo"><i class="icon-download"></i> Recursos del Tema</h2>
-                <div class="recursos-lista">
-                    <?php
-                    $extension = strtolower(pathinfo($tema['recurso_url'], PATHINFO_EXTENSION));
-                    $es_archivo_local = strpos($tema['recurso_url'], '/imt-cursos/uploads/') === 0;
-                    $es_url_externa = filter_var($tema['recurso_url'], FILTER_VALIDATE_URL);
-                    $nombre_archivo = basename($tema['recurso_url']);
-                    
-                    // Determinar el tipo de recurso
-                    $tipo_recurso = 'archivo';
-                    $icono = 'icon-file';
-                    
-                    if (in_array($extension, ['pdf'])) {
-                        $tipo_recurso = 'PDF';
-                        $icono = 'icon-file-pdf';
-                    } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv'])) {
-                        $tipo_recurso = 'Video';
-                        $icono = 'icon-play';
-                    } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
-                        $tipo_recurso = 'Imagen';
-                        $icono = 'icon-image';
-                    } elseif (in_array($extension, ['doc', 'docx'])) {
-                        $tipo_recurso = 'Documento Word';
-                        $icono = 'icon-file-word';
-                    } elseif (in_array($extension, ['ppt', 'pptx'])) {
-                        $tipo_recurso = 'Presentación';
-                        $icono = 'icon-file-powerpoint';
-                    } elseif ($es_url_externa) {
-                        $tipo_recurso = 'Enlace externo';
-                        $icono = 'icon-link';
-                    }
-                    ?>
-                    
-                    <div class="recurso-item">
-                        <div class="recurso-info">
-                            <i class="<?= $icono ?>"></i>
-                            <div class="recurso-detalles">
-                                <h4 class="recurso-nombre"><?= htmlspecialchars($nombre_archivo) ?></h4>
-                                <span class="recurso-tipo"><?= $tipo_recurso ?></span>
+            <?php if (!empty($subtemas)): ?>
+                <h2 class="seccion-titulo"><i class="icon-book"></i> Subtemas</h2>
+                <div class="temas-lista">
+                    <?php foreach ($subtemas as $st): ?>
+                        <div class="tema-card">
+                            <div class="tema-header">
+                                <h3 class="tema-titulo"><?= htmlspecialchars($st['titulo'], ENT_QUOTES, 'UTF-8') ?></h3>
+                            </div>
+                            <?php if (!empty($st['descripcion'])): ?>
+                                <p class="tema-descripcion"><?= htmlspecialchars($st['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                            <?php endif; ?>
+                            <div class="tema-acciones">
+                                <a class="btn-tema" href="<?= BASE_URL ?>/estudiante/subtema_contenido.php?id=<?= (int)$st['id'] ?>">
+                                    Ver Subtema
+                                </a>
                             </div>
                         </div>
-                        <div class="recurso-acciones">
-                            <?php if ($es_url_externa): ?>
-                                <a href="<?= htmlspecialchars($tema['recurso_url']) ?>" target="_blank" class="btn-recurso">
-                                    <i class="icon-external-link"></i> Abrir enlace
-                                </a>
-                            <?php else: ?>
-                                <button onclick="toggleRecursoViewer('<?= htmlspecialchars($tema['recurso_url']) ?>', '<?= htmlspecialchars($tema['titulo']) ?>', '<?= $extension ?>')" 
-                                        class="btn-recurso">
-                                    <i class="icon-eye"></i> Ver recurso
-                                </button>
-                                <?php if ($es_archivo_local): ?>
-                                    <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($tema['recurso_url']) ?>&titulo=<?= urlencode($tema['titulo']) ?>" target="_blank" class="btn-recurso-download">
-                                        <i class="icon-download"></i> Descargar
-                                    </a>
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
 
-
-        <!-- Título/descr. del tema -->
-        <h1 class="modulo-titulo"><?= htmlspecialchars($tema['titulo'], ENT_QUOTES, 'UTF-8') ?></h1>
-        <?php if (!empty($tema['descripcion'])): ?>
-            <p class="modulo-descripcion"><?= htmlspecialchars($tema['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
-        <?php endif; ?>
-
-        <!-- Subtemas -->
-        <?php if (!empty($subtemas)): ?>
-            <h2 class="seccion-titulo"><i class="icon-book"></i> Subtemas</h2>
-            <div class="temas-lista">
-                <?php foreach ($subtemas as $st): ?>
-                    <div class="tema-card">
-                        <div class="tema-header">
-                            <h3 class="tema-titulo"><?= htmlspecialchars($st['titulo'], ENT_QUOTES, 'UTF-8') ?></h3>
+            <?php if (!empty($lecciones)): ?>
+                <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones del Tema</h2>
+                <div class="lecciones-lista">
+                    <?php foreach ($lecciones as $l): ?>
+                        <div class="leccion-item">
+                            <div class="leccion-numero"><?= (int)$l['orden'] ?></div>
+                            <div class="leccion-info">
+                                <h4 class="leccion-titulo"><?= htmlspecialchars($l['titulo'], ENT_QUOTES, 'UTF-8') ?></h4>
+                                <?php if (!empty($l['descripcion'])): ?>
+                                    <p class="leccion-descripcion"><?= htmlspecialchars($l['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <?php endif; ?>
+                            </div>
+                            <div class="leccion-acciones">
+                                <a class="btn-leccion" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)$l['id'] ?>">
+                                    <?= !empty($l['completado']) ? 'Revisar' : 'Estudiar' ?>
+                                </a>
+                            </div>
                         </div>
-                        <?php if (!empty($st['descripcion'])): ?>
-                            <p class="tema-descripcion"><?= htmlspecialchars($st['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
-                        <?php endif; ?>
-                        <div class="tema-acciones">
-                            <a class="btn-tema" href="<?= BASE_URL ?>/estudiante/subtema_contenido.php?id=<?= (int)$st['id'] ?>">
-                                Ver Subtema
-                            </a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Lecciones del tema -->
-        <?php if (!empty($lecciones)): ?>
-            <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones del Tema</h2>
-            <div class="lecciones-lista">
-                <?php foreach ($lecciones as $l): ?>
-                    <div class="leccion-item">
-                        <div class="leccion-numero"><?= (int)$l['orden'] ?></div>
-                        <div class="leccion-info">
-                            <h4 class="leccion-titulo"><?= htmlspecialchars($l['titulo'], ENT_QUOTES, 'UTF-8') ?></h4>
-                            <?php if (!empty($l['descripcion'])): ?>
-                                <p class="leccion-descripcion"><?= htmlspecialchars($l['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php endif; ?>
-                        </div>
-                        <div class="leccion-acciones">
-                            <a class="btn-leccion" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)$l['id'] ?>">
-                                <?= !empty($l['completado']) ? 'Revisar' : 'Estudiar' ?>
-                            </a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <!-- Estado vacío  -->
-        <?php if (empty($subtemas) && empty($lecciones) && empty($tema['contenido'] ?? '')): ?>
+        <?php if (empty($subtemas) && empty($lecciones) && empty($tema['contenido'] ?? '') && empty($tema['recurso_url'])): ?>
             <div class="empty-content">
                 <i class="icon-info"></i>
                 <h3>Contenido en preparación</h3>
@@ -347,7 +332,9 @@ function toggleRecursoViewer(url, titulo, extension) {
     try {
         const isAbsolute = /^https?:\/\//i.test(url);
         if (!isAbsolute) {
-            if (url.startsWith('/')) {
+            if (BASE && url.startsWith(BASE + '/')) {
+                normalizedUrl = url;
+            } else if (url.startsWith('/')) {
                 normalizedUrl = BASE + url;
             } else {
                 normalizedUrl = BASE + '/' + url;

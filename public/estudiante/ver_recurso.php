@@ -44,12 +44,13 @@ $extension = strtolower(pathinfo($recurso_url, PATHINFO_EXTENSION));
 // Normalizar URL del recurso a absoluta basada en BASE_URL cuando sea relativa
 $recurso_url_public = $recurso_url;
 if (!empty($recurso_url) && !filter_var($recurso_url, FILTER_VALIDATE_URL)) {
-    if (strpos($recurso_url, '/') === 0) {
-        // Ruta absoluta relativa al dominio
-        $recurso_url_public = rtrim(BASE_URL, '/') . $recurso_url;
+    $baseUrl = rtrim(BASE_URL, '/');
+    if ($baseUrl !== '' && strpos($recurso_url, $baseUrl . '/') === 0) {
+        $recurso_url_public = $recurso_url;
+    } elseif (strpos($recurso_url, '/') === 0) {
+        $recurso_url_public = $baseUrl . $recurso_url;
     } else {
-        // Ruta relativa (ej: uploads/cursos/...)
-        $recurso_url_public = rtrim(BASE_URL, '/') . '/' . $recurso_url;
+        $recurso_url_public = $baseUrl . '/' . $recurso_url;
     }
 }
 
@@ -58,7 +59,11 @@ $path_en_url = parse_url($recurso_url_public, PHP_URL_PATH) ?: '';
 $host_en_url = parse_url($recurso_url_public, PHP_URL_HOST) ?: '';
 $host_base = parse_url(BASE_URL, PHP_URL_HOST) ?: '';
 // Considerar recursos locales aunque BASE_URL tenga prefijo de subcarpeta (ej: /imt-cursos)
-$es_archivo_local = ($host_en_url === $host_base) && (strpos($path_en_url, '/uploads/') !== false);
+$es_archivo_local = (($host_en_url === $host_base) || $host_en_url === '' || $host_en_url === 'localhost' || $host_en_url === '127.0.0.1')
+    && (strpos($path_en_url, '/uploads/') !== false);
+if (!$es_archivo_local && strpos($path_en_url, '/uploads/') !== false) {
+    $es_archivo_local = true;
+}
 
 // Si es un archivo local bajo /uploads, usar el proxy seguro para servirlo
 if ($es_archivo_local) {

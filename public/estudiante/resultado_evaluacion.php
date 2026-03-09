@@ -1,7 +1,6 @@
 <?php
-// Vista Estudiante – Resultado de Evaluación: resumen y detalle de respuestas
-
 declare(strict_types=1);
+// Vista Estudiante – Resultado de Evaluación: resumen y detalle de respuestas
 
 /* Asegurar sesión y BASE_URL antes de usarla en redirects/rutas */
 if (session_status() === PHP_SESSION_NONE) {

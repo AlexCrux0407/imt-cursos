@@ -372,7 +372,7 @@ require __DIR__ . '/../partials/nav.php';
                 
                 <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
                     <div style="flex: 1;">
-                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Duración</label>
+                        <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Duración (horas)</label>
                         <input type="text" name="duracion" 
                                style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease;"
                                placeholder="Ej: 40 horas, 8 semanas, 3 meses"
@@ -439,15 +439,27 @@ require __DIR__ . '/../partials/nav.php';
             <div style="font-family: monospace; font-size: 14px; color: #2c3e50; line-height: 1.6;">
                 <div>📁 <strong>contenido/</strong></div>
                 <div>&nbsp;&nbsp;📁 <strong>modulo-01/</strong></div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;📄 index.html (opcional)</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;📁 <strong>assets/</strong> (opcional)</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 styles.css</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 script.js</div>
                 <div>&nbsp;&nbsp;&nbsp;&nbsp;📁 <strong>tema-01/</strong></div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 index.html</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📁 <strong>recursos/</strong> (opcional)</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 imagen.png</div>
                 <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📁 <strong>subtema-01/</strong></div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 index.html</div>
                 <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 leccion-01.html</div>
                 <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 leccion-02.html</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📁 <strong>recursos/</strong> (opcional)</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 video.mp4</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 audio.mp3</div>
+                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;📄 documento.pdf</div>
                 <div>📁 <strong>tema/</strong> (opcional)</div>
                 <div>&nbsp;&nbsp;📄 tema.css</div>
             </div>
             <p style="margin: 15px 0 0 0; color: #6c757d; font-size: 14px;">
-                <strong>Nota:</strong> El sistema procesará automáticamente la estructura y creará los módulos, temas, subtemas y lecciones correspondientes.
+                <strong>Nota:</strong> El sistema procesará automáticamente la estructura y creará los módulos, temas, subtemas y lecciones correspondientes. Si los HTML contienen recursos embebidos (imágenes, videos, audio, PDF, iframes), se visualizarán directamente en el contenido de la lección.
             </p>
         </div>
         
@@ -636,11 +648,17 @@ function procesarZip() {
                     progressBar.style.background = '#e74c3c';
                 }
             } catch (e) {
-                progressText.textContent = 'Error al procesar la respuesta del servidor';
+                const rawResponse = (xhr.responseText || '').trim();
+                const resumen = rawResponse ? rawResponse.slice(0, 300) : 'Error al procesar la respuesta del servidor';
+                progressText.textContent = 'Error: ' + resumen;
                 progressBar.style.background = '#e74c3c';
+                console.error('Respuesta no JSON:', rawResponse);
+                console.error('Error JSON:', e);
             }
         } else {
-            progressText.textContent = 'Error de conexión con el servidor';
+            const rawResponse = (xhr.responseText || '').trim();
+            const resumen = rawResponse ? rawResponse.slice(0, 300) : 'Error de conexión con el servidor';
+            progressText.textContent = `Error ${xhr.status}: ` + resumen;
             progressBar.style.background = '#e74c3c';
         }
     });

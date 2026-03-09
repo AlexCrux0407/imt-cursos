@@ -6,6 +6,8 @@ require_once __DIR__ . '/../../config/database.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $leccion_id = (int)($_POST['leccion_id'] ?? 0);
     $modulo_id = (int)($_POST['modulo_id'] ?? 0);
+    $tema_id = (int)($_POST['tema_id'] ?? 0);
+    $subtema_id = (int)($_POST['subtema_id'] ?? 0);
     $curso_id = (int)($_POST['curso_id'] ?? 0);
     $titulo = trim($_POST['titulo'] ?? '');
     $contenido = trim($_POST['contenido'] ?? '');
@@ -14,13 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $orden = (int)($_POST['orden'] ?? 1);
     
     if (empty($titulo) || $leccion_id === 0) {
-        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=datos_invalidos');
+        $dest = $subtema_id > 0
+            ? BASE_URL . '/docente/lecciones_subtema.php?id=' . $subtema_id . '&tema_id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id
+            : BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id;
+        header('Location: ' . $dest . '&error=datos_invalidos');
         exit;
     }
     
     // Verificar permisos
     $stmt = $conn->prepare("
-        SELECT l.id, l.recurso_url as archivo_actual, l.orden as orden_actual FROM lecciones l
+        SELECT l.id, l.recurso_url as archivo_actual, l.orden as orden_actual, l.tema_id, l.subtema_id FROM lecciones l
         INNER JOIN modulos m ON l.modulo_id = m.id
         INNER JOIN cursos c ON m.curso_id = c.id
         WHERE l.id = :leccion_id AND (c.creado_por = :docente_id OR c.asignado_a = :docente_id2)
@@ -46,7 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         if ($stmt->fetch()) {
-            header('Location: ' . BASE_URL . '/docente/editar_leccion.php?id=' . $leccion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=orden_duplicado');
+            $dest = BASE_URL . '/docente/editar_leccion.php?id=' . $leccion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id;
+            if ($subtema_id > 0) {
+                $dest .= '&tema_id=' . $tema_id . '&subtema_id=' . $subtema_id;
+            }
+            header('Location: ' . $dest . '&error=orden_duplicado');
             exit;
         }
     }
@@ -79,24 +88,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("
             UPDATE lecciones 
             SET titulo = :titulo, contenido = :contenido, tipo = :tipo, 
-                recurso_url = :recurso_url, orden = :orden
+                recurso_url = :recurso_url, orden = :orden, tema_id = :tema_id, subtema_id = :subtema_id
             WHERE id = :id
         ");
         
+        $tema_final = $tema_id ?: ($leccion_actual['tema_id'] ?? null);
+        $subtema_final = $subtema_id ?: ($leccion_actual['subtema_id'] ?? null);
         $stmt->execute([
             ':titulo' => $titulo,
             ':contenido' => $contenido,
             ':tipo' => $tipo,
             ':recurso_url' => $url_final ?: null,
             ':orden' => $orden,
+            ':tema_id' => $tema_final,
+            ':subtema_id' => $subtema_final,
             ':id' => $leccion_id
         ]);
         
-        header('Location: ' . BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id . '&success=leccion_actualizada');
+        $dest = $subtema_id > 0
+            ? BASE_URL . '/docente/lecciones_subtema.php?id=' . $subtema_id . '&tema_id=' . $tema_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id
+            : BASE_URL . '/docente/lecciones_modulo.php?id=' . $modulo_id . '&curso_id=' . $curso_id;
+        header('Location: ' . $dest . '&success=leccion_actualizada');
         exit;
         
     } catch (Exception $e) {
-        header('Location: ' . BASE_URL . '/docente/editar_leccion.php?id=' . $leccion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id . '&error=error_actualizar');
+        $dest = BASE_URL . '/docente/editar_leccion.php?id=' . $leccion_id . '&modulo_id=' . $modulo_id . '&curso_id=' . $curso_id;
+        if ($subtema_id > 0) {
+            $dest .= '&tema_id=' . $tema_id . '&subtema_id=' . $subtema_id;
+        }
+        header('Location: ' . $dest . '&error=error_actualizar');
         exit;
     }
 } else {

@@ -12,14 +12,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
+$nombres = trim($input['nombres'] ?? '');
+$apellidos = trim($input['apellidos'] ?? '');
+$nombre = trim($input['nombre'] ?? '');
+if ($nombre === '') {
+    $nombre = trim($nombres . ' ' . $apellidos);
+}
 
 // Validar datos requeridos
-$required_fields = ['nombre', 'email', 'usuario', 'password', 'role'];
+$required_fields = ['email', 'password', 'role'];
 foreach ($required_fields as $field) {
     if (empty($input[$field])) {
         echo json_encode(['success' => false, 'message' => "El campo $field es requerido"]);
         exit;
     }
+}
+if ($nombre === '') {
+    echo json_encode(['success' => false, 'message' => 'El nombre es requerido']);
+    exit;
 }
 
 // Validar rol
@@ -43,14 +53,6 @@ if ($stmt->fetch()) {
     exit;
 }
 
-// Verificar si el usuario ya existe
-$stmt = $conn->prepare("SELECT id FROM usuarios WHERE usuario = :usuario");
-$stmt->execute([':usuario' => $input['usuario']]);
-if ($stmt->fetch()) {
-    echo json_encode(['success' => false, 'message' => 'El nombre de usuario ya está en uso']);
-    exit;
-}
-
 $stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'tipo_estudiante'");
 $stmt->execute();
 $tiene_tipo_estudiante = (bool)$stmt->fetch();
@@ -65,24 +67,51 @@ try {
     $password_hash = password_hash($input['password'], PASSWORD_DEFAULT);
     $estado = $input['estado'] ?? 'activo';
 
-    $sql = "INSERT INTO usuarios (nombre, email, usuario, password, role, estado, created_at";
-    $valores = "VALUES (:nombre, :email, :usuario, :password, :role, :estado, NOW()";
+    $stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'nombre'");
+    $stmt->execute();
+    $tiene_nombre = (bool)$stmt->fetch();
+    $stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'nombres'");
+    $stmt->execute();
+    $tiene_nombres = (bool)$stmt->fetch();
+    $stmt = $conn->prepare("SHOW COLUMNS FROM usuarios LIKE 'apellidos'");
+    $stmt->execute();
+    $tiene_apellidos = (bool)$stmt->fetch();
+
+    $columnas = [];
+    $placeholders = [];
     $parametros = [
-        ':nombre' => $input['nombre'],
         ':email' => $input['email'],
-        ':usuario' => $input['usuario'],
         ':password' => $password_hash,
         ':role' => $input['role'],
         ':estado' => $estado
     ];
-    
-    if ($tiene_tipo_estudiante) {
-        $sql .= ", tipo_estudiante";
-        $valores .= ", :tipo_estudiante";
-        $parametros[':tipo_estudiante'] = $tipo_estudiante;
+
+    if ($tiene_nombre) {
+        $columnas[] = 'nombre';
+        $placeholders[] = ':nombre';
+        $parametros[':nombre'] = $nombre;
+    }
+    if ($tiene_nombres) {
+        $columnas[] = 'nombres';
+        $placeholders[] = ':nombres';
+        $parametros[':nombres'] = $nombres;
+    }
+    if ($tiene_apellidos) {
+        $columnas[] = 'apellidos';
+        $placeholders[] = ':apellidos';
+        $parametros[':apellidos'] = $apellidos;
     }
     
-    $sql .= ") " . $valores . ")";
+    $columnas = array_merge($columnas, ['email', 'password', 'role', 'estado', 'created_at']);
+    $placeholders = array_merge($placeholders, [':email', ':password', ':role', ':estado', 'NOW()']);
+    
+    if ($tiene_tipo_estudiante) {
+        $columnas[] = 'tipo_estudiante';
+        $placeholders[] = ':tipo_estudiante';
+        $parametros[':tipo_estudiante'] = $tipo_estudiante;
+    }
+
+    $sql = "INSERT INTO usuarios (" . implode(', ', $columnas) . ") VALUES (" . implode(', ', $placeholders) . ")";
     
     $stmt = $conn->prepare($sql);
     $result = $stmt->execute($parametros);

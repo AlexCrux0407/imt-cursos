@@ -12,9 +12,3 @@ require_once __DIR__ . '/../app/auth.php';
 
 $router = require_once __DIR__ . '/../app/routes.php';
 $router->dispatch();
-<?php
-/**
- * Redirección automática al login
- */
-header('Location: public/login.php');
-exit;

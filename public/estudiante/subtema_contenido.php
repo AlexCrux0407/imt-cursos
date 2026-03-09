@@ -1,7 +1,6 @@
 <?php
-// Vista Estudiante – Contenido del subtema
-
 declare(strict_types=1);
+// Vista Estudiante – Contenido del subtema
 
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
@@ -41,6 +40,33 @@ $subtema = $stmt->fetch();
 if (!$subtema) {
     header('Location: ' . BASE_URL . '/estudiante/catalogo.php?error=acceso_denegado');
     exit;
+}
+
+$subtema_recurso_url_public = '';
+if (!empty($subtema['recurso_url'])) {
+    $subtema_recurso_url_public = $subtema['recurso_url'];
+    if (!filter_var($subtema_recurso_url_public, FILTER_VALIDATE_URL)) {
+        if (strpos($subtema_recurso_url_public, '/') === 0) {
+            $subtema_recurso_url_public = rtrim(BASE_URL, '/') . $subtema_recurso_url_public;
+        } else {
+            $subtema_recurso_url_public = rtrim(BASE_URL, '/') . '/' . $subtema_recurso_url_public;
+        }
+    }
+    $path_en_url = parse_url($subtema_recurso_url_public, PHP_URL_PATH) ?: '';
+    $host_en_url = parse_url($subtema_recurso_url_public, PHP_URL_HOST) ?: '';
+    $host_base = parse_url(BASE_URL, PHP_URL_HOST) ?: '';
+    $es_archivo_local = (($host_en_url === $host_base) || $host_en_url === '' || $host_en_url === 'localhost' || $host_en_url === '127.0.0.1')
+        && (strpos($path_en_url, '/uploads/') !== false);
+    if (!$es_archivo_local && strpos($path_en_url, '/uploads/') !== false) {
+        $es_archivo_local = true;
+    }
+    if ($es_archivo_local) {
+        $pos = strpos($path_en_url, '/uploads/');
+        $rel = substr($path_en_url, $pos + strlen('/uploads/'));
+        if (strpos($rel, 'cursos/') === 0) {
+            $subtema_recurso_url_public = rtrim(BASE_URL, '/') . '/serve_uploads.php?path=' . rawurlencode($rel);
+        }
+    }
 }
 
 /* 2) Lecciones del subtema */
@@ -179,144 +205,104 @@ require __DIR__ . '/../partials/nav.php';
         </div>
 
         <div class="contenido-modulo">
-        <?php if (!empty($subtema['contenido'])): ?>
+        <?php if (!empty($subtema_recurso_url_public)): ?>
+            <?php
+            $subtema_recurso_url = $subtema_recurso_url_public;
+            $subtema_recurso_es_imagen = preg_match('/\.(jpe?g|png|gif|webp)(\?.*)?$/i', $subtema_recurso_url)
+                && (strpos($subtema_recurso_url, '/uploads/') !== false || strpos($subtema_recurso_url, 'serve_uploads.php?') !== false);
+            ?>
             <div class="contenido-modulo-section">
                 <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Subtema</h2>
-                <div class="contenido-texto">
-                    <?= $subtema['contenido'] ?>
+                <div style="width: 100%; height: 70vh; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                    <?php if ($subtema_recurso_es_imagen): ?>
+                        <img src="<?= htmlspecialchars($subtema_recurso_url_public) ?>" style="width: 100%; height: auto; border: 0;" alt="<?= htmlspecialchars($subtema['titulo'] ?? 'Contenido del Subtema', ENT_QUOTES, 'UTF-8') ?>">
+                    <?php else: ?>
+                        <iframe src="<?= htmlspecialchars($subtema_recurso_url_public) ?>" style="width: 100%; height: 100%; border: 0;" title="<?= htmlspecialchars($subtema['titulo'] ?? 'Contenido del Subtema', ENT_QUOTES, 'UTF-8') ?>"></iframe>
+                    <?php endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php else: ?>
+            <?php if (!empty($subtema['contenido'])): ?>
+                <?php
+                $contenido_subtema = $subtema['contenido'];
+                $contenido_subtema = str_replace(
+                    [
+                        '<p class="modulo-descripcion"></p>',
+                        '<h1 class="modulo-titulo"></h1>',
+                        '&lt;p class=&quot;modulo-descripcion&quot;&gt;&lt;/p&gt;',
+                        '&lt;h1 class=&quot;modulo-titulo&quot;&gt;&lt;/h1&gt;'
+                    ],
+                    '',
+                    $contenido_subtema
+                );
+                $baseUrl = rtrim(BASE_URL, '/');
+                $contenido_subtema = preg_replace_callback(
+                    '/\b(src|href)\s*=\s*(["\'])([^"\']+)\2/i',
+                    function ($matches) use ($baseUrl) {
+                        $attr = $matches[1];
+                        $quote = $matches[2];
+                        $url = $matches[3];
+                        if (stripos($url, 'serve_uploads.php?path=') !== false) {
+                            return $matches[0];
+                        }
+                        $rel = null;
+                        $posUploads = strpos($url, '/uploads/');
+                        if ($posUploads !== false) {
+                            $rel = substr($url, $posUploads + strlen('/uploads/'));
+                        } elseif (stripos($url, 'uploads/') === 0) {
+                            $rel = substr($url, strlen('uploads/'));
+                        }
+                        if ($rel && stripos($rel, 'cursos/') === 0) {
+                            $newUrl = $baseUrl . '/serve_uploads.php?path=' . rawurlencode($rel);
+                            return $attr . '=' . $quote . $newUrl . $quote;
+                        }
+                        return $matches[0];
+                    },
+                    $contenido_subtema
+                );
+                ?>
+                <div class="contenido-modulo-section">
+                    <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Subtema</h2>
+                    <div class="contenido-texto">
+                        <?= $contenido_subtema ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
-        <!-- Recursos del subtema (múltiples) -->
-        <?php
-        // Construir lista de recursos del subtema desde tabla subtema_recursos + recurso_url legado
-        $recursos_total = [];
-        try {
-            $checkTable = $conn->query("SHOW TABLES LIKE 'subtema_recursos'");
-            if ($checkTable->fetch()) {
-                $st = $conn->prepare("SELECT id, url, nombre, tipo FROM subtema_recursos WHERE subtema_id = :sid ORDER BY id");
-                $st->execute([':sid' => (int)$subtema['id']]);
-                $recursos_total = $st->fetchAll();
-            }
-        } catch (Exception $e) {
-            $recursos_total = [];
-        }
-        if (!empty($subtema['recurso_url'])) {
-            $recursos_total[] = [
-                'id' => 0,
-                'url' => $subtema['recurso_url'],
-                'nombre' => basename($subtema['recurso_url']),
-                'tipo' => strtolower(pathinfo($subtema['recurso_url'], PATHINFO_EXTENSION))
-            ];
-        }
-        ?>
+            <h1 class="modulo-titulo"><?= htmlspecialchars($subtema['titulo'], ENT_QUOTES, 'UTF-8') ?></h1>
+            <?php if (!empty($subtema['descripcion'])): ?>
+                <p class="modulo-descripcion"><?= htmlspecialchars($subtema['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+            <?php endif; ?>
 
-        <?php if (!empty($recursos_total)): ?>
-            <div class="contenido-modulo-section">
-                <h2 class="seccion-titulo"><i class="icon-download"></i> Recursos del Subtema</h2>
-                <div class="recursos-lista">
-                    <?php foreach ($recursos_total as $rc): ?>
-                        <?php
-                            $recurso = $rc['url'];
-                            $extension = strtolower(pathinfo($recurso, PATHINFO_EXTENSION));
-                            $path = @parse_url($recurso, PHP_URL_PATH);
-                            $host = @parse_url($recurso, PHP_URL_HOST);
-                            $baseHost = @parse_url(BASE_URL, PHP_URL_HOST);
-                            $es_archivo_local = ($path && strpos($path, '/uploads/') !== false) && (!$host || $host === $baseHost);
-                            $es_url_externa = filter_var($recurso, FILTER_VALIDATE_URL) && !$es_archivo_local;
-                            $nombre_archivo = !empty($rc['nombre']) ? $rc['nombre'] : basename($recurso);
-
-                            $tipo_recurso = 'archivo';
-                            $icono = 'icon-file';
-                            if (in_array($extension, ['pdf'])) {
-                                $tipo_recurso = 'PDF';
-                                $icono = 'icon-file-pdf';
-                            } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv'])) {
-                                $tipo_recurso = 'Video';
-                                $icono = 'icon-play';
-                            } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                                $tipo_recurso = 'Imagen';
-                                $icono = 'icon-image';
-                            } elseif (in_array($extension, ['doc', 'docx'])) {
-                                $tipo_recurso = 'Documento Word';
-                                $icono = 'icon-file-word';
-                            } elseif (in_array($extension, ['ppt', 'pptx'])) {
-                                $tipo_recurso = 'Presentación';
-                                $icono = 'icon-file-powerpoint';
-                            } elseif ($es_url_externa) {
-                                $tipo_recurso = 'Enlace externo';
-                                $icono = 'icon-link';
-                            }
-                        ?>
-
-                        <div class="recurso-item">
-                            <div class="recurso-info">
-                                <i class="<?= $icono ?>"></i>
-                                <div class="recurso-detalles">
-                                    <h4 class="recurso-nombre"><?= htmlspecialchars($nombre_archivo) ?></h4>
-                                    <span class="recurso-tipo"><?= $tipo_recurso ?></span>
-                                </div>
-                            </div>
-                            <div class="recurso-acciones">
-                                <?php if ($es_url_externa): ?>
-                                    <a href="<?= htmlspecialchars($recurso) ?>" target="_blank" class="btn-recurso">
-                                        <i class="icon-external-link"></i> Abrir enlace
-                                    </a>
-                                <?php else: ?>
-                                    <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($recurso) ?>&titulo=<?= urlencode($subtema['titulo']) ?>"
-                                       target="_blank" class="btn-recurso">
-                                        <i class="icon-eye"></i> Ver recurso
-                                    </a>
-                                    <?php if ($es_archivo_local): ?>
-                                        <a href="<?= BASE_URL ?>/estudiante/ver_recurso.php?url=<?= urlencode($recurso) ?>&titulo=<?= urlencode($subtema['titulo']) ?>" target="_blank" class="btn-recurso-download">
-                                            <i class="icon-download"></i> Descargar
-                                        </a>
-                                    <?php endif; ?>
+            <?php if (!empty($lecciones)): ?>
+                <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones del Subtema</h2>
+                <div class="lecciones-lista">
+                    <?php foreach ($lecciones as $l): ?>
+                        <div class="leccion-item">
+                            <div class="leccion-numero"><?= (int)$l['orden'] ?></div>
+                            <div class="leccion-info">
+                                <h4 class="leccion-titulo"><?= htmlspecialchars($l['titulo'], ENT_QUOTES, 'UTF-8') ?></h4>
+                                <?php if (!empty($l['descripcion'])): ?>
+                                    <p class="leccion-descripcion"><?= htmlspecialchars($l['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
                                 <?php endif; ?>
+                            </div>
+                            <div class="leccion-acciones">
+                                <a class="btn-leccion" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)$l['id'] ?>">
+                                    <?= !empty($l['completado']) ? 'Revisar' : 'Estudiar' ?>
+                                </a>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
 
-        <!-- Título/descr. del subtema -->
-        <h1 class="modulo-titulo"><?= htmlspecialchars($subtema['titulo'], ENT_QUOTES, 'UTF-8') ?></h1>
-        <?php if (!empty($subtema['descripcion'])): ?>
-            <p class="modulo-descripcion"><?= htmlspecialchars($subtema['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
-        <?php endif; ?>
-
-        <!-- Lecciones del subtema -->
-        <?php if (!empty($lecciones)): ?>
-            <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones del Subtema</h2>
-            <div class="lecciones-lista">
-                <?php foreach ($lecciones as $l): ?>
-                    <div class="leccion-item">
-                        <div class="leccion-numero"><?= (int)$l['orden'] ?></div>
-                        <div class="leccion-info">
-                            <h4 class="leccion-titulo"><?= htmlspecialchars($l['titulo'], ENT_QUOTES, 'UTF-8') ?></h4>
-                            <?php if (!empty($l['descripcion'])): ?>
-                                <p class="leccion-descripcion"><?= htmlspecialchars($l['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
-                            <?php endif; ?>
-                        </div>
-                        <div class="leccion-acciones">
-                            <a class="btn-leccion" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)$l['id'] ?>">
-                                <?= !empty($l['completado']) ? 'Revisar' : 'Estudiar' ?>
-                            </a>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Estado vacío - solo se muestra si  no hay contenido -->
-        <?php if (empty($lecciones) && empty($subtema['contenido'] ?? '') && empty($subtema['recurso_url']) && empty($subtema['descripcion'])): ?>
-            <div class="empty-content">
-                <i class="icon-info"></i>
-                <h3>Contenido en preparación</h3>
-                <p>Este subtema aún no tiene contenido publicado.</p>
-            </div>
+            <?php if (empty($lecciones) && empty($subtema['contenido'] ?? '') && empty($subtema['recurso_url']) && empty($subtema['descripcion'])): ?>
+                <div class="empty-content">
+                    <i class="icon-info"></i>
+                    <h3>Contenido en preparación</h3>
+                    <p>Este subtema aún no tiene contenido publicado.</p>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
         </div><!-- /.contenido-modulo -->
 

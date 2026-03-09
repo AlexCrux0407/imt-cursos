@@ -84,7 +84,7 @@ require __DIR__ . '/../partials/nav.php';
             
             <div class="div-fila" style="gap: 20px; margin-bottom: 20px;">
                 <div style="flex: 1;">
-                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Duración</label>
+                    <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Duración (horas)</label>
                     <input type="text" name="duracion" value="<?= htmlspecialchars($curso['duracion'] ?? '') ?>" 
                            style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 16px;">
                 </div>

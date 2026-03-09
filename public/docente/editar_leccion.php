@@ -8,6 +8,8 @@ $page_title = 'Docente – Editar Lección';
 $leccion_id = $_GET['id'] ?? 0;
 $modulo_id = $_GET['modulo_id'] ?? 0;
 $curso_id = $_GET['curso_id'] ?? 0;
+$tema_id = $_GET['tema_id'] ?? 0;
+$subtema_id = $_GET['subtema_id'] ?? 0;
 
 // Verificar que la lección pertenece a un módulo de un curso del docente
 $stmt = $conn->prepare("
@@ -67,6 +69,8 @@ require __DIR__ . '/../partials/nav.php';
             <input type="hidden" name="leccion_id" value="<?= $leccion['id'] ?>">
             <input type="hidden" name="modulo_id" value="<?= $modulo_id ?>">
             <input type="hidden" name="curso_id" value="<?= $curso_id ?>">
+            <input type="hidden" name="tema_id" value="<?= $tema_id ?>">
+            <input type="hidden" name="subtema_id" value="<?= $subtema_id ?>">
             
             <div style="margin-bottom: 20px;">
                 <label style="display: block; color: #2c3e50; margin-bottom: 8px; font-weight: 500;">Título de la Lección</label>

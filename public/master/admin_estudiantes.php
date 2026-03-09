@@ -24,7 +24,7 @@ if ($filtro_estado) {
 }
 
 if ($filtro_busqueda) {
-    $where_conditions[] = "(u.nombre LIKE :busqueda OR u.email LIKE :busqueda OR u.usuario LIKE :busqueda)";
+    $where_conditions[] = "(u.nombre LIKE :busqueda OR u.email LIKE :busqueda)";
     $params[':busqueda'] = '%' . $filtro_busqueda . '%';
 }
 
@@ -37,7 +37,7 @@ $where_clause = implode(' AND ', $where_conditions);
 
 // Obtener estudiantes con estadísticas
 $select_tipo_estudiante = $tiene_tipo_estudiante ? "u.tipo_estudiante" : "'interno' as tipo_estudiante";
-$group_by = "u.id, u.nombre, u.email, u.usuario, u.estado, u.created_at";
+$group_by = "u.id, u.nombre, u.email, u.estado, u.created_at";
 if ($tiene_tipo_estudiante) {
     $group_by .= ", u.tipo_estudiante";
 }
@@ -47,7 +47,6 @@ $stmt = $conn->prepare("
         u.id,
         u.nombre,
         u.email,
-        u.usuario,
         u.estado,
         u.created_at,
         $select_tipo_estudiante,
@@ -339,7 +338,7 @@ require __DIR__ . '/../partials/nav.php';
         <form method="GET" class="filters-grid">
             <div class="filter-group">
                 <label>Buscar por nombre/email:</label>
-                <input type="text" name="busqueda" value="<?= htmlspecialchars($filtro_busqueda) ?>" placeholder="Nombre, email o usuario...">
+                <input type="text" name="busqueda" value="<?= htmlspecialchars($filtro_busqueda) ?>" placeholder="Nombre o email...">
             </div>
             <div class="filter-group">
                 <label>Estado:</label>
@@ -399,8 +398,7 @@ require __DIR__ . '/../partials/nav.php';
                         <tr>
                             <td>
                                 <div>
-                                    <strong><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></strong><br>
-                                    <small style="color: #7f8c8d;">@<?= htmlspecialchars($estudiante['usuario']) ?></small>
+                                    <strong><?= htmlspecialchars(format_nombre($estudiante['nombre'])) ?></strong>
                                 </div>
                             </td>
                             <td><?= htmlspecialchars($estudiante['email']) ?></td>
@@ -492,29 +490,41 @@ function mostrarFormularioCrearEstudiante() {
                 <button onclick="cerrarModalEstudiante()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</button>
             </div>
             
-            <form id="formCrearEstudiante" onsubmit="crearEstudiante(event)">
+            <form id="formCrearEstudiante" onsubmit="crearEstudiante(event)" autocomplete="off">
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nombre Completo *</label>
-                    <input type="text" name="nombre" required 
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nombres *</label>
+                    <input type="text" name="nombres" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Apellidos</label>
+                    <input type="text" name="apellidos"
                            style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
                 </div>
                 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Email *</label>
-                    <input type="email" name="email" required 
+                    <input type="email" name="email" required autocomplete="off"
                            style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
                 </div>
                 
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Usuario *</label>
-                    <input type="text" name="usuario" required 
-                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
-                </div>
+                
                 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Contraseña *</label>
-                    <input type="password" name="password" required 
-                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="password" id="passwordCrearEstudiante" name="password" required autocomplete="new-password"
+                               style="flex: 1; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                        <button type="button" onclick="togglePasswordVisibility('passwordCrearEstudiante', this)"
+                                style="padding: 10px 12px; border: 1px solid #dfe6ee; border-radius: 10px; background: linear-gradient(180deg,#ffffff,#f2f5f9); color: #2c3e50; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); width: 40px; font-size: 1rem; line-height: 1;">
+                            👁
+                        </button>
+                        <button type="button" onclick="generarPasswordTemporal('passwordCrearEstudiante')"
+                                style="padding: 10px 12px; border: 1px solid #dfe6ee; border-radius: 10px; background: linear-gradient(180deg,#eaf4ff,#f6f9ff); color: #2c3e50; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                            Generar
+                        </button>
+                    </div>
                 </div>
                 
                 <div style="margin-bottom: 25px;">
@@ -557,14 +567,32 @@ function cerrarModalEstudiante() {
     }
 }
 
+function togglePasswordVisibility(inputId, button) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+}
+
+function generarPasswordTemporal(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+        password += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    input.value = password;
+}
+
 function crearEstudiante(event) {
     event.preventDefault();
     
     const formData = new FormData(event.target);
     const data = {
-        nombre: formData.get('nombre'),
+        nombres: formData.get('nombres'),
+        apellidos: formData.get('apellidos'),
         email: formData.get('email'),
-        usuario: formData.get('usuario'),
         password: formData.get('password'),
         estado: formData.get('estado'),
         tipo_estudiante: formData.get('tipo_estudiante'),

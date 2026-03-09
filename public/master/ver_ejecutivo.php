@@ -11,7 +11,7 @@ if ($id <= 0) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT id, nombre, email, usuario, estado, created_at, updated_at FROM usuarios WHERE id = :id AND role = 'ejecutivo' LIMIT 1");
+$stmt = $conn->prepare("SELECT id, nombre, email, estado, created_at, updated_at FROM usuarios WHERE id = :id AND role = 'ejecutivo' LIMIT 1");
 $stmt->execute([':id' => $id]);
 $ejecutivo = $stmt->fetch();
 if (!$ejecutivo) {
@@ -59,10 +59,6 @@ require __DIR__ . '/../partials/nav.php';
             <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
                 <div style="font-weight: 600; color: #2c3e50;">Email</div>
                 <div style="color: #34495e;"><?= htmlspecialchars($ejecutivo['email']) ?></div>
-            </div>
-            <div style="flex: 1; background: #f8f9fa; padding: 16px; border-radius: 8px;">
-                <div style="font-weight: 600; color: #2c3e50;">Usuario</div>
-                <div style="color: #34495e;"><?= htmlspecialchars($ejecutivo['usuario']) ?></div>
             </div>
         </div>
         <div class="div-fila" style="gap: 20px; margin-top: 15px;">

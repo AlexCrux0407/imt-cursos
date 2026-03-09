@@ -1,6 +1,6 @@
 <?php
-// Vista Estudiante – Inscripción a curso
 declare(strict_types=1);
+// Vista Estudiante – Inscripción a curso
 
 require_once __DIR__ . '/../../app/auth.php';
 require_role('estudiante');
@@ -106,7 +106,7 @@ require __DIR__ . '/../partials/nav.php';
 
                 <?php if (!empty($curso['duracion'])): ?>
                     <div class="info-item">
-                        <div class="info-label">Duración</div>
+                        <div class="info-label">Duración (horas)</div>
                         <div class="info-value"><?= htmlspecialchars($curso['duracion']) ?></div>
                     </div>
                 <?php endif; ?>

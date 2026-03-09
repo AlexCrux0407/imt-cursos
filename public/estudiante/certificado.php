@@ -78,12 +78,7 @@ $nombre_estudiante = $usuario ? format_nombre($usuario['nombre'], 'nombres_apell
 // Promedio/calificación opcional del curso
 $promedio = null;
 if ((int)($config['mostrar_calificacion'] ?? 0) === 1) {
-    $stmt = $conn->prepare("SELECT AVG(CASE WHEN ie.puntaje_obtenido IS NOT NULL THEN ie.puntaje_obtenido ELSE NULL END) as promedio FROM modulos m LEFT JOIN evaluaciones_modulo em ON m.id = em.modulo_id LEFT JOIN intentos_evaluacion ie ON em.id = ie.evaluacion_id AND ie.usuario_id = :uid WHERE m.curso_id = :cid");
-    $stmt->execute([':uid' => $usuario_id, ':cid' => $curso_id]);
-    $row = $stmt->fetch();
-    if ($row && $row['promedio'] !== null) {
-        $promedio = round($row['promedio'], 1);
-    }
+    $promedio = calcularCalificacionFinal($curso_id, $usuario_id);
 }
 
 require __DIR__ . '/../partials/header.php';
@@ -123,21 +118,28 @@ require __DIR__ . '/../partials/nav.php';
           list($cal_fam, $cal_px, $cal_col) = resolveStyle($config, 'calificacion', $g_family, $g_size_pt, $g_color);
           list($fecha_fam, $fecha_px, $fecha_col) = resolveStyle($config, 'fecha', $g_family, $g_size_pt, $g_color);
           list($dur_fam, $dur_px, $dur_col) = resolveStyle($config, 'duracion', $g_family, $g_size_pt, $g_color);
+          $text_align = $config['text_align'] ?? 'center';
+          if (!in_array($text_align, ['left', 'center', 'right'], true)) {
+            $text_align = 'center';
+          }
+          $text_transform = $text_align === 'left'
+            ? 'translate(0, -50%)'
+            : ($text_align === 'right' ? 'translate(-100%, -50%)' : 'translate(-50%, -50%)');
         ?>
         <?php if (!empty($config['nombre_x']) && !empty($config['nombre_y'])): ?>
-          <div class="est-cert-text" data-size-pt="<?= (int)($config['nombre_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['nombre_x']) ?>%; top: <?= floatval($config['nombre_y']) ?>%; transform: translate(-50%, -50%); color: <?= $nombre_col ?>; font-size: <?= $nombre_px ?>px; font-family: <?= $nombre_fam ?>; font-weight: 600;"><?= htmlspecialchars($nombre_estudiante) ?></div>
+          <div class="est-cert-text" data-size-pt="<?= (int)($config['nombre_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['nombre_x']) ?>%; top: <?= floatval($config['nombre_y']) ?>%; transform: <?= $text_transform ?>; text-align: <?= $text_align ?>; color: <?= $nombre_col ?>; font-size: <?= $nombre_px ?>px; font-family: <?= $nombre_fam ?>; font-weight: 600;"><?= htmlspecialchars($nombre_estudiante) ?></div>
         <?php endif; ?>
         <?php if (!empty($config['curso_x']) && !empty($config['curso_y'])): ?>
-          <div class="est-cert-text" data-size-pt="<?= (int)($config['curso_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['curso_x']) ?>%; top: <?= floatval($config['curso_y']) ?>%; transform: translate(-50%, -50%); color: <?= $curso_col ?>; font-size: <?= $curso_px ?>px; font-family: <?= $curso_fam ?>; font-weight: 600;"><?= htmlspecialchars($insc['titulo']) ?></div>
+          <div class="est-cert-text" data-size-pt="<?= (int)($config['curso_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['curso_x']) ?>%; top: <?= floatval($config['curso_y']) ?>%; transform: <?= $text_transform ?>; text-align: <?= $text_align ?>; color: <?= $curso_col ?>; font-size: <?= $curso_px ?>px; font-family: <?= $curso_fam ?>; font-weight: 600;"><?= htmlspecialchars($insc['titulo']) ?></div>
         <?php endif; ?>
         <?php if ((int)($config['mostrar_calificacion'] ?? 0) === 1 && !empty($config['calificacion_x']) && !empty($config['calificacion_y']) && $promedio !== null): ?>
-          <div class="est-cert-text" data-size-pt="<?= (int)($config['calificacion_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['calificacion_x']) ?>%; top: <?= floatval($config['calificacion_y']) ?>%; transform: translate(-50%, -50%); color: <?= $cal_col ?>; font-size: <?= $cal_px ?>px; font-family: <?= $cal_fam ?>;">Calificación: <?= htmlspecialchars(number_format($promedio, 1)) ?></div>
+          <div class="est-cert-text" data-size-pt="<?= (int)($config['calificacion_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['calificacion_x']) ?>%; top: <?= floatval($config['calificacion_y']) ?>%; transform: <?= $text_transform ?>; text-align: <?= $text_align ?>; color: <?= $cal_col ?>; font-size: <?= $cal_px ?>px; font-family: <?= $cal_fam ?>;"><?= htmlspecialchars(number_format($promedio, 1)) ?></div>
         <?php endif; ?>
         <?php if (!empty($config['fecha_x']) && !empty($config['fecha_y']) && $fecha_completado): ?>
-          <div class="est-cert-text" data-size-pt="<?= (int)($config['fecha_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['fecha_x']) ?>%; top: <?= floatval($config['fecha_y']) ?>%; transform: translate(-50%, -50%); color: <?= $fecha_col ?>; font-size: <?= $fecha_px ?>px; font-family: <?= $fecha_fam ?>;"><?= $fecha_completado->format('d/m/Y') ?></div>
+          <div class="est-cert-text" data-size-pt="<?= (int)($config['fecha_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['fecha_x']) ?>%; top: <?= floatval($config['fecha_y']) ?>%; transform: <?= $text_transform ?>; text-align: <?= $text_align ?>; color: <?= $fecha_col ?>; font-size: <?= $fecha_px ?>px; font-family: <?= $fecha_fam ?>;"><?= $fecha_completado->format('d/m/Y') ?></div>
         <?php endif; ?>
         <?php if ((int)($config['mostrar_duracion'] ?? 0) === 1 && !empty($config['duracion_x']) && !empty($config['duracion_y']) && isset($insc['duracion']) && $insc['duracion'] !== null && $insc['duracion'] !== ''): ?>
-          <div class="est-cert-text" data-size-pt="<?= (int)($config['duracion_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['duracion_x']) ?>%; top: <?= floatval($config['duracion_y']) ?>%; transform: translate(-50%, -50%); color: <?= $dur_col ?>; font-size: <?= $dur_px ?>px; font-family: <?= $dur_fam ?>;">Duración: <?= (int)$insc['duracion'] ?> horas</div>
+          <div class="est-cert-text" data-size-pt="<?= (int)($config['duracion_font_size'] ?? $g_size_pt) ?>" style="position:absolute; left: <?= floatval($config['duracion_x']) ?>%; top: <?= floatval($config['duracion_y']) ?>%; transform: <?= $text_transform ?>; text-align: <?= $text_align ?>; color: <?= $dur_col ?>; font-size: <?= $dur_px ?>px; font-family: <?= $dur_fam ?>;"><?= (int)$insc['duracion'] ?></div>
         <?php endif; ?>
         <?php 
           // Render del ID del certificado en la esquina inferior derecha por defecto
@@ -149,7 +151,7 @@ require __DIR__ . '/../partials/nav.php';
           $codigo_col = htmlspecialchars($config['codigo_font_color'] ?? '#2c3e50');
         ?>
         <?php if ($codigo_unico): ?>
-          <div class="est-cert-text" data-size-pt="<?= $codigo_size_pt ?>" style="position:absolute; left: <?= $codigo_x ?>%; top: <?= $codigo_y ?>%; transform: translate(-50%, -50%); color: <?= $codigo_col ?>; font-size: <?= $codigo_px ?>px; font-family: <?= $codigo_fam ?>;">ID: <?= htmlspecialchars($codigo_unico) ?></div>
+          <div class="est-cert-text" data-size-pt="<?= $codigo_size_pt ?>" style="position:absolute; left: <?= $codigo_x ?>%; top: <?= $codigo_y ?>%; transform: <?= $text_transform ?>; text-align: <?= $text_align ?>; color: <?= $codigo_col ?>; font-size: <?= $codigo_px ?>px; font-family: <?= $codigo_fam ?>;">ID: <?= htmlspecialchars($codigo_unico) ?></div>
         <?php endif; ?>
       </div>
 

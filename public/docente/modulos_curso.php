@@ -1,11 +1,19 @@
 <?php
 require_once __DIR__ . '/../../app/auth.php';
-require_role('docente');
+require_login();
 require_once __DIR__ . '/../../config/database.php';
 
 $page_title = 'Docente – Módulos del Curso';
 
 $curso_id = $_GET['id'] ?? 0;
+$role = strtolower($_SESSION['role'] ?? '');
+$is_master = $role === 'master';
+$is_docente = $role === 'docente';
+if (!$is_master && !$is_docente) {
+    header('Location: ' . BASE_URL . '/login.php');
+    exit;
+}
+$back_url = $is_master ? BASE_URL . '/master/admin_cursos.php' : BASE_URL . '/docente/admin_cursos.php';
 
 // Verificar que el curso pertenece al docente y obtener información
 // Verificar si las nuevas columnas existen
@@ -13,7 +21,12 @@ $stmt = $conn->prepare("SHOW COLUMNS FROM cursos LIKE 'asignado_a'");
 $stmt->execute();
 $nuevas_columnas_existen = $stmt->fetch();
 
-if ($nuevas_columnas_existen) {
+if ($is_master) {
+    $stmt = $conn->prepare("
+        SELECT * FROM cursos 
+        WHERE id = :id
+    ");
+} elseif ($nuevas_columnas_existen) {
     // Sistema nuevo: verificar por asignación
     $stmt = $conn->prepare("
         SELECT * FROM cursos 
@@ -26,12 +39,290 @@ if ($nuevas_columnas_existen) {
         WHERE id = :id AND creado_por = :docente_id
     ");
 }
-$stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
+if ($is_master) {
+    $stmt->execute([':id' => $curso_id]);
+} else {
+    $stmt->execute([':id' => $curso_id, ':docente_id' => $_SESSION['user_id']]);
+}
 $curso = $stmt->fetch();
 
 if (!$curso) {
-    header('Location: ' . BASE_URL . '/docente/admin_cursos.php?error=curso_no_encontrado');
+    header('Location: ' . $back_url . '?error=curso_no_encontrado');
     exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'actualizar_html') {
+    require_once __DIR__ . '/../../app/curso_scanner.php';
+    $folder = sanitizeFileName($curso['titulo']);
+    $public_dir = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'cursos' . DIRECTORY_SEPARATOR . $folder;
+    $root_dir = rtrim(UPLOADS_PATH, '/\\') . DIRECTORY_SEPARATOR . 'cursos' . DIRECTORY_SEPARATOR . $folder;
+    $curso_dir = is_dir($public_dir) ? $public_dir : (is_dir($root_dir) ? $root_dir : null);
+
+    if ($curso_dir === null) {
+        header('Location: ' . BASE_URL . '/docente/modulos_curso.php?id=' . $curso_id . '&error=contenido_no_encontrado');
+        exit;
+    }
+
+    $contenido_escaneado = scanImportedCourse($curso_dir);
+    $hayContenido = !empty($contenido_escaneado['lecciones'])
+        || !empty($contenido_escaneado['modulos_detectados'])
+        || !empty($contenido_escaneado['temas_detectados'])
+        || !empty($contenido_escaneado['subtemas_detectados']);
+    if (!$hayContenido) {
+        header('Location: ' . BASE_URL . '/docente/modulos_curso.php?id=' . $curso_id . '&error=contenido_invalido');
+        exit;
+    }
+
+    try {
+        $conn->beginTransaction();
+        $modulos_creados = [];
+        $temas_creados = [];
+        $subtemas_creados = [];
+
+        $modulos_detectados = $contenido_escaneado['modulos_detectados'] ?? [];
+        $temas_detectados = $contenido_escaneado['temas_detectados'] ?? [];
+        $subtemas_detectados = $contenido_escaneado['subtemas_detectados'] ?? [];
+
+        foreach ($modulos_detectados as $modulo_data) {
+            $modulo_orden = (int)$modulo_data['modulo_orden'];
+            $modulo_key = $modulo_orden;
+            if (isset($modulos_creados[$modulo_key])) {
+                continue;
+            }
+            $stmt = $conn->prepare("
+                INSERT INTO modulos (curso_id, titulo, descripcion, orden, created_at) 
+                VALUES (:curso_id, :titulo, :descripcion, :orden, NOW())
+                ON DUPLICATE KEY UPDATE 
+                    titulo = VALUES(titulo),
+                    descripcion = VALUES(descripcion),
+                    orden = VALUES(orden)
+            ");
+            $stmt->execute([
+                ':curso_id' => $curso_id,
+                ':titulo' => 'Módulo ' . str_pad($modulo_orden, 2, '0', STR_PAD_LEFT),
+                ':descripcion' => 'Módulo ' . $modulo_orden . ' actualizado desde HTML',
+                ':orden' => $modulo_orden
+            ]);
+            $modulos_creados[$modulo_key] = $conn->lastInsertId() ?: getExistingModuloId($conn, $curso_id, $modulo_orden);
+        }
+
+        foreach ($temas_detectados as $tema_data) {
+            $modulo_orden = (int)$tema_data['modulo_orden'];
+            $tema_orden = (int)$tema_data['tema_orden'];
+            $modulo_key = $modulo_orden;
+            $tema_key = $modulo_orden . '_' . $tema_orden;
+
+            if (!isset($modulos_creados[$modulo_key])) {
+                $stmt = $conn->prepare("
+                    INSERT INTO modulos (curso_id, titulo, descripcion, orden, created_at) 
+                    VALUES (:curso_id, :titulo, :descripcion, :orden, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        titulo = VALUES(titulo),
+                        descripcion = VALUES(descripcion),
+                        orden = VALUES(orden)
+                ");
+                $stmt->execute([
+                    ':curso_id' => $curso_id,
+                    ':titulo' => 'Módulo ' . str_pad($modulo_orden, 2, '0', STR_PAD_LEFT),
+                    ':descripcion' => 'Módulo ' . $modulo_orden . ' actualizado desde HTML',
+                    ':orden' => $modulo_orden
+                ]);
+                $modulos_creados[$modulo_key] = $conn->lastInsertId() ?: getExistingModuloId($conn, $curso_id, $modulo_orden);
+            }
+
+            if (isset($temas_creados[$tema_key])) {
+                continue;
+            }
+
+            $stmt = $conn->prepare("
+                INSERT INTO temas (modulo_id, titulo, descripcion, orden, created_at) 
+                VALUES (:modulo_id, :titulo, :descripcion, :orden, NOW())
+                ON DUPLICATE KEY UPDATE 
+                    titulo = VALUES(titulo),
+                    descripcion = VALUES(descripcion),
+                    orden = VALUES(orden)
+            ");
+            $stmt->execute([
+                ':modulo_id' => $modulos_creados[$modulo_key],
+                ':titulo' => 'Tema ' . str_pad($tema_orden, 2, '0', STR_PAD_LEFT),
+                ':descripcion' => 'Tema ' . $tema_orden . ' del módulo ' . $modulo_orden,
+                ':orden' => $tema_orden
+            ]);
+            $temas_creados[$tema_key] = $conn->lastInsertId() ?: getExistingTemaId($conn, $modulos_creados[$modulo_key], $tema_orden);
+        }
+
+        foreach ($subtemas_detectados as $subtema_data) {
+            $modulo_orden = (int)$subtema_data['modulo_orden'];
+            $tema_orden = (int)$subtema_data['tema_orden'];
+            $subtema_orden = (int)$subtema_data['subtema_orden'];
+            $modulo_key = $modulo_orden;
+            $tema_key = $modulo_orden . '_' . $tema_orden;
+            $subtema_key = $tema_key . '_' . $subtema_orden;
+
+            if (!isset($modulos_creados[$modulo_key])) {
+                $stmt = $conn->prepare("
+                    INSERT INTO modulos (curso_id, titulo, descripcion, orden, created_at) 
+                    VALUES (:curso_id, :titulo, :descripcion, :orden, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        titulo = VALUES(titulo),
+                        descripcion = VALUES(descripcion),
+                        orden = VALUES(orden)
+                ");
+                $stmt->execute([
+                    ':curso_id' => $curso_id,
+                    ':titulo' => 'Módulo ' . str_pad($modulo_orden, 2, '0', STR_PAD_LEFT),
+                    ':descripcion' => 'Módulo ' . $modulo_orden . ' actualizado desde HTML',
+                    ':orden' => $modulo_orden
+                ]);
+                $modulos_creados[$modulo_key] = $conn->lastInsertId() ?: getExistingModuloId($conn, $curso_id, $modulo_orden);
+            }
+
+            if (!isset($temas_creados[$tema_key])) {
+                $stmt = $conn->prepare("
+                    INSERT INTO temas (modulo_id, titulo, descripcion, orden, created_at) 
+                    VALUES (:modulo_id, :titulo, :descripcion, :orden, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        titulo = VALUES(titulo),
+                        descripcion = VALUES(descripcion),
+                        orden = VALUES(orden)
+                ");
+                $stmt->execute([
+                    ':modulo_id' => $modulos_creados[$modulo_key],
+                    ':titulo' => 'Tema ' . str_pad($tema_orden, 2, '0', STR_PAD_LEFT),
+                    ':descripcion' => 'Tema ' . $tema_orden . ' del módulo ' . $modulo_orden,
+                    ':orden' => $tema_orden
+                ]);
+                $temas_creados[$tema_key] = $conn->lastInsertId() ?: getExistingTemaId($conn, $modulos_creados[$modulo_key], $tema_orden);
+            }
+
+            if (isset($subtemas_creados[$subtema_key])) {
+                continue;
+            }
+
+            $stmt = $conn->prepare("
+                INSERT INTO subtemas (tema_id, titulo, descripcion, orden, created_at) 
+                VALUES (:tema_id, :titulo, :descripcion, :orden, NOW())
+                ON DUPLICATE KEY UPDATE 
+                    titulo = VALUES(titulo),
+                    descripcion = VALUES(descripcion),
+                    orden = VALUES(orden)
+            ");
+            $stmt->execute([
+                ':tema_id' => $temas_creados[$tema_key],
+                ':titulo' => 'Subtema ' . str_pad($subtema_orden, 2, '0', STR_PAD_LEFT),
+                ':descripcion' => 'Subtema ' . $subtema_orden . ' del tema ' . $tema_orden,
+                ':orden' => $subtema_orden
+            ]);
+            $subtemas_creados[$subtema_key] = $conn->lastInsertId() ?: getExistingSubtemaId($conn, $temas_creados[$tema_key], $subtema_orden);
+        }
+
+        foreach ($contenido_escaneado['lecciones'] ?? [] as $leccion_data) {
+            $modulo_orden = $leccion_data['modulo_orden'];
+            $tema_orden = $leccion_data['tema_orden'];
+            $subtema_orden = $leccion_data['subtema_orden'];
+            $leccion_orden = $leccion_data['leccion_orden'];
+
+            $modulo_key = $modulo_orden;
+            if (!isset($modulos_creados[$modulo_key])) {
+                $stmt = $conn->prepare("
+                    INSERT INTO modulos (curso_id, titulo, descripcion, orden, created_at) 
+                    VALUES (:curso_id, :titulo, :descripcion, :orden, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        titulo = VALUES(titulo),
+                        descripcion = VALUES(descripcion),
+                        orden = VALUES(orden)
+                ");
+                $stmt->execute([
+                    ':curso_id' => $curso_id,
+                    ':titulo' => 'Módulo ' . str_pad($modulo_orden, 2, '0', STR_PAD_LEFT),
+                    ':descripcion' => 'Módulo ' . $modulo_orden . ' actualizado desde HTML',
+                    ':orden' => $modulo_orden
+                ]);
+                $modulos_creados[$modulo_key] = $conn->lastInsertId() ?: getExistingModuloId($conn, $curso_id, $modulo_orden);
+            }
+
+            $tema_key = $modulo_orden . '_' . $tema_orden;
+            if (!isset($temas_creados[$tema_key])) {
+                $stmt = $conn->prepare("
+                    INSERT INTO temas (modulo_id, titulo, descripcion, orden, created_at) 
+                    VALUES (:modulo_id, :titulo, :descripcion, :orden, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        titulo = VALUES(titulo),
+                        descripcion = VALUES(descripcion),
+                        orden = VALUES(orden)
+                ");
+                $stmt->execute([
+                    ':modulo_id' => $modulos_creados[$modulo_key],
+                    ':titulo' => 'Tema ' . str_pad($tema_orden, 2, '0', STR_PAD_LEFT),
+                    ':descripcion' => 'Tema ' . $tema_orden . ' del módulo ' . $modulo_orden,
+                    ':orden' => $tema_orden
+                ]);
+                $temas_creados[$tema_key] = $conn->lastInsertId() ?: getExistingTemaId($conn, $modulos_creados[$modulo_key], $tema_orden);
+            }
+
+            $subtema_key = $modulo_orden . '_' . $tema_orden . '_' . $subtema_orden;
+            if (!isset($subtemas_creados[$subtema_key])) {
+                $stmt = $conn->prepare("
+                    INSERT INTO subtemas (tema_id, titulo, descripcion, orden, created_at) 
+                    VALUES (:tema_id, :titulo, :descripcion, :orden, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                        titulo = VALUES(titulo),
+                        descripcion = VALUES(descripcion),
+                        orden = VALUES(orden)
+                ");
+                $stmt->execute([
+                    ':tema_id' => $temas_creados[$tema_key],
+                    ':titulo' => 'Subtema ' . str_pad($subtema_orden, 2, '0', STR_PAD_LEFT),
+                    ':descripcion' => 'Subtema ' . $subtema_orden . ' del tema ' . $tema_orden,
+                    ':orden' => $subtema_orden
+                ]);
+                $subtemas_creados[$subtema_key] = $conn->lastInsertId() ?: getExistingSubtemaId($conn, $temas_creados[$tema_key], $subtema_orden);
+            }
+
+            $archivo_leccion = $curso_dir . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $leccion_data['path']);
+            $contenido_html = file_exists($archivo_leccion) ? file_get_contents($archivo_leccion) : '';
+            $existing_leccion_id = getExistingLeccionId($conn, $subtemas_creados[$subtema_key], $leccion_orden);
+            if ($existing_leccion_id) {
+                $stmt = $conn->prepare("
+                    UPDATE lecciones 
+                    SET modulo_id = :modulo_id, subtema_id = :subtema_id, tema_id = :tema_id, titulo = :titulo, contenido = :contenido, tipo = 'documento', orden = :orden
+                    WHERE id = :id
+                ");
+                $stmt->execute([
+                    ':modulo_id' => $modulos_creados[$modulo_key],
+                    ':subtema_id' => $subtemas_creados[$subtema_key],
+                    ':tema_id' => $temas_creados[$tema_key],
+                    ':titulo' => $leccion_data['titulo'],
+                    ':contenido' => $contenido_html,
+                    ':orden' => $leccion_orden,
+                    ':id' => $existing_leccion_id
+                ]);
+            } else {
+                $stmt = $conn->prepare("
+                    INSERT INTO lecciones (modulo_id, subtema_id, tema_id, titulo, contenido, tipo, orden, created_at) 
+                    VALUES (:modulo_id, :subtema_id, :tema_id, :titulo, :contenido, 'documento', :orden, NOW())
+                ");
+                $stmt->execute([
+                    ':modulo_id' => $modulos_creados[$modulo_key],
+                    ':subtema_id' => $subtemas_creados[$subtema_key],
+                    ':tema_id' => $temas_creados[$tema_key],
+                    ':titulo' => $leccion_data['titulo'],
+                    ':contenido' => $contenido_html,
+                    ':orden' => $leccion_orden
+                ]);
+            }
+        }
+
+        $conn->commit();
+        header('Location: ' . BASE_URL . '/docente/modulos_curso.php?id=' . $curso_id . '&success=contenido_actualizado');
+        exit;
+    } catch (Exception $e) {
+        if ($conn->inTransaction()) {
+            $conn->rollBack();
+        }
+        header('Location: ' . BASE_URL . '/docente/modulos_curso.php?id=' . $curso_id . '&error=actualizar_fallido&details=' . urlencode($e->getMessage()));
+        exit;
+    }
 }
 
 // Obtener módulos del curso
@@ -45,6 +336,42 @@ $stmt = $conn->prepare("
 ");
 $stmt->execute([':curso_id' => $curso_id]);
 $modulos = $stmt->fetchAll();
+
+$editar_curso_url = $is_master ? BASE_URL . '/master/editar_curso.php?id=' . $curso['id'] : BASE_URL . '/docente/editar_curso.php?id=' . $curso['id'];
+
+function sanitizeFileName($filename) {
+    $filename = preg_replace('/[^a-zA-Z0-9\-_\.]/', '-', $filename);
+    $filename = preg_replace('/-+/', '-', $filename);
+    return trim($filename, '-');
+}
+
+function getExistingModuloId($conn, $curso_id, $orden) {
+    $stmt = $conn->prepare("SELECT id FROM modulos WHERE curso_id = :curso_id AND orden = :orden");
+    $stmt->execute([':curso_id' => $curso_id, ':orden' => $orden]);
+    $row = $stmt->fetch();
+    return $row ? $row['id'] : null;
+}
+
+function getExistingTemaId($conn, $modulo_id, $orden) {
+    $stmt = $conn->prepare("SELECT id FROM temas WHERE modulo_id = :modulo_id AND orden = :orden");
+    $stmt->execute([':modulo_id' => $modulo_id, ':orden' => $orden]);
+    $row = $stmt->fetch();
+    return $row ? $row['id'] : null;
+}
+
+function getExistingSubtemaId($conn, $tema_id, $orden) {
+    $stmt = $conn->prepare("SELECT id FROM subtemas WHERE tema_id = :tema_id AND orden = :orden");
+    $stmt->execute([':tema_id' => $tema_id, ':orden' => $orden]);
+    $row = $stmt->fetch();
+    return $row ? $row['id'] : null;
+}
+
+function getExistingLeccionId($conn, $subtema_id, $orden) {
+    $stmt = $conn->prepare("SELECT id FROM lecciones WHERE subtema_id = :subtema_id AND orden = :orden");
+    $stmt->execute([':subtema_id' => $subtema_id, ':orden' => $orden]);
+    $row = $stmt->fetch();
+    return $row ? $row['id'] : null;
+}
 
 require __DIR__ . '/../partials/header.php';
 require __DIR__ . '/../partials/nav.php';
@@ -67,6 +394,9 @@ require __DIR__ . '/../partials/nav.php';
                         case 'modulo_actualizado':
                             echo 'Módulo actualizado exitosamente.';
                             break;
+                        case 'contenido_actualizado':
+                            echo 'Contenido actualizado desde HTML.';
+                            break;
                         default:
                             echo 'Operación completada exitosamente.';
                     }
@@ -86,6 +416,18 @@ require __DIR__ . '/../partials/nav.php';
                              break;
                         case 'error_crear':
                             echo 'Error al crear el módulo. Por favor, inténtelo de nuevo.';
+                            break;
+                        case 'contenido_no_encontrado':
+                            echo 'No se encontró el contenido del curso en uploads.';
+                            break;
+                        case 'contenido_invalido':
+                            echo 'No se encontraron lecciones válidas en el contenido.';
+                            break;
+                        case 'actualizar_fallido':
+                            echo 'Error al actualizar el contenido.';
+                            if (isset($_GET['details'])) {
+                                echo '<br><small>Detalles: ' . htmlspecialchars($_GET['details']) . '</small>';
+                            }
                             break;
                         case 'datos_invalidos':
                             echo 'Los datos proporcionados no son válidos.';
@@ -113,9 +455,23 @@ require __DIR__ . '/../partials/nav.php';
                         style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
                     + Nuevo Módulo
                 </button>
-                <a href="<?= BASE_URL ?>/docente/editar_curso.php?id=<?= $curso['id'] ?>"
+                <?php if ($is_master): ?>
+                    <form method="POST" style="margin: 0;">
+                        <input type="hidden" name="accion" value="actualizar_html">
+                        <button type="submit"
+                                onclick="return confirm('¿Actualizar contenido desde los HTML en uploads?')"
+                                style="background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                            Actualizar HTML
+                        </button>
+                    </form>
+                <?php endif; ?>
+                <a href="<?= $editar_curso_url ?>"
                    style="background: transparent; color: white; border: 2px solid white; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none;">
                     Editar Curso
+                </a>
+                <a href="<?= BASE_URL ?>/docente/configuracion_calificacion.php?curso_id=<?= $curso_id ?>"
+                   style="background: transparent; color: #f8f9fa; border: 2px solid #f8f9fa; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; text-decoration: none;">
+                    ⚖️ Calificación
                 </a>
             </div>
         </div>
@@ -135,7 +491,7 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
             </div>
             <div>
-                <a href="admin_cursos.php" class="btn-volver">← Volver</a>
+                <a href="<?= $back_url ?>" class="btn-volver">← Volver</a>
             </div>
         </div>
     </div>

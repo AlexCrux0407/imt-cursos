@@ -1,7 +1,6 @@
 <?php
-// Vista Estudiante – Contenido del módulo: temas, subtemas y lecciones
-
 declare(strict_types=1);
+// Vista Estudiante – Contenido del módulo: temas, subtemas y lecciones
 
 /* Asegurar sesión y BASE_URL antes de usarla en redirects/rutas */
 if (session_status() === PHP_SESSION_NONE) {
@@ -29,7 +28,7 @@ if ($estudiante_id === 0) {
 
 /** Verificar acceso: módulo válido y estudiante inscrito en ese curso */
 $stmt = $conn->prepare("
-    SELECT m.id, m.titulo, m.descripcion, m.contenido, m.orden, m.curso_id,
+    SELECT m.id, m.titulo, m.descripcion, m.contenido, m.recurso_url, m.orden, m.curso_id,
            c.titulo AS curso_titulo, c.descripcion AS curso_descripcion,
            i.estado AS curso_estado, i.progreso AS curso_progreso
     FROM modulos m
@@ -44,6 +43,42 @@ $modulo = $stmt->fetch();
 if (!$modulo) {
     header('Location: ' . BASE_URL . '/estudiante/catalogo.php?error=acceso_denegado');
     exit;
+}
+
+$modulo_recurso_url_public = '';
+if (!empty($modulo['recurso_url'])) {
+    $modulo_recurso_url_public = $modulo['recurso_url'];
+    if (!filter_var($modulo_recurso_url_public, FILTER_VALIDATE_URL)) {
+        $baseUrl = rtrim(BASE_URL, '/');
+        if ($baseUrl !== '' && strpos($modulo_recurso_url_public, $baseUrl . '/') === 0) {
+            $modulo_recurso_url_public = $modulo_recurso_url_public;
+        } elseif (strpos($modulo_recurso_url_public, '/') === 0) {
+            $modulo_recurso_url_public = $baseUrl . $modulo_recurso_url_public;
+        } else {
+            $modulo_recurso_url_public = $baseUrl . '/' . $modulo_recurso_url_public;
+        }
+    }
+    $path_en_url = parse_url($modulo_recurso_url_public, PHP_URL_PATH) ?: '';
+    $host_en_url = parse_url($modulo_recurso_url_public, PHP_URL_HOST) ?: '';
+    $host_base = parse_url(BASE_URL, PHP_URL_HOST) ?: '';
+    $es_archivo_local = (($host_en_url === $host_base) || $host_en_url === '' || $host_en_url === 'localhost' || $host_en_url === '127.0.0.1')
+        && (strpos($path_en_url, '/uploads/') !== false);
+    if (!$es_archivo_local && strpos($path_en_url, '/uploads/') !== false) {
+        $es_archivo_local = true;
+    }
+    if ($es_archivo_local) {
+        $pos = strpos($path_en_url, '/uploads/');
+        $rel = substr($path_en_url, $pos + strlen('/uploads/'));
+        if (strpos($rel, 'cursos/') === 0) {
+            $publicPath = rtrim(PUBLIC_PATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $rel;
+            $rootPath = rtrim(UPLOADS_PATH, '/\\') . DIRECTORY_SEPARATOR . $rel;
+            if (is_readable($publicPath) || is_readable($rootPath)) {
+                $modulo_recurso_url_public = rtrim(BASE_URL, '/') . '/serve_uploads.php?path=' . rawurlencode($rel);
+            } else {
+                $modulo_recurso_url_public = '';
+            }
+        }
+    }
 }
 
 /** Control de acceso: solo permitir si el módulo anterior tiene evaluación aprobada */
@@ -143,12 +178,12 @@ $stmt = $conn->prepare("
            COUNT(ie.id) as intentos_realizados,
            MAX(ie.puntaje_obtenido) as mejor_calificacion,
            CASE 
-               WHEN MAX(ie.puntaje_obtenido) >= 100.0 THEN 1 
+               WHEN MAX(ie.puntaje_obtenido) >= e.puntaje_minimo_aprobacion THEN 1 
                ELSE 0 
            END as aprobada,
            CASE 
                WHEN e.intentos_permitidos > 0 AND COUNT(ie.id) >= e.intentos_permitidos 
-                    AND (MAX(ie.puntaje_obtenido) < 100.0 OR MAX(ie.puntaje_obtenido) IS NULL) THEN 1
+                    AND (MAX(ie.puntaje_obtenido) < e.puntaje_minimo_aprobacion OR MAX(ie.puntaje_obtenido) IS NULL) THEN 1
                ELSE 0 
            END as sin_intentos
     FROM evaluaciones_modulo e
@@ -691,62 +726,77 @@ require __DIR__ . '/../partials/nav.php';
         </div>
 
         <div class="contenido-modulo">
-            <!-- Contenido textual del módulo -->
-            <?php if (!empty($modulo['contenido'])): ?>
+            <?php if (!empty($modulo_recurso_url_public)): ?>
+                <?php
+                $modulo_recurso_url = $modulo_recurso_url_public;
+                $modulo_recurso_es_imagen = preg_match('/\.(jpe?g|png|gif|webp)(\?.*)?$/i', $modulo_recurso_url)
+                    && (strpos($modulo_recurso_url, '/uploads/') !== false || strpos($modulo_recurso_url, 'serve_uploads.php?') !== false);
+                ?>
                 <div class="contenido-modulo-section">
                     <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Módulo</h2>
-                    <div class="contenido-texto">
-                        <?= $modulo['contenido'] ?>
+                    <div style="width: 100%; height: 70vh; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+                        <?php if ($modulo_recurso_es_imagen): ?>
+                            <img src="<?= htmlspecialchars($modulo_recurso_url_public) ?>" style="width: 100%; height: auto; border: 0;" alt="<?= htmlspecialchars($modulo['titulo'] ?? 'Contenido del Módulo', ENT_QUOTES, 'UTF-8') ?>">
+                        <?php else: ?>
+                            <iframe src="<?= htmlspecialchars($modulo_recurso_url_public) ?>" style="width: 100%; height: 100%; border: 0;" title="<?= htmlspecialchars($modulo['titulo'] ?? 'Contenido del Módulo', ENT_QUOTES, 'UTF-8') ?>"></iframe>
+                        <?php endif; ?>
                     </div>
                 </div>
-            <?php endif; ?>
+            <?php else: ?>
+                <?php if (!empty($modulo['contenido'])): ?>
+                    <div class="contenido-modulo-section">
+                        <h2 class="seccion-titulo"><i class="icon-file-text"></i> Contenido del Módulo</h2>
+                        <div class="contenido-texto">
+                            <?= $modulo['contenido'] ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
-            <!-- Temas -->
-            <?php if (!empty($temas)): ?>
-                <h2 class="seccion-titulo"><i class="icon-book"></i> Temas del Módulo</h2>
-                <div class="temas-lista">
-                    <?php foreach ($temas as $index => $tema): ?>
-                        <div class="tema-card">
-                            <div class="tema-header">
-                                <div class="tema-numero"><?= (int)$index + 1 ?></div>
-                                <a href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= (int)$tema['id'] ?>" class="tema-titulo-link">
-                                    <h3 class="tema-titulo"><?= htmlspecialchars($tema['titulo']) ?></h3>
-                                </a>
-                                <?php if ((int)$tema['total_subtemas'] > 0): ?>
-                                    <a href="<?= BASE_URL ?>/estudiante/subtemas.php?tema_id=<?= (int)$tema['id'] ?>" class="subtemas-count clickable">
-                                        <?= (int)$tema['total_subtemas'] ?> subtema<?= ((int)$tema['total_subtemas'] !== 1 ? 's' : '') ?>
+                <?php if (!empty($temas)): ?>
+                    <h2 class="seccion-titulo"><i class="icon-book"></i> Temas del Módulo</h2>
+                    <div class="temas-lista">
+                        <?php foreach ($temas as $index => $tema): ?>
+                            <div class="tema-card">
+                                <div class="tema-header">
+                                    <div class="tema-numero"><?= (int)$index + 1 ?></div>
+                                    <a href="<?= BASE_URL ?>/estudiante/tema_contenido.php?id=<?= (int)$tema['id'] ?>" class="tema-titulo-link">
+                                        <h3 class="tema-titulo"><?= htmlspecialchars($tema['titulo']) ?></h3>
                                     </a>
+                                    <?php if ((int)$tema['total_subtemas'] > 0): ?>
+                                        <span class="subtemas-count">
+                                            <?= (int)$tema['total_subtemas'] ?> subtema<?= ((int)$tema['total_subtemas'] !== 1 ? 's' : '') ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if (!empty($tema['descripcion'])): ?>
+                                    <p class="tema-descripcion"><?= htmlspecialchars($tema['descripcion']) ?></p>
                                 <?php endif; ?>
                             </div>
-                            <?php if (!empty($tema['descripcion'])): ?>
-                                <p class="tema-descripcion"><?= htmlspecialchars($tema['descripcion']) ?></p>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
 
-            <!-- Lecciones directas -->
-            <?php if (!empty($lecciones)): ?>
-                <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones</h2>
-                <div class="lecciones-lista">
-                    <?php foreach ($lecciones as $leccion): ?>
-                        <div class="leccion-item">
-                            <div class="leccion-numero"><?= (int)$leccion['orden'] ?></div>
-                            <div class="leccion-info">
-                                <h4 class="leccion-titulo"><?= htmlspecialchars($leccion['titulo']) ?></h4>
-                                <?php if (!empty($leccion['descripcion'])): ?>
-                                    <p class="leccion-descripcion"><?= htmlspecialchars($leccion['descripcion']) ?></p>
-                                <?php endif; ?>
+                <?php if (!empty($lecciones)): ?>
+                    <h2 class="seccion-titulo"><i class="icon-play"></i> Lecciones</h2>
+                    <div class="lecciones-lista">
+                        <?php foreach ($lecciones as $leccion): ?>
+                            <div class="leccion-item">
+                                <div class="leccion-numero"><?= (int)$leccion['orden'] ?></div>
+                                <div class="leccion-info">
+                                    <h4 class="leccion-titulo"><?= htmlspecialchars($leccion['titulo']) ?></h4>
+                                    <?php if (!empty($leccion['descripcion'])): ?>
+                                        <p class="leccion-descripcion"><?= htmlspecialchars($leccion['descripcion']) ?></p>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="leccion-acciones">
+                                    <a class="btn-leccion" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)$leccion['id'] ?>">
+                                        Estudiar
+                                    </a>
+                                </div>
                             </div>
-                            <div class="leccion-acciones">
-                                <a class="btn-leccion" href="<?= BASE_URL ?>/estudiante/leccion.php?id=<?= (int)$leccion['id'] ?>">
-                                    Estudiar
-                                </a>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <!-- Evaluaciones del módulo -->
@@ -904,7 +954,7 @@ require __DIR__ . '/../partials/nav.php';
             <?php endif; ?>
 
             <!-- Estado vacío - solo mostrar si realmente no hay contenido -->
-            <?php if (empty($temas) && empty($lecciones) && empty($modulo['contenido']) && empty(trim(strip_tags($modulo['contenido'] ?? '')))): ?>
+            <?php if (empty($temas) && empty($lecciones) && empty($modulo['contenido']) && empty(trim(strip_tags($modulo['contenido'] ?? ''))) && empty($modulo['recurso_url'])): ?>
                 <div class="empty-content">
                     <i class="icon-info"></i>
                     <h3>Contenido en preparación</h3>

@@ -20,7 +20,7 @@ if ($filtro_estado) {
 }
 
 if ($filtro_busqueda) {
-    $where_conditions[] = "(u.nombre LIKE :busqueda OR u.email LIKE :busqueda OR u.usuario LIKE :busqueda)";
+    $where_conditions[] = "(u.nombre LIKE :busqueda OR u.email LIKE :busqueda)";
     $params[':busqueda'] = '%' . $filtro_busqueda . '%';
 }
 
@@ -105,7 +105,7 @@ require __DIR__ . '/../partials/nav.php';
             <div style="flex: 2;">
                 <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Buscar:</label>
                 <input type="text" name="busqueda" value="<?= htmlspecialchars($filtro_busqueda) ?>" 
-                       placeholder="Nombre, email o usuario" 
+                       placeholder="Nombre o email" 
                        style="width: 100%; padding: 10px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
             </div>
             <div style="flex: 1;">
@@ -163,9 +163,7 @@ require __DIR__ . '/../partials/nav.php';
                                     <div style="color: #2c3e50; font-weight: 600; margin-bottom: 3px;">
                                         <?= htmlspecialchars(format_nombre($ejecutivo['nombre'])) ?>
                                     </div>
-                                    <div style="color: #95a5a6; font-size: 0.85rem;">
-                                        Usuario: <?= htmlspecialchars($ejecutivo['usuario']) ?>
-                                    </div>
+                                    
                                 </td>
                                 <td style="padding: 15px; text-align: center; vertical-align: middle;">
                                     <div style="color: #7f8c8d; font-size: 0.9rem;">
@@ -246,8 +244,14 @@ function mostrarFormularioCrearEjecutivo() {
             
             <form id="formCrearEjecutivo" onsubmit="crearEjecutivo(event)">
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nombre Completo *</label>
-                    <input type="text" name="nombre" required 
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nombres *</label>
+                    <input type="text" name="nombres" required 
+                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Apellidos *</label>
+                    <input type="text" name="apellidos" required 
                            style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
                 </div>
                 
@@ -257,16 +261,22 @@ function mostrarFormularioCrearEjecutivo() {
                            style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
                 </div>
                 
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Usuario *</label>
-                    <input type="text" name="usuario" required 
-                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
-                </div>
+                
                 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Contraseña *</label>
-                    <input type="password" name="password" required 
-                           style="width: 100%; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="password" id="passwordCrearEjecutivo" name="password" required 
+                               style="flex: 1; padding: 12px; border: 2px solid #e8ecef; border-radius: 8px; font-size: 1rem;">
+                        <button type="button" onclick="togglePasswordVisibility('passwordCrearEjecutivo', this)"
+                                style="padding: 10px 12px; border: 1px solid #dfe6ee; border-radius: 10px; background: linear-gradient(180deg,#ffffff,#f2f5f9); color: #2c3e50; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04); width: 40px; font-size: 1rem; line-height: 1;">
+                            👁
+                        </button>
+                        <button type="button" onclick="generarPasswordTemporal('passwordCrearEjecutivo')"
+                                style="padding: 10px 12px; border: 1px solid #dfe6ee; border-radius: 10px; background: linear-gradient(180deg,#eaf4ff,#f6f9ff); color: #2c3e50; font-weight: 600; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                            Generar
+                        </button>
+                    </div>
                 </div>
                 
                 <div style="margin-bottom: 25px;">
@@ -301,14 +311,32 @@ function cerrarModalEjecutivo() {
     }
 }
 
+function togglePasswordVisibility(inputId, button) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+}
+
+function generarPasswordTemporal(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+        password += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    input.value = password;
+}
+
 function crearEjecutivo(event) {
     event.preventDefault();
     
     const formData = new FormData(event.target);
     const data = {
-        nombre: formData.get('nombre'),
+        nombres: formData.get('nombres'),
+        apellidos: formData.get('apellidos'),
         email: formData.get('email'),
-        usuario: formData.get('usuario'),
         password: formData.get('password'),
         estado: formData.get('estado'),
         role: 'ejecutivo'

@@ -12,7 +12,12 @@ $usuario = $stmt->fetch();
 
 // Procesar actualización del perfil
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nombres = trim($_POST['nombres'] ?? '');
+    $apellidos = trim($_POST['apellidos'] ?? '');
     $nombre = trim($_POST['nombre'] ?? '');
+    if ($nombre === '') {
+        $nombre = trim($nombres . ' ' . $apellidos);
+    }
     $email = trim($_POST['email'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
     $password = trim($_POST['password'] ?? '');
@@ -127,14 +132,21 @@ require __DIR__ . '/../partials/nav.php';
                 </div>
             <?php endif; ?>
 
+            <?php list($nombres_actual, $apellidos_actual) = split_nombre_apellidos($usuario['nombre'] ?? ''); ?>
             <form method="POST" class="profile-form">
                 <div class="form-section">
                     <h4 class="section-title">Información Personal</h4>
                     
                     <div class="form-group">
-                        <label for="nombre" class="form-label">Nombre Completo</label>
-                        <input type="text" id="nombre" name="nombre" class="form-input" 
-                               value="<?= htmlspecialchars($usuario['nombre']) ?>" required>
+                        <label for="nombres" class="form-label">Nombres</label>
+                        <input type="text" id="nombres" name="nombres" class="form-input" 
+                               value="<?= htmlspecialchars($nombres_actual) ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apellidos" class="form-label">Apellidos</label>
+                        <input type="text" id="apellidos" name="apellidos" class="form-input" 
+                               value="<?= htmlspecialchars($apellidos_actual) ?>" required>
                     </div>
 
                     <div class="form-group">
